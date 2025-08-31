@@ -33,7 +33,7 @@ interface VerificationCodeData {
 }
 
 // SMTP Configuration
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
