@@ -55,6 +55,15 @@ export default function Home() {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuActive(!isMobileMenuActive);
+    // Close the plus menu when mobile menu opens
+    if (!isMobileMenuActive) {
+      setIsPlusMenuActive(false);
+    }
+  };
+
+  // Close mobile menu when clicking on a link
+  const closeMobileMenu = () => {
+    setIsMobileMenuActive(false);
   };
 
   // Add hover event handlers for better dropdown behavior
@@ -106,9 +115,9 @@ export default function Home() {
           
           <nav className="main-nav">
             <ul className={`nav-links ${isMobileMenuActive ? 'active' : ''}`}>
-              <li><a href="#showcase">Showcase</a></li>
-              <li><a href="#meetup">AI Meetup</a></li>
-              <li><a href="#community">Community</a></li>
+              <li><a href="#showcase" onClick={closeMobileMenu}>Showcase</a></li>
+              <li><a href="#meetup" onClick={closeMobileMenu}>AI Meetup</a></li>
+              <li><a href="#community" onClick={closeMobileMenu}>Community</a></li>
             </ul>
             <div className="nav-actions">
               <button 

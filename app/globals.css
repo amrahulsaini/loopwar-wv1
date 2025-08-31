@@ -557,27 +557,53 @@ body.dark-mode .logo:hover::after {
 
 /* RESPONSIVE DESIGN */
 @media (max-width: 992px) {
+    .main-nav {
+        position: relative;
+    }
+    
     .nav-links {
         display: none;
         flex-direction: column;
         position: absolute;
-        top: 88px; /* header height + padding adjust */
+        top: 100%;
         left: 0;
         width: 100%;
         background-color: var(--color-bg);
         border-bottom: 1px solid var(--color-border);
         padding: 20px 0;
         text-align: center;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+    
     .nav-links.active {
         display: flex;
     }
+    
     .nav-links li {
-        padding: 10px 0;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--color-border);
     }
+    
+    .nav-links li:last-child {
+        border-bottom: none;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+    }
+    
     .hamburger {
         display: block;
+        margin-left: 15px;
     }
+    
+    .nav-actions {
+        gap: 10px;
+    }
+    
     .hero .container {
         grid-template-columns: 1fr;
         text-align: center;
@@ -588,6 +614,20 @@ body.dark-mode .logo:hover::after {
 }
 
 @media (max-width: 768px) {
+    .main-header .container {
+        flex-wrap: wrap;
+    }
+    
+    .main-nav {
+        order: 2;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .nav-actions {
+        margin-left: auto;
+    }
+    
     .main-footer .container {
         flex-direction: column;
         text-align: center;
@@ -602,6 +642,28 @@ body.dark-mode .logo:hover::after {
     .plus-button { width: 35px; height: 35px; font-size: 1.5rem; }
     .dropdown-menu { top: 50px; width: 160px; }
     .footer-right { flex-direction: column; gap: 20px; }
+    
+    .main-header .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .main-nav {
+        order: 2;
+        width: 100%;
+        margin-top: 0;
+    }
+    
+    .nav-actions {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .hamburger {
+        margin-left: 0;
+    }
 }
 
 /* ===== JOIN PAGE STYLES ===== */
