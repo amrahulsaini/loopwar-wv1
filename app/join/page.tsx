@@ -40,7 +40,7 @@ export default function JoinPage() {
             >
               {isDarkMode ? '☀️' : '🌙'}
             </button>
-            <Link href="/login" className="login-link">Already have an account? Login</Link>
+            <Link href="/login" className="login-link">Alrready have an account? Login</Link>
           </div>
         </div>
       </header>
