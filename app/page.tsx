@@ -8,14 +8,38 @@ export default function Home() {
   const [isPlusMenuActive, setIsPlusMenuActive] = useState(false);
   const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
 
+  // Check theme and existing session on mount
   useEffect(() => {
-    // Check for saved theme in localStorage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.body.classList.add('dark-mode');
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        setIsDarkMode(true);
+        document.body.classList.add('dark-mode');
+      }
+      
+      // Check if user is already logged in and verified
+      const sessionToken = getCookie('sessionToken');
+      const username = getCookie('username');
+      const isUserVerified = getCookie('isVerified') === 'true';
+      
+      if (sessionToken && username && isUserVerified) {
+        // Redirect to zone if already authenticated and verified
+        window.location.href = '/zone';
+      }
     }
   }, []);
+
+  // Cookie utility functions
+  const getCookie = (name: string): string | null => {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  };
 
   useEffect(() => {
     // Fade-in animation on scroll
