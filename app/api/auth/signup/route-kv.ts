@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import { kv } from '@vercel/kv';
 
 // Types
 interface User {
@@ -31,37 +32,42 @@ interface VerificationCodeData {
   expiry: number;
 }
 
-// In-memory storage for development/demo (replace with real database in production)
-// Note: This is a temporary solution for Vercel deployment
-let users: User[] = [];
-let verificationCodes: VerificationCodeData[] = [];
-
 // SMTP Configuration
 const transporter = nodemailer.createTransporter({
   host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
-    pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2',
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-// Simple storage functions (replace with database calls in production)
+// Database functions using Vercel KV
 async function loadUsers(): Promise<User[]> {
-  return users;
+  try {
+    const users = await kv.get('users');
+    return users ? JSON.parse(users as string) : [];
+  } catch {
+    return [];
+  }
 }
 
-async function saveUsers(newUsers: User[]): Promise<void> {
-  users = newUsers;
+async function saveUsers(users: User[]): Promise<void> {
+  await kv.set('users', JSON.stringify(users));
 }
 
 async function loadVerificationCodes(): Promise<VerificationCodeData[]> {
-  return verificationCodes;
+  try {
+    const codes = await kv.get('verification-codes');
+    return codes ? JSON.parse(codes as string) : [];
+  } catch {
+    return [];
+  }
 }
 
 async function saveVerificationCodes(codes: VerificationCodeData[]): Promise<void> {
-  verificationCodes = codes;
+  await kv.set('verification-codes', JSON.stringify(codes));
 }
 
 async function sendVerificationEmail(email: string, code: string) {
@@ -265,14 +271,14 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcryptjs.hash(password, saltRounds);
 
     // Generate verification code
-    const verificationCode = crypto.getRandomValues(new Uint8Array(6)).reduce((acc: string, val: number) => acc + (val % 10).toString(), '');
+    const verificationCode = crypto.getRandomValues(new Uint8Array(6)).reduce((acc, val) => acc + (val % 10).toString(), '');
     const verificationExpiry = Date.now() + (15 * 60 * 1000); // 15 minutes
 
     // Generate session token
-    const sessionToken = crypto.getRandomValues(new Uint8Array(32)).reduce((acc: string, val: number) => acc + val.toString(16).padStart(2, '0'), '');
+    const sessionToken = crypto.getRandomValues(new Uint8Array(32)).reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '');
     
     // Generate unique user ID
-    const userId = crypto.getRandomValues(new Uint8Array(16)).reduce((acc: string, val: number) => acc + val.toString(16).padStart(2, '0'), '');
+    const userId = crypto.getRandomValues(new Uint8Array(16)).reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '');
 
     // Create user
     const newUser: User = {
