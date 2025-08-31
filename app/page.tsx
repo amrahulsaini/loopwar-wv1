@@ -22,7 +22,7 @@ export default function Home() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.style.animationPlayState = 'running';
+          (entry.target as HTMLElement).style.animationPlayState = 'running';
           observer.unobserve(entry.target);
         }
       });
@@ -30,7 +30,7 @@ export default function Home() {
 
     sections.forEach(section => {
       // Pause animation initially
-      section.style.animationPlayState = 'paused';
+      (section as HTMLElement).style.animationPlayState = 'paused';
       observer.observe(section);
     });
 
