@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -56,22 +57,6 @@ export default function Home() {
     setIsMobileMenuActive(!isMobileMenuActive);
   };
 
-  const closePlusMenu = () => {
-    setIsPlusMenuActive(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.plus-button-container')) {
-        setIsPlusMenuActive(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
   // Add hover event handlers for better dropdown behavior
   const handlePlusButtonMouseEnter = () => {
     setIsPlusMenuActive(true);
@@ -101,11 +86,23 @@ export default function Home() {
     }, 100);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.plus-button-container')) {
+        setIsPlusMenuActive(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   return (
     <>
       <header className="main-header">
         <div className="container">
-          <a href="/" className="logo" aria-label="LoopWar.dev Home">L</a>
+          <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
           
           <nav className="main-nav">
             <ul className={`nav-links ${isMobileMenuActive ? 'active' : ''}`}>
@@ -144,7 +141,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <button 
+             <button 
               className="hamburger" 
               onClick={toggleMobileMenu}
               aria-label="Toggle navigation menu"
@@ -162,10 +159,10 @@ export default function Home() {
             <div className="hero-text">
               <span>Welcome to the Arena</span>
               <h1>What is LoopWar?</h1>
-              <p>It's not just a platform; it's your personal AI coding dojo. We're redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
+              <p>It&apos;s not just a platform; it&apos;s your personal AI coding dojo. We&apos;re redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
             </div>
             <div className="hero-card">
-              <p>"LoopWar is an online AI learning platform that helps students learn coding in all languages and build software skills in a fun and personalized way. It's like having a smart AI tutor that gives you hints, helps fix your code, and guides you through projects. You can also compete in coding battles, making learning feel like a game!"</p>
+              <p>&ldquo;LoopWar is an online AI learning platform that helps students learn coding in all languages and build software skills in a fun and personalized way. It&apos;s like having a smart AI tutor that gives you hints, helps fix your code, and guides you through projects. You can also compete in coding battles, making learning feel like a game!&rdquo;</p>
             </div>
           </div>
         </section>
@@ -196,7 +193,7 @@ export default function Home() {
         <section id="meetup" className="section ai-features fade-in-section">
           <div className="container">
             <h2 className="section-title">How LoopAI Sharpens Your Skills</h2>
-            <p className="section-subtitle">Our AI is more than a tool—it's your mentor, sparring partner, and strategist, available 24/7.</p>
+            <p className="section-subtitle">Our AI is more than a tool—it&apos;s your mentor, sparring partner, and strategist, available 24/7.</p>
             <div className="features-grid">
               <div className="feature-item">
                 <div className="feature-icon">💡</div>
@@ -211,7 +208,7 @@ export default function Home() {
               <div className="feature-item">
                 <div className="feature-icon">📈</div>
                 <h3>Conversational Feedback</h3>
-                <p>Get detailed, human-like reports on your code. LoopAI explains your mistakes, suggests improvements, and helps you understand the "why" behind the logic.</p>
+                <p>Get detailed, human-like reports on your code. LoopAI explains your mistakes, suggests improvements, and helps you understand the &ldquo;why&rdquo; behind the logic.</p>
               </div>
             </div>
           </div>
@@ -222,7 +219,7 @@ export default function Home() {
           <div className="container">
             <h2 className="section-title">Ready to Join the Battle?</h2>
             <p className="section-subtitle">Your journey from beginner to pro starts here. Sign up for free and start your first challenge today. The arena awaits.</p>
-            <a href="/join" className="cta-btn">Start Learning Now</a>
+            <Link href="/join" className="cta-btn">Start Learning Now</Link>
           </div>
         </section>
       </main>
