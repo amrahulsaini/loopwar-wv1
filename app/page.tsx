@@ -146,7 +146,7 @@ export default function Home() {
             </ul>
             <div className="nav-actions">
               <button 
-                className="theme-switcher" 
+                className="theme-switcher theme-toggle hover-lift icon" 
                 onClick={toggleTheme}
                 aria-label="Toggle dark mode"
               >
@@ -157,7 +157,7 @@ export default function Home() {
                 onMouseLeave={handleContainerMouseLeave}
               >
                 <button 
-                  className="plus-button" 
+                  className="plus-button hover-lift glow" 
                   onClick={togglePlusMenu}
                   onMouseEnter={handlePlusButtonMouseEnter}
                   onMouseLeave={handlePlusButtonMouseLeave}
@@ -166,12 +166,12 @@ export default function Home() {
                   +
                 </button>
                 <div 
-                  className="dropdown-menu"
+                  className="dropdown-menu scale-in"
                   onMouseEnter={handleDropdownMouseEnter}
                   onMouseLeave={handleDropdownMouseLeave}
                 >
-                  <a href="/join" className="dropdown-btn btn-join">Join the War</a>
-                  <a href="/login" className="dropdown-btn btn-login">Login</a>
+                  <a href="/join" className="dropdown-btn btn-join hover-lift-small gradient-animate">Join the War</a>
+                  <a href="/login" className="dropdown-btn btn-login hover-lift-small">Login</a>
                 </div>
               </div>
             </div>
@@ -190,12 +190,12 @@ export default function Home() {
         {/* Hero Section */}
         <section className="hero fade-in-section">
           <div className="container">
-            <div className="hero-text">
-              <span>Welcome to the Arena</span>
-              <h1>What is LoopWar?</h1>
-              <p>It&apos;s not just a platform; it&apos;s your personal AI coding dojo. We&apos;re redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
+            <div className="hero-text stagger-children">
+              <span className="fade-in-up">Welcome to the Arena</span>
+              <h1 className="fade-in-up typewriter">What is LoopWar?</h1>
+              <p className="fade-in-up">It&apos;s not just a platform; it&apos;s your personal AI coding dojo. We&apos;re redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
             </div>
-            <div className="hero-card">
+            <div className="hero-card card-hover float">
               <p>&ldquo;LoopWar is an online AI learning platform that helps students learn coding in all languages and build software skills in a fun and personalized way. It&apos;s like having a smart AI tutor that gives you hints, helps fix your code, and guides you through projects. You can also compete in coding battles, making learning feel like a game!&rdquo;</p>
             </div>
           </div>
@@ -204,20 +204,20 @@ export default function Home() {
         {/* Languages & Tracks Section */}
         <section id="showcase" className="section fade-in-section">
           <div className="container">
-            <h2 className="section-title">Master Your Arsenal</h2>
-            <p className="section-subtitle">From foundational syntax to complex system architecture, we provide the tracks you need to conquer the tech world.</p>
-            <div className="languages-grid">
-              <div className="lang-card">Python</div>
-              <div className="lang-card">Java</div>
-              <div className="lang-card">C++</div>
-              <div className="lang-card">JavaScript</div>
-              <div className="lang-card">Data Structures</div>
-              <div className="lang-card">Algorithms</div>
-              <div className="lang-card">System Design</div>
-              <div className="lang-card">Databases (SQL)</div>
-              <div className="lang-card">Web Development</div>
-              <div className="lang-card">AI / Machine Learning</div>
-              <div className="lang-card">DevOps & CI/CD</div>
+            <h2 className="section-title scale-in">Master Your Arsenal</h2>
+            <p className="section-subtitle fade-in-up">From foundational syntax to complex system architecture, we provide the tracks you need to conquer the tech world.</p>
+            <div className="languages-grid stagger-children">
+              <div className="lang-card card-hover hover-lift">Python</div>
+              <div className="lang-card card-hover hover-lift">Java</div>
+              <div className="lang-card card-hover hover-lift">C++</div>
+              <div className="lang-card card-hover hover-lift">JavaScript</div>
+              <div className="lang-card card-hover hover-lift">Data Structures</div>
+              <div className="lang-card card-hover hover-lift">Algorithms</div>
+              <div className="lang-card card-hover hover-lift">System Design</div>
+              <div className="lang-card card-hover hover-lift">Databases (SQL)</div>
+              <div className="lang-card card-hover hover-lift">Web Development</div>
+              <div className="lang-card card-hover hover-lift">AI / Machine Learning</div>
+              <div className="lang-card card-hover hover-lift">DevOps & CI/CD</div>
               <div className="lang-card">PHP</div>
             </div>
           </div>
