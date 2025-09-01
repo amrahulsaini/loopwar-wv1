@@ -24,9 +24,28 @@ interface SignupRequest {
   experienceLevel: string;
 }
 
-// Global in-memory storage - this will persist for the lifetime of the serverless function
-// Note: Data will be lost when the function cold starts, but this is for testing only
-const globalUsers: User[] = [];
+interface VerificationCodeData {
+  userId: string;
+  code: string;
+  expiry: number;
+}
+
+// Global storage shared across serverless functions
+declare global {
+  var globalUsers: User[] | undefined;
+  var globalVerificationCodes: VerificationCodeData[] | undefined;
+}
+
+// Initialize global storage if not exists
+if (!global.globalUsers) {
+  global.globalUsers = [];
+}
+if (!global.globalVerificationCodes) {
+  global.globalVerificationCodes = [];
+}
+
+const globalUsers = global.globalUsers;
+const globalVerificationCodes = global.globalVerificationCodes;
 
 // Validation functions
 function validateUsername(username: string): string | null {
@@ -164,7 +183,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       passwordHash,
       experienceLevel,
-      isVerified: true, // Auto-verify for testing
+      isVerified: false, // Require verification
       verificationCode,
       verificationExpiry: Date.now() + (15 * 60 * 1000),
       createdAt: Date.now(),
@@ -175,7 +194,17 @@ export async function POST(request: NextRequest) {
     // Save user to global array (NO FILE SYSTEM OPERATIONS)
     console.log('💾 Saving user to memory...');
     globalUsers.push(newUser);
+    
+    // Save verification code separately
+    const verificationCodeData: VerificationCodeData = {
+      userId: userId,
+      code: verificationCode,
+      expiry: Date.now() + (15 * 60 * 1000)
+    };
+    globalVerificationCodes.push(verificationCodeData);
+    
     console.log('✅ User saved successfully. Total users:', globalUsers.length);
+    console.log('✅ Verification code saved. Total codes:', globalVerificationCodes.length);
 
     const endTime = Date.now();
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
@@ -184,13 +213,16 @@ export async function POST(request: NextRequest) {
     // Return success
     return NextResponse.json({
       success: true,
-      message: 'Account created successfully! You can now log in.',
+      message: 'Account created successfully! Please check your email for verification code.',
       userId: newUser.id,
       sessionToken: newUser.sessionToken,
+      requiresVerification: true,
+      verificationCode: verificationCode, // Include for testing (remove in production)
       debug: {
         timestamp: new Date().toISOString(),
         processingTime: endTime - startTime,
-        totalUsers: globalUsers.length
+        totalUsers: globalUsers.length,
+        totalCodes: globalVerificationCodes.length
       }
     }, { status: 201 });
 

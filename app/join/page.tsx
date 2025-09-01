@@ -82,18 +82,27 @@ export default function JoinPage() {
           text: data.message 
         });
         
-        // Set session cookies
+        // Set session cookies (but not isVerified - requires verification first)
         setCookie('sessionToken', data.sessionToken, 7);
         setCookie('username', formData.username, 7);
         setCookie('userId', data.userId, 7);
+        setCookie('isVerified', 'false', 7); // Explicitly set as not verified
         
         // Store username in localStorage for the zone page
         localStorage.setItem('username', formData.username);
         
+        // Show verification code for testing (remove in production)
+        if (data.verificationCode) {
+          setMessage({ 
+            type: 'success', 
+            text: `Account created! Verification code: ${data.verificationCode}. Redirecting to verification page...` 
+          });
+        }
+        
         // Redirect to verify page after successful registration
         setTimeout(() => {
           window.location.href = `/verify?userId=${data.userId}`;
-        }, 2000);
+        }, 3000);
       } else {
         setMessage({ 
           type: 'error', 

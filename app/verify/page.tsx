@@ -98,11 +98,22 @@ function VerifyPageContent() {
         setIsVerified(true);
         
         // Set session cookies after successful verification
-        const username = getCookie('username') || localStorage.getItem('username') || 'User';
-        setCookie('sessionToken', data.sessionToken, 7);
-        setCookie('username', username, 7);
-        setCookie('userId', userId || '', 7);
-        setCookie('isVerified', 'true', 7); // Mark user as verified
+        if (data.user) {
+          setCookie('sessionToken', data.user.sessionToken, 7);
+          setCookie('username', data.user.username, 7);
+          setCookie('userId', data.user.id, 7);
+          setCookie('isVerified', 'true', 7); // Mark user as verified
+          setCookie('email', data.user.email, 7);
+          setCookie('experienceLevel', data.user.experienceLevel, 7);
+          
+          // Update localStorage as well
+          localStorage.setItem('username', data.user.username);
+          localStorage.setItem('isVerified', 'true');
+        } else {
+          // Fallback to existing cookies
+          const username = getCookie('username') || localStorage.getItem('username') || 'User';
+          setCookie('isVerified', 'true', 7);
+        }
         
         // Redirect to zone page after successful verification
         setTimeout(() => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import CookieConsent from './components/CookieConsent';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -272,6 +273,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Cookie Consent */}
+      <CookieConsent isDarkMode={isDarkMode} />
     </>
   );
 }
