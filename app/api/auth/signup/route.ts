@@ -5,12 +5,12 @@ import Database from '../../../../lib/database';
 
 // SMTP configuration for sending emails
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
+  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || 'your-email@gmail.com',
-    pass: process.env.SMTP_PASS || 'your-app-password'
+    user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
+    pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2'
   }
 });
 
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       `;
 
       await transporter.sendMail({
-        from: '"LoopWar Team" <noreply@loopwar.dev>',
+        from: `"LoopWar Team" <${process.env.SMTP_FROM || 'verify@loopwar.dev'}>`,
         to: email,
         subject: '🚀 Welcome to LoopWar - Verify Your Email',
         html: emailHtml,
