@@ -1,211 +1,133 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-
-// Types (same as signup route)
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-  experienceLevel: string;
-  isVerified: boolean;
-  verificationCode: string;
-  verificationExpiry: number;
-  createdAt: number;
-  lastLogin: number | null;
-  sessionToken: string;
-}
-
-interface VerificationRequest {
-  userId: string;
-  code: string;
-}
-
-interface VerificationCodeData {
-  userId: string;
-  code: string;
-  expiry: number;
-}
-
-// Global storage (shared with signup route)
-declare global {
-  var globalUsers: User[] | undefined;
-  var globalVerificationCodes: VerificationCodeData[] | undefined;
-}
-
-// Initialize global storage if not exists
-if (!global.globalUsers) {
-  global.globalUsers = [];
-}
-if (!global.globalVerificationCodes) {
-  global.globalVerificationCodes = [];
-}
-
-const globalUsers = global.globalUsers;
-const globalVerificationCodes = global.globalVerificationCodes;
+import Database from '../../../../lib/database';
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-  
   try {
-    console.log('=== VERIFICATION API CALLED ===');
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('Current users:', globalUsers.length);
-    console.log('Current verification codes:', globalVerificationCodes.length);
+    console.log('🔐 Verification API called (MySQL version)');
     
-    // Parse request body
-    let body: VerificationRequest;
-    try {
-      body = await request.json();
-      console.log('✅ Request body parsed successfully');
-    } catch (parseError) {
-      console.error('❌ Failed to parse request body:', parseError);
-      return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
+    // Health check for database
+    const dbHealthy = await Database.healthCheck();
+    if (!dbHealthy) {
+      console.error('❌ Database connection failed');
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
     }
 
-    const { userId, code } = body;
-    console.log('📝 Verification request:', { userId, codeLength: code?.length });
+    const { verificationCode } = await request.json();
+    console.log('📋 Received verification request');
 
     // Validation
-    if (!userId) {
-      console.log('❌ User ID not provided');
-      return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+    if (!verificationCode) {
+      console.log('❌ Missing verification code');
+      return NextResponse.json(
+        { error: 'Verification code is required' },
+        { status: 400 }
+      );
     }
 
-    if (!code || code.length !== 6) {
-      console.log('❌ Invalid verification code');
-      return NextResponse.json({ message: 'Please enter a valid 6-digit verification code' }, { status: 400 });
+    // Validate code format
+    if (!/^\d{6}$/.test(verificationCode)) {
+      console.log('❌ Invalid verification code format');
+      return NextResponse.json(
+        { error: 'Invalid verification code format' },
+        { status: 400 }
+      );
     }
 
-    console.log('✅ Basic validation passed');
+    // Find user by verification code
+    const user = await Database.queryOne(
+      'SELECT * FROM users WHERE verification_code = ? AND verification_code_expires > NOW() AND is_verified = FALSE',
+      [verificationCode]
+    ) as { id: number; username: string; email: string } | null;
 
-    // Find user
-    const userIndex = globalUsers.findIndex(user => user.id === userId);
-    if (userIndex === -1) {
-      console.log('❌ User not found:', userId);
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    if (!user) {
+      console.log('❌ Invalid or expired verification code');
+      return NextResponse.json(
+        { error: 'Invalid or expired verification code' },
+        { status: 400 }
+      );
     }
 
-    const user = globalUsers[userIndex];
-    console.log('✅ User found:', user.username);
+    console.log('✅ Valid verification code found for user:', user.username);
 
-    // Check if already verified
-    if (user.isVerified) {
-      console.log('ℹ️ User already verified');
-      return NextResponse.json({
-        success: true,
-        message: 'Account already verified',
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          sessionToken: user.sessionToken
-        }
-      });
-    }
-
-    // Check verification code
-    if (user.verificationCode !== code) {
-      console.log('❌ Invalid verification code provided');
-      return NextResponse.json({ message: 'Invalid verification code' }, { status: 400 });
-    }
-
-    // Check if code expired
-    if (Date.now() > user.verificationExpiry) {
-      console.log('❌ Verification code expired');
-      return NextResponse.json({ message: 'Verification code has expired. Please request a new one.' }, { status: 400 });
-    }
-
-    console.log('✅ Verification code valid');
-
-    // Mark user as verified
-    user.isVerified = true;
-    user.lastLogin = Date.now();
+    // Verify the user
+    const verificationSuccess = await Database.verifyUser(verificationCode);
     
-    // Generate new session token for security
-    user.sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map(val => val.toString(16).padStart(2, '0'))
-      .join('');
-
-    // Update user in global array
-    globalUsers[userIndex] = user;
-    
-    // Remove verification code from global codes array
-    const codeIndex = globalVerificationCodes.findIndex(vc => vc.userId === userId);
-    if (codeIndex !== -1) {
-      globalVerificationCodes.splice(codeIndex, 1);
+    if (!verificationSuccess) {
+      console.log('❌ Failed to verify user');
+      return NextResponse.json(
+        { error: 'Failed to verify user' },
+        { status: 500 }
+      );
     }
 
-    console.log('✅ User verified successfully');
+    // Generate session token
+    const sessionToken = crypto.randomBytes(64).toString('hex');
+    
+    // Get client information
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                    request.headers.get('x-real-ip') || 
+                    'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const endTime = Date.now();
-    console.log('⏱️ Verification processed in:', endTime - startTime, 'ms');
-    console.log('🎉 Verification completed for user:', user.username);
+    // Create session
+    await Database.createSession(user.id, sessionToken, clientIP, userAgent);
 
-    // Return success with user data for cookies
-    return NextResponse.json({
-      success: true,
-      message: 'Account verified successfully! Welcome to LoopWar.',
+    // Log verification activity
+    await Database.logActivity(user.id, 'verify_email', clientIP, userAgent, {
+      verificationCode: verificationCode
+    });
+
+    // Create success notification
+    await Database.createNotification(
+      user.id,
+      '🎉 Email Verified Successfully!',
+      'Your account has been verified. Welcome to LoopWar! You can now access all features.',
+      'success',
+      '/zone'
+    );
+
+    console.log('✅ User verified successfully and saved to MySQL:', user.username);
+
+    // Set response with cookies
+    const response = NextResponse.json({
+      message: 'Email verified successfully!',
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
-        experienceLevel: user.experienceLevel,
-        isVerified: user.isVerified,
-        sessionToken: user.sessionToken
-      },
-      debug: {
-        timestamp: new Date().toISOString(),
-        processingTime: endTime - startTime
+        isVerified: true
       }
-    });
+    }, { status: 200 });
+
+    // Set secure cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: false, // Allow client-side access for our middleware
+      secure: isProduction,
+      sameSite: 'lax' as const,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/'
+    };
+
+    response.cookies.set('sessionToken', sessionToken, cookieOptions);
+    response.cookies.set('username', user.username, cookieOptions);
+    response.cookies.set('isVerified', 'true', cookieOptions);
+
+    return response;
 
   } catch (error) {
-    const endTime = Date.now();
-    console.error('💥 === VERIFICATION ERROR ===');
-    console.error('⏱️ Error occurred at:', endTime - startTime, 'ms');
-    console.error('🔍 Error type:', typeof error);
-    console.error('📝 Error details:', error);
+    console.error('❌ Verification error:', error);
     
-    if (error instanceof Error) {
-      console.error('📄 Error message:', error.message);
-      console.error('📚 Error stack:', error.stack);
-    }
-    
-    return NextResponse.json({
-      message: 'Internal server error',
-      timestamp: new Date().toISOString(),
-      error: process.env.NODE_ENV === 'development' ? String(error) : 'Server error',
-      debug: {
-        processingTime: endTime - startTime,
-        errorType: typeof error
-      }
-    }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: 'Internal server error occurred during verification',
+        details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+      },
+      { status: 500 }
+    );
   }
-}
-
-// Add OPTIONS handler for CORS
-export async function OPTIONS() {
-  console.log('OPTIONS request received for verification');
-  
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-}
-
-// Add GET handler for debugging
-export async function GET() {
-  return NextResponse.json({
-    message: 'Verification API is working',
-    timestamp: new Date().toISOString(),
-    totalUsers: globalUsers.length,
-    totalCodes: globalVerificationCodes.length,
-    verifiedUsers: globalUsers.filter(u => u.isVerified).length,
-    unverifiedUsers: globalUsers.filter(u => !u.isVerified).length
-  });
 }
