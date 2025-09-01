@@ -4,7 +4,7 @@
 ## MySQL Database Configuration
 ```
 Database: loop_wv1
-Username: wv1  
+Username: loop_wv1  
 Password: wv1
 Host: localhost
 Port: 3306
@@ -25,7 +25,7 @@ Add these to your server's `.env.local` file:
 ```bash
 # MySQL Database
 DB_HOST=localhost
-DB_USER=wv1
+DB_USER=loop_wv1
 DB_PASSWORD=wv1
 DB_NAME=loop_wv1
 DB_PORT=3306
