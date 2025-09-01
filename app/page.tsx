@@ -275,7 +275,7 @@ export default function Home() {
       </footer>
 
       {/* Cookie Consent */}
-      <CookieConsent isDarkMode={isDarkMode} />
+      <CookieConsent />
     </>
   );
 }

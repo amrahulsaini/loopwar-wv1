@@ -27,9 +27,14 @@ export default function JoinPage() {
       // Check if user is already logged in
       const sessionToken = getCookie('sessionToken');
       const username = getCookie('username');
-      if (sessionToken && username) {
-        // Redirect to zone if already authenticated
+      const isVerified = getCookie('isVerified') === 'true';
+      
+      if (sessionToken && username && isVerified) {
+        // Redirect to zone if fully authenticated and verified
         window.location.href = '/zone';
+      } else if (sessionToken && username && !isVerified) {
+        // Redirect to verify page if logged in but not verified
+        window.location.href = '/verify';
       }
     }
   }, []);
