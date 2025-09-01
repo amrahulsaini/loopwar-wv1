@@ -80,8 +80,10 @@ export default function JoinPage() {
       });
 
       const data = await response.json();
+      console.log('📥 Signup response:', { status: response.status, data });
 
       if (response.ok) {
+        console.log('✅ Signup successful, redirecting to verification...');
         setMessage({ 
           type: 'success', 
           text: data.message 
@@ -95,11 +97,14 @@ export default function JoinPage() {
         // Store username in localStorage for the zone page
         localStorage.setItem('username', formData.username);
         
+        console.log('🔗 Redirecting to verify page with userId:', data.userId);
+        
         // Redirect to verify page after successful registration
         setTimeout(() => {
           window.location.href = `/verify?userId=${data.userId}`;
         }, 2000);
       } else {
+        console.log('❌ Signup failed:', data);
         // Show specific error message from server
         setMessage({ 
           type: 'error', 
