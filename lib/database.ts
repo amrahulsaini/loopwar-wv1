@@ -115,7 +115,7 @@ export class Database {
       INSERT INTO user_sessions (user_id, session_token, ip_address, user_agent, expires_at)
       VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))
     `;
-    await this.query(sql, [userId, sessionToken, ipAddress, userAgent]);
+    await this.query(sql, [userId, sessionToken, ipAddress || null, userAgent || null]);
   }
 
   static async invalidateSession(sessionToken: string) {
@@ -128,7 +128,7 @@ export class Database {
       INSERT INTO user_activities (user_id, activity_type, ip_address, user_agent, details)
       VALUES (?, ?, ?, ?, ?)
     `;
-    await this.query(sql, [userId, activityType, ipAddress, userAgent, JSON.stringify(details)]);
+    await this.query(sql, [userId, activityType, ipAddress || null, userAgent || null, details ? JSON.stringify(details) : null]);
   }
 
   static async createNotification(userId: number, title: string, message: string, type: string = 'info', actionUrl?: string) {
@@ -136,7 +136,7 @@ export class Database {
       INSERT INTO notifications (user_id, title, message, type, action_url)
       VALUES (?, ?, ?, ?, ?)
     `;
-    await this.query(sql, [userId, title, message, type, actionUrl]);
+    await this.query(sql, [userId, title, message, type, actionUrl || null]);
   }
 
   static async getUserNotifications(userId: number, limit: number = 20) {

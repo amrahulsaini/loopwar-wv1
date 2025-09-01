@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Valid verification code found for user:', user.username);
 
     // Verify the user
-    const verificationSuccess = await Database.verifyUser(verificationCode);
+    const verificationSuccess = await Database.verifyUser(codeToVerify);
     
     if (!verificationSuccess) {
       console.log('❌ Failed to verify user');
@@ -81,17 +81,11 @@ export async function POST(request: NextRequest) {
 
     // Log verification activity
     await Database.logActivity(user.id, 'verify_email', clientIP, userAgent, {
-      verificationCode: verificationCode
+      verificationCode: codeToVerify
     });
 
-    // Create success notification
-    await Database.createNotification(
-      user.id,
-      '🎉 Email Verified Successfully!',
-      'Your account has been verified. Welcome to LoopWar! You can now access all features.',
-      'success',
-      '/zone'
-    );
+    // Skip notification creation to avoid charset issues temporarily
+    console.log('⏭️ Skipping verification notification to avoid charset issues');
 
     console.log('✅ User verified successfully and saved to MySQL:', user.username);
 
