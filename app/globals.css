@@ -18,6 +18,12 @@
     --color-border-dark: #2a2a2a;
     --color-card-bg-dark: #1e1e1e;
 
+    /* RGB Values for rgba functions */
+    --color-primary-rgb-light: 0, 0, 0;
+    --color-primary-rgb-dark: 255, 255, 255;
+    --color-bg-rgb-light: 255, 255, 255;
+    --color-bg-rgb-dark: 18, 18, 18;
+
     /* Default to Light Theme */
     --color-bg: var(--color-bg-light);
     --color-text: var(--color-text-light);
@@ -25,6 +31,8 @@
     --color-secondary: var(--color-secondary-light);
     --color-border: var(--color-border-light);
     --color-card-bg: var(--color-card-bg-light);
+    --color-primary-rgb: var(--color-primary-rgb-light);
+    --color-bg-rgb: var(--color-bg-rgb-light);
     
     --border-radius: 12px;
     --transition-speed: 0.3s ease;
@@ -44,6 +52,66 @@
     /* Font */
 }
 
+/* NProgress Styles */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: var(--color-primary);
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px var(--color-primary), 0 0 5px var(--color-primary);
+  opacity: 1;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+#nprogress .spinner {
+  display: block;
+  position: fixed;
+  z-index: 1031;
+  top: 15px;
+  right: 15px;
+}
+
+#nprogress .spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+.nprogress-custom-parent {
+  overflow: hidden;
+  position: relative;
+}
+
+.nprogress-custom-parent #nprogress .spinner,
+.nprogress-custom-parent #nprogress .bar {
+  position: absolute;
+}
+
+@keyframes nprogress-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Dark Mode Class */
 body.dark-mode {
     --color-bg: var(--color-bg-dark);
@@ -52,6 +120,8 @@ body.dark-mode {
     --color-secondary: var(--color-secondary-dark);
     --color-border: var(--color-border-dark);
     --color-card-bg: var(--color-card-bg-dark);
+    --color-primary-rgb: var(--color-primary-rgb-dark);
+    --color-bg-rgb: var(--color-bg-rgb-dark);
     
     /* Dark mode warning colors */
     --warning-bg: #2a2a2a;
@@ -268,6 +338,26 @@ body.dark-mode .logo:hover::after {
     transform: scale(1.1) rotate(15deg);
 }
 
+.home-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--color-secondary);
+    transition: color var(--transition-speed), transform var(--transition-speed);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 8px;
+}
+.home-btn:hover {
+    color: var(--color-primary);
+    transform: scale(1.1);
+    background-color: var(--color-card-bg);
+}
+
 .plus-button-container {
     position: relative;
     z-index: 1001; /* Higher z-index than header */
@@ -289,7 +379,8 @@ body.dark-mode .logo:hover::after {
     transition: transform var(--transition-speed), background-color var(--transition-speed);
 }
 
-.plus-button:hover {
+.plus-button:hover,
+.plus-button-container.active .plus-button {
     transform: scale(1.1) rotate(90deg);
 }
 
@@ -353,23 +444,60 @@ body.dark-mode .logo:hover::after {
 }
 
 .btn-join {
-    background-color: var(--color-primary);
-    color: var(--color-bg);
+  /* neutral default so it doesn't look "extra" when dropdown opens */
+  background-color: transparent;
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+  font-weight: 700;
 }
-.btn-join:hover {
-     background-color: transparent;
-     color: var(--color-primary);
-     border-color: var(--color-primary);
+/* Neutralize gradient animation for buttons when inside dropdown menu */
+.dropdown-menu .gradient-animate {
+  background: none;
+  background-image: none;
+  animation: none;
+}
+
+/* Hover and active (dropdown-open) appearance - light theme */
+.btn-join:hover,
+.btn-join:active,
+.btn-join:focus,
+.plus-button-container.active .btn-join {
+   background-color: #ffffff;
+   color: #000000;
+   border-color: #000000;
+   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+   transform: translateY(-2px) scale(1.02);
+}
+
+/* Dark mode defaults and hover/active appearance */
+body.dark-mode .btn-join {
+  background-color: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .btn-join:hover,
+body.dark-mode .btn-join:active,
+body.dark-mode .btn-join:focus,
+body.dark-mode .plus-button-container.active .btn-join {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .btn-login {
-    background-color: transparent;
-    color: var(--color-primary);
-    border: 2px solid var(--color-border);
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-border);
 }
-.btn-login:hover {
-    background-color: var(--color-card-bg);
-    border-color: var(--color-primary);
+.btn-login:hover,
+.btn-login:active,
+.btn-login:focus,
+.plus-button-container.active .btn-login {
+  background-color: var(--color-card-bg);
+  border-color: var(--color-primary);
 }
 
 .hamburger {
@@ -720,6 +848,166 @@ body.dark-mode .logo:hover::after {
 .join-main {
     min-height: 100vh;
     background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-card-bg) 100%);
+    display: flex;
+    align-items: center;
+    padding: 40px 0;
+}
+
+/* Join Content Wrapper */
+.join-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    min-height: 80vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Left Side - Welcome Content */
+.join-left {
+    padding: 40px 20px;
+}
+
+.welcome-content {
+    max-width: 500px;
+}
+
+.welcome-header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: var(--color-primary);
+    line-height: 1.2;
+}
+
+.welcome-header p {
+    font-size: 1.2rem;
+    color: var(--color-secondary);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* Join Options */
+.join-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.join-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+  background: var(--color-card-bg);
+  border: 2px solid var(--color-border);
+    border-radius: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.join-option-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary);
+}
+
+.join-option-btn.active {
+    border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.join-option-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  background: var(--color-card-bg);
+  border-color: var(--color-border);
+}
+
+.join-option-btn:disabled .option-icon {
+    opacity: 0.8;
+}
+
+.join-option-btn:disabled .option-content h3 {
+    color: var(--color-text);
+    opacity: 0.9;
+}
+
+.join-option-btn:disabled .option-content p {
+    color: var(--color-secondary);
+    opacity: 0.8;
+}
+
+.option-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+/* Ensure inline SVG icons inherit text color and remain visible in dark mode */
+.option-icon svg,
+.join-option-btn svg,
+.dropdown-btn svg {
+  width: 2rem;
+  height: 2rem;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor; /* inherit color from text for proper contrast */
+}
+
+/* Slightly larger home icon in header */
+.home-btn svg {
+  width: 2rem;
+  height: 2rem;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+}
+
+/* Dark-mode: keep social icons visible by adjusting color on disabled buttons */
+body.dark-mode .join-option-btn:disabled .option-icon,
+body.dark-mode .join-option-btn:disabled .option-icon svg {
+  color: #e6e6e6;
+  opacity: 0.95;
+}
+
+.option-content h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: inherit;
+}
+
+.option-content p {
+    font-size: 0.95rem;
+    color: var(--color-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.join-option-btn.active .option-content p {
+    color: var(--color-bg);
+    opacity: 0.9;
+}
+
+/* Right Side - Form */
+.join-right {
+    padding: 40px 20px;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: all var(--transition-speed);
+}
+
+.join-right.active {
+    opacity: 1;
+    pointer-events: all;
 }
 
 /* Join Hero Section */
@@ -833,15 +1121,15 @@ body.dark-mode .logo:hover::after {
 }
 
 .message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-text);
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-text);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .form-group {
@@ -857,13 +1145,94 @@ body.dark-mode .logo:hover::after {
     font-family: inherit;
     background-color: var(--color-bg);
     color: var(--color-text);
+
+/* Custom styled select (Experience Level) */
+.form-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+            linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 44px;
+  position: relative;
+}
+
+.form-group { position: relative; }
+
+.form-select:focus {
+  outline: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  border-color: var(--color-primary);
+}
+
+/* A visible overlay caret for accessibility when using custom appearance */
+.form-group::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-50%) rotate(-45deg);
+  opacity: 0.8;
+}
+
+/* Dark mode tweaks for select caret and background */
+body.dark-mode .form-select {
+  background-color: var(--color-card-bg);
+  color: var(--color-text);
+}
+body.dark-mode .form-group::after { color: var(--color-text); }
+
+/* Dark mode: make non-active join-option less pitch-black for readability */
+body.dark-mode .join-option-btn {
+  background: #242424; /* slightly lighter than background to create separation */
+  border-color: #333333;
+}
+
+body.dark-mode .join-option-btn:hover:not(:disabled) {
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .join-option-btn.active {
+  background: var(--color-primary-dark);
+  color: var(--color-bg-dark);
+}
+
+/* Ensure headings and icons inside the join-option are readable in dark mode */
+/* Force white text for join option headings and description in dark mode */
+body.dark-mode .join-option-btn,
+body.dark-mode .join-option-btn .option-content,
+body.dark-mode .join-option-btn .option-content h3,
+body.dark-mode .join-option-btn .option-content p {
+  color: #ffffff;
+}
+
+/* Make the icon clearly visible in dark mode */
+body.dark-mode .join-option-btn .option-icon,
+body.dark-mode .join-option-btn .option-icon svg {
+  color: #ffffff;
+  opacity: 0.95;
+}
+
+/* Slightly reduce opacity for disabled state in dark mode for clarity */
+body.dark-mode .join-option-btn:disabled {
+  opacity: 0.85;
+}
     transition: all var(--transition-speed);
 }
 
 .form-input:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
 }
 
 .form-input::placeholder {
@@ -879,6 +1248,11 @@ select.form-input {
     background-repeat: no-repeat;
     background-size: 16px;
     padding-right: 40px;
+}
+
+/* Dark mode dropdown arrow */
+body.dark-mode select.form-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23b3b3b3' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
 }
 
 .btn-primary {
@@ -928,7 +1302,8 @@ select.form-input {
 .divider {
     text-align: center;
     position: relative;
-    margin: 20px 0;
+    margin: 30px 0;
+    line-height: 1.5;
 }
 
 .divider::before {
@@ -939,14 +1314,18 @@ select.form-input {
     right: 0;
     height: 1px;
     background-color: var(--color-border);
+    z-index: 1;
 }
 
 .divider span {
     background-color: var(--color-bg);
-    padding: 0 20px;
+    padding: 8px 20px;
     color: var(--color-secondary);
     font-size: 0.9rem;
     font-weight: 600;
+    position: relative;
+    z-index: 2;
+    display: inline-block;
 }
 
 .social-btn {
@@ -974,11 +1353,13 @@ select.form-input {
 }
 
 .google-btn:hover {
-    background-color: #f8f9fa;
+    background-color: var(--color-card-bg);
+    border-color: var(--color-secondary);
 }
 
 .github-btn:hover {
-    background-color: #f6f8fa;
+    background-color: var(--color-card-bg);
+    border-color: var(--color-secondary);
 }
 
 .social-btn svg {
@@ -1090,40 +1471,60 @@ select.form-input {
 
 /* Responsive Design for Join Page */
 @media (max-width: 992px) {
-    .options-grid {
+    .join-content-wrapper {
         grid-template-columns: 1fr;
         gap: 40px;
+        min-height: auto;
     }
     
-    .hero-title {
-        font-size: 3rem;
+    .join-left {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .welcome-header h1 {
+        font-size: 2.5rem;
     }
 }
 
 @media (max-width: 768px) {
-    .join-hero {
-        padding: 60px 0 40px 0;
+    .join-main {
+        padding: 20px 0;
     }
     
-    .hero-title {
-        font-size: 2.5rem;
+    .join-content-wrapper {
+        gap: 30px;
     }
     
-    .hero-subtitle {
+    .welcome-header h1 {
+        font-size: 2rem;
+    }
+    
+    .welcome-header p {
         font-size: 1.1rem;
     }
     
-    .join-options {
-        padding: 40px 0;
+    .join-option-btn {
+        padding: 20px;
+        gap: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .option-icon {
+        font-size: 1.5rem;
+    }
+    
+    .option-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .option-content p {
+        font-size: 0.9rem;
     }
     
     .join-card {
         padding: 30px 20px;
-    }
-    
-    .benefits-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
     }
     
     .join-footer .container {
@@ -1133,13 +1534,13 @@ select.form-input {
 }
 
 @media (max-width: 576px) {
-    .hero-title {
-        font-size: 2rem;
+    .welcome-header h1 {
+        font-size: 1.8rem;
     }
     
-    .hero-badge {
-        padding: 10px 20px;
-        font-size: 0.9rem;
+    .join-option-btn {
+        padding: 16px;
+        gap: 12px;
     }
     
     .card-header h2 {
@@ -1153,11 +1554,6 @@ select.form-input {
     .btn-primary {
         padding: 16px 24px;
         font-size: 1rem;
-    }
-    
-    .social-btn {
-        padding: 14px 20px;
-        font-size: 0.9rem;
     }
     
     .footer-links {
@@ -1248,9 +1644,9 @@ select.form-input {
 }
 
 .success-message {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-text);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     border-radius: 8px;
     padding: 20px;
     margin: 20px 0;
@@ -1515,8 +1911,8 @@ select.form-input {
 .cookie-consent-container {
   margin: 0 1rem 1rem 1rem;
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #e5e7eb;
+  background: rgba(var(--color-bg-rgb), 0.95);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(8px);
@@ -1526,9 +1922,9 @@ select.form-input {
 }
 
 body.dark-mode .cookie-consent-container {
-  background: rgba(17, 24, 39, 0.95);
-  border-color: #374151;
-  color: #f3f4f6;
+  background: rgba(var(--color-bg-rgb), 0.95);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 
 .cookie-consent-content {
@@ -2130,6 +2526,34 @@ body.dark-mode .code-scrollbar::-webkit-scrollbar-thumb:hover {
   --animation-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.15);
   --shadow-active: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading Spinner Animations */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 1.5s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
 }
 
 /* Enhanced Button Animations */

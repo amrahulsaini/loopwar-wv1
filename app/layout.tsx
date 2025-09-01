@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import { NotificationProvider } from "./components/NotificationContext";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.variable} antialiased`}>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

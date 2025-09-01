@@ -52,7 +52,7 @@ export default function JoinPage() {
   const setCookie = (name: string, value: string, days: number = 7) => {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
   };
 
   const getCookie = (name: string): string | null => {
@@ -78,6 +78,7 @@ export default function JoinPage() {
     e.preventDefault();
     setIsLoading(true);
     setMessage({ type: '', text: '' });
+    
     NProgress.start();
 
     try {
@@ -90,33 +91,25 @@ export default function JoinPage() {
       });
 
       const data = await response.json();
-      console.log('📥 Signup response:', { status: response.status, data });
+      NProgress.done();
 
       if (response.ok) {
-        console.log('✅ Signup successful, redirecting to verification...');
+        // Store session data
+        setCookie('sessionToken', data.sessionToken);
+        setCookie('username', data.username);
+        setCookie('isVerified', 'false');
+        
         setMessage({ 
           type: 'success', 
-          text: data.message 
+          text: 'Account created successfully! Redirecting to verification...' 
         });
-        
-        // Store user data for verification
-        setCookie('username', formData.username, 7);
-        setCookie('userId', data.userId, 7);
-        setCookie('isVerified', 'false', 7); // Explicitly set as not verified
-        
-        // Store username in localStorage for the zone page
-        localStorage.setItem('username', formData.username);
-        
-        console.log('🔗 Redirecting to verify page with userId:', data.userId);
-        
-        // Redirect to verify page after successful registration
+
+        // Redirect to verification page after a short delay
         setTimeout(() => {
-          NProgress.done();
-          window.location.href = `/verify?userId=${data.userId}`;
+          NProgress.start();
+          router.push('/verify');
         }, 2000);
       } else {
-        console.log('❌ Signup failed:', data);
-        NProgress.done();
         // Show specific error message from server
         setMessage({ 
           type: 'error', 
@@ -145,8 +138,9 @@ export default function JoinPage() {
               className="home-btn"
               aria-label="Go to Homepage"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.5z" fill="currentColor"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9,22 9,12 15,12 15,22"/>
               </svg>
             </Link>
           </div>
@@ -166,8 +160,8 @@ export default function JoinPage() {
                 
                 <div className="join-options">
                   <button 
-                    onClick={() => setShowForm(true)}
                     className={`join-option-btn ${showForm ? 'active' : ''}`}
+                    onClick={() => setShowForm(true)}
                   >
                     <span className="option-icon">⚔️</span>
                     <div className="option-content">
@@ -211,8 +205,8 @@ export default function JoinPage() {
               <div className="join-card">
                 <div className="card-header">
                   <span className="card-icon">⚔️</span>
-                  <h2>Create Account</h2>
-                  <p>Join the elite community of developers</p>
+                  <h2>Join the Battle</h2>
+                  <p>Create your LoopWar account and start coding</p>
                 </div>
 
                 {message.text && (
@@ -223,104 +217,73 @@ export default function JoinPage() {
 
                 <form className="signup-form" onSubmit={handleSubmit}>
                   <div className="form-group">
-                    <label htmlFor="username" className="form-label">
-                      <span className="label-icon">👤</span>
-                      Username
-                    </label>
                     <input
-                      id="username"
-                      name="username"
                       type="text"
+                      name="username"
+                      placeholder="Choose a username"
                       value={formData.username}
                       onChange={handleInputChange}
                       className="form-input"
-                      placeholder="Choose your warrior name"
                       required
-                      minLength={3}
-                      maxLength={20}
                     />
-                    <span className="form-hint">3-20 characters, letters and numbers only</span>
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="email" className="form-label">
-                      <span className="label-icon">📧</span>
-                      Email Address
-                    </label>
                     <input
-                      id="email"
-                      name="email"
                       type="email"
+                      name="email"
+                      placeholder="Your email address"
                       value={formData.email}
                       onChange={handleInputChange}
                       className="form-input"
-                      placeholder="your.email@example.com"
                       required
                     />
-                    <span className="form-hint">We'll send you a verification code</span>
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="password" className="form-label">
-                      <span className="label-icon">🔐</span>
-                      Password
-                    </label>
                     <input
-                      id="password"
-                      name="password"
                       type="password"
+                      name="password"
+                      placeholder="Create a strong password"
                       value={formData.password}
                       onChange={handleInputChange}
                       className="form-input"
-                      placeholder="Create a strong password"
                       required
-                      minLength={8}
                     />
-                    <span className="form-hint">Minimum 8 characters for security</span>
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="experienceLevel" className="form-label">
-                      <span className="label-icon">📊</span>
-                      Experience Level
-                    </label>
                     <select
-                      id="experienceLevel"
                       name="experienceLevel"
                       value={formData.experienceLevel}
                       onChange={handleInputChange}
-                      className="form-input form-select"
+                      className="form-input"
                       required
                     >
-                      <option value="beginner">🌱 Beginner - Just starting out</option>
-                      <option value="intermediate">⚡ Intermediate - Some coding experience</option>
-                      <option value="advanced">🏆 Advanced - Experienced developer</option>
+                      <option value="beginner">Beginner - New to coding</option>
+                      <option value="intermediate">Intermediate - Some experience</option>
+                      <option value="advanced">Advanced - Experienced developer</option>
+                      <option value="expert">Expert - Senior developer</option>
                     </select>
-                    <span className="form-hint">Help us customize your learning path</span>
                   </div>
 
                   <button 
                     type="submit" 
-                    className="btn-primary btn-submit gradient-animate"
                     disabled={isLoading}
+                    className="btn-primary btn-submit gradient-animate"
                   >
                     {isLoading ? (
                       <LoadingSpinner size="small" color="white" text="Creating Account..." />
                     ) : (
-                      <>
-                        <span className="btn-icon">🚀</span>
-                        <span>Join the War</span>
-                      </>
+                      'Join the War'
                     )}
                   </button>
 
-                  <div className="form-footer">
-                    <p className="terms-text">
-                      By creating an account, you agree to our{' '}
-                      <Link href="/terms" className="terms-link">Terms of Service</Link>{' '}
-                      and{' '}
-                      <Link href="/privacy" className="terms-link">Privacy Policy</Link>
-                    </p>
+                  <div className="terms-text">
+                    By creating an account, you agree to our{' '}
+                    <Link href="/terms" className="terms-link">Terms of Service</Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" className="terms-link">Privacy Policy</Link>
                   </div>
                 </form>
               </div>
@@ -328,17 +291,6 @@ export default function JoinPage() {
           </div>
         </div>
       </main>
-
-      <footer className="join-footer">
-        <div className="container">
-          <p>&copy; 2024 LoopWar.dev. All rights reserved.</p>
-          <div className="footer-links">
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms of Service</Link>
-            <Link href="/contact">Contact</Link>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }

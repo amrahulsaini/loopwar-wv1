@@ -3,21 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CookieConsent from './components/CookieConsent';
+import { useTheme } from './components/ThemeProvider';
 
 export default function Home() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [isPlusMenuActive, setIsPlusMenuActive] = useState(false);
   const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
 
-  // Check theme and existing session on mount
+  // Check existing session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        setIsDarkMode(true);
-        document.body.classList.add('dark-mode');
-      }
-      
       // Check if user is already logged in and verified
       const sessionToken = getCookie('sessionToken');
       const username = getCookie('username');
@@ -62,17 +57,6 @@ export default function Home() {
 
     return () => observer.disconnect();
   }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const togglePlusMenu = () => {
     setIsPlusMenuActive(!isPlusMenuActive);
