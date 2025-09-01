@@ -16,11 +16,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { verificationCode } = await request.json();
+    const { verificationCode, code, userId } = await request.json();
     console.log('📋 Received verification request');
 
+    // Accept either 'code' or 'verificationCode' field
+    const codeToVerify = verificationCode || code;
+
     // Validation
-    if (!verificationCode) {
+    if (!codeToVerify) {
       console.log('❌ Missing verification code');
       return NextResponse.json(
         { error: 'Verification code is required' },
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate code format
-    if (!/^\d{6}$/.test(verificationCode)) {
+    if (!/^\d{6}$/.test(codeToVerify)) {
       console.log('❌ Invalid verification code format');
       return NextResponse.json(
         { error: 'Invalid verification code format' },
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Find user by verification code
     const user = await Database.queryOne(
       'SELECT * FROM users WHERE verification_code = ? AND verification_code_expires > NOW() AND is_verified = FALSE',
-      [verificationCode]
+      [codeToVerify]
     ) as { id: number; username: string; email: string } | null;
 
     if (!user) {

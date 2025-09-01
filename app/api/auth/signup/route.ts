@@ -209,14 +209,20 @@ export async function POST(request: NextRequest) {
 
       console.log('📧 Verification email sent successfully to:', email);
 
-      // Create welcome notification
-      await Database.createNotification(
-        userId,
-        '🎉 Welcome to LoopWar!',
-        'Your account has been created successfully. Please check your email for the verification code.',
-        'success',
-        '/verify'
-      );
+      // Create welcome notification (without emojis to avoid charset issues)
+      try {
+        await Database.createNotification(
+          userId,
+          'Welcome to LoopWar!',
+          'Your account has been created successfully. Please check your email for the verification code.',
+          'success',
+          '/verify'
+        );
+        console.log('✅ Welcome notification created');
+      } catch (notificationError) {
+        console.error('❌ Failed to create notification:', notificationError);
+        // Don't fail the signup if notification fails
+      }
 
     } catch (emailError) {
       console.error('📧 Failed to send verification email:', emailError);
@@ -229,6 +235,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'Account created successfully! Please check your email for verification code.',
       email: email,
+      userId: userId,
       requiresVerification: true
     }, { status: 201 });
 

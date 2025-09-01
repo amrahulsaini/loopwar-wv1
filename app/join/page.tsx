@@ -87,8 +87,7 @@ export default function JoinPage() {
           text: data.message 
         });
         
-        // Set session cookies (but not isVerified - requires verification first)
-        setCookie('sessionToken', data.sessionToken, 7);
+        // Store user data for verification
         setCookie('username', formData.username, 7);
         setCookie('userId', data.userId, 7);
         setCookie('isVerified', 'false', 7); // Explicitly set as not verified
@@ -101,9 +100,10 @@ export default function JoinPage() {
           window.location.href = `/verify?userId=${data.userId}`;
         }, 2000);
       } else {
+        // Show specific error message from server
         setMessage({ 
           type: 'error', 
-          text: data.message || 'Registration failed. Please try again.' 
+          text: data.error || 'Registration failed. Please try again.' 
         });
       }
     } catch {
