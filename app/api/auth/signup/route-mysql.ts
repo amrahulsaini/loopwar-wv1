@@ -121,17 +121,17 @@ export async function POST(request: NextRequest) {
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
             .email-container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; }
+            .header { background: linear-gradient(135deg, #1a1a1a 0%, #4d4d4d 100%); padding: 40px 20px; text-align: center; }
             .header h1 { color: white; font-size: 28px; margin-bottom: 10px; }
             .header p { color: rgba(255,255,255,0.9); font-size: 16px; }
             .content { padding: 40px 30px; }
             .welcome-text { font-size: 18px; margin-bottom: 30px; color: #2c3e50; }
             .verification-box { background: #f8f9fa; border: 2px dashed #6c757d; border-radius: 10px; padding: 30px; text-align: center; margin: 30px 0; }
-            .verification-code { font-size: 36px; font-weight: bold; color: #667eea; letter-spacing: 8px; margin: 20px 0; font-family: 'Courier New', monospace; }
-            .instructions { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0; }
-            .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+            .verification-code { font-size: 36px; font-weight: bold; color: #1a1a1a; letter-spacing: 8px; margin: 20px 0; font-family: 'Courier New', monospace; }
+            .instructions { background: #f5f5f5; border-left: 4px solid #4d4d4d; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0; }
+            .button { display: inline-block; background: #1a1a1a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
             .footer { background: #2c3e50; color: white; padding: 30px; text-align: center; }
-            .footer a { color: #3498db; text-decoration: none; }
+            .footer a { color: #cccccc; text-decoration: none; }
             @media (max-width: 600px) {
               .content { padding: 20px 15px; }
               .header { padding: 30px 15px; }
