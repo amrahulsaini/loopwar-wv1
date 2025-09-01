@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
+import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 
 // Types
@@ -46,6 +47,156 @@ if (!global.globalVerificationCodes) {
 
 const globalUsers = global.globalUsers;
 const globalVerificationCodes = global.globalVerificationCodes;
+
+// SMTP Configuration
+let transporter: nodemailer.Transporter | null = null;
+
+try {
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
+      pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2',
+    },
+    logger: false,
+    debug: false,
+  });
+} catch (error) {
+  console.error('Failed to create SMTP transporter:', error);
+}
+
+async function sendVerificationEmail(email: string, code: string) {
+  const emailTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your LoopWar Account</title>
+    <style>
+        body {
+            font-family: 'Sora', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .verification-code {
+            background-color: #f0f0f0;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #000;
+        }
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid #000;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .cta {
+            background-color: #000;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">L</div>
+            <h1 class="title">Welcome to LoopWar!</h1>
+            <p class="subtitle">Your AI-powered coding journey begins now</p>
+        </div>
+
+        <p>Hi there,</p>
+
+        <p>Thank you for joining LoopWar! To complete your account setup and start your coding adventure, please verify your email address.</p>
+        
+        <div class="verification-code">
+            ${code}
+        </div>
+        
+        <div class="instructions">
+            <strong>How to verify:</strong>
+            <ol>
+                <li>Copy the verification code above</li>
+                <li>Go back to LoopWar and enter the code</li>
+                <li>Start your coding journey!</li>
+            </ol>
+        </div>
+        
+        <p>This verification code will expire in 15 minutes for security reasons.</p>
+        
+        <div class="footer">
+            <p>If you didn't create this account, please ignore this email.</p>
+            <p>&copy; ${new Date().getFullYear()} LoopWar.dev. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || 'verify@loopwar.dev',
+    to: email,
+    subject: 'Verify Your LoopWar Account - Start Your Coding Journey!',
+    html: emailTemplate,
+  };
+
+  if (!transporter) {
+    throw new Error('SMTP transporter not configured');
+  }
+
+  await transporter.sendMail(mailOptions);
+}
 
 // Validation functions
 function validateUsername(username: string): string | null {
@@ -206,18 +357,27 @@ export async function POST(request: NextRequest) {
     console.log('✅ User saved successfully. Total users:', globalUsers.length);
     console.log('✅ Verification code saved. Total codes:', globalVerificationCodes.length);
 
+    // Send verification email
+    try {
+      console.log('📧 Sending verification email...');
+      await sendVerificationEmail(email, verificationCode);
+      console.log('✅ Verification email sent successfully');
+    } catch (emailError) {
+      console.error('❌ Failed to send verification email:', emailError);
+      // Continue with signup even if email fails, but log the error
+    }
+
     const endTime = Date.now();
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
     console.log('🎉 Signup completed successfully for user:', username);
 
-    // Return success
+    // Return success (DO NOT include verification code in response)
     return NextResponse.json({
       success: true,
-      message: 'Account created successfully! Please check your email for verification code.',
+      message: 'Account created successfully! Please check your email for the verification code.',
       userId: newUser.id,
       sessionToken: newUser.sessionToken,
       requiresVerification: true,
-      verificationCode: verificationCode, // Include for testing (remove in production)
       debug: {
         timestamp: new Date().toISOString(),
         processingTime: endTime - startTime,

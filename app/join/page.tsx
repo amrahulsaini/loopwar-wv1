@@ -91,18 +91,10 @@ export default function JoinPage() {
         // Store username in localStorage for the zone page
         localStorage.setItem('username', formData.username);
         
-        // Show verification code for testing (remove in production)
-        if (data.verificationCode) {
-          setMessage({ 
-            type: 'success', 
-            text: `Account created! Verification code: ${data.verificationCode}. Redirecting to verification page...` 
-          });
-        }
-        
         // Redirect to verify page after successful registration
         setTimeout(() => {
           window.location.href = `/verify?userId=${data.userId}`;
-        }, 3000);
+        }, 2000);
       } else {
         setMessage({ 
           type: 'error', 
