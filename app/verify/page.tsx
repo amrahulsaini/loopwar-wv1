@@ -111,7 +111,6 @@ function VerifyPageContent() {
           localStorage.setItem('isVerified', 'true');
         } else {
           // Fallback to existing cookies
-          const username = getCookie('username') || localStorage.getItem('username') || 'User';
           setCookie('isVerified', 'true', 7);
         }
         

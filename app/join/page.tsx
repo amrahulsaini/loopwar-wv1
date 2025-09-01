@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NProgress from 'nprogress';
 
@@ -16,7 +15,6 @@ export default function JoinPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const router = useRouter();
 
   // Configure NProgress
   useEffect(() => {
@@ -257,7 +255,7 @@ export default function JoinPage() {
                       placeholder="your.email@example.com"
                       required
                     />
-                    <span className="form-hint">We'll send you a verification code</span>
+                    <span className="form-hint">We&apos;ll send you a verification code</span>
                   </div>
 
                   <div className="form-group">

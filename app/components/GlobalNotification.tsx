@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface NotificationData {
   id: string;
@@ -30,6 +30,14 @@ export default function GlobalNotification({ notification, onClose }: GlobalNoti
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(() => {
+      setIsAnimating(false);
+      onClose();
+    }, 300);
+  }, [onClose]);
+
   useEffect(() => {
     if (notification) {
       setIsAnimating(true);
@@ -47,15 +55,7 @@ export default function GlobalNotification({ notification, onClose }: GlobalNoti
       setIsVisible(false);
       setTimeout(() => setIsAnimating(false), 300);
     }
-  }, [notification]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setIsAnimating(false);
-      onClose();
-    }, 300);
-  };
+  }, [notification, handleClose]);
 
   if (!notification || !isAnimating) return null;
 

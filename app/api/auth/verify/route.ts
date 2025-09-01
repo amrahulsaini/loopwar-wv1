@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { verificationCode, code, userId } = await request.json();
+    const { verificationCode, code } = await request.json();
     console.log('📋 Received verification request');
 
     // Accept either 'code' or 'verificationCode' field

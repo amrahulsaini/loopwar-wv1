@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Add OPTIONS handler for CORS
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   console.log('OPTIONS request received for signup');
   
   return new NextResponse(null, {
