@@ -1,11 +1,12 @@
 import mysql from 'mysql2/promise';
 
-// Database configuration
+// Database configuration from environment variables
 const dbConfig = {
-  host: 'localhost',
-  user: 'loop_wv1',
-  password: 'wv1',
-  database: 'loop_wv1',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'wv1',
+  password: process.env.DB_PASSWORD || 'wv1',
+  database: process.env.DB_NAME || 'loop_wv1',
+  port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
