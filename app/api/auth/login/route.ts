@@ -9,6 +9,16 @@ interface LoginRequest {
   rememberMe?: boolean;
 }
 
+interface DatabaseUser {
+  id: number;
+  username: string;
+  email: string;
+  password_hash: string;
+  experience_level: string;
+  is_verified: boolean;
+  created_at: string;
+}
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
@@ -54,7 +64,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Searching for user...');
     
     // Find user by username using Database
-    const user = await Database.findUserByUsername(username);
+    const user = await Database.findUserByUsername(username) as DatabaseUser | null;
 
     if (!user) {
       console.log('❌ User not found:', username);
@@ -63,11 +73,11 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    console.log('✅ User found:', (user as any).username);
+    console.log('✅ User found:', user.username);
 
     // Verify password
     console.log('🔐 Verifying password...');
-    const passwordMatch = await bcryptjs.compare(password, (user as any).password_hash);
+    const passwordMatch = await bcryptjs.compare(password, user.password_hash);
 
     if (!passwordMatch) {
       console.log('❌ Password verification failed');
@@ -85,7 +95,7 @@ export async function POST(request: NextRequest) {
       .join('');
 
     // Update user's session token and last login
-    await Database.createSession((user as any).id, sessionToken);
+    await Database.createSession(user.id, sessionToken);
 
     console.log('✅ Session token generated and user updated');
 
@@ -98,12 +108,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login successful!',
       user: {
-        id: (user as any).id,
-        username: (user as any).username,
-        email: (user as any).email,
-        experienceLevel: (user as any).experience_level || 'beginner',
-        isVerified: (user as any).is_verified,
-        createdAt: (user as any).created_at,
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        experienceLevel: user.experience_level || 'beginner',
+        isVerified: user.is_verified,
+        createdAt: user.created_at,
         lastLogin: new Date().toISOString()
       },
       sessionToken: sessionToken,

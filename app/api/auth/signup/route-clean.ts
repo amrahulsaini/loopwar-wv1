@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
-import { UserStorage, type User } from '../../../../lib/userStorage';
+import Database from '../../../../lib/database';
 
 interface SignupRequest {
   username: string;
@@ -43,9 +43,18 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    console.log('=== VERCEL FIXED SIGNUP API - SHARED STORAGE ===');
+    console.log('=== VERCEL FIXED SIGNUP API - DATABASE STORAGE ===');
     console.log('Timestamp:', new Date().toISOString());
-    console.log('Current users in memory:', UserStorage.count());
+    
+    // Health check for database
+    const dbHealthy = await Database.healthCheck();
+    if (!dbHealthy) {
+      console.error('❌ Database connection failed');
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     
     // Parse request body
     let body: SignupRequest;
@@ -93,17 +102,17 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ All validations passed');
 
-    // Check for duplicates using shared storage
+    // Check for duplicates using database
     console.log('🔍 Checking for duplicates...');
     
-    const existingUserByUsername = UserStorage.findByUsername(username);
+    const existingUserByUsername = await Database.findUserByUsername(username);
     
     if (existingUserByUsername) {
       console.log('❌ Username already exists:', username);
       return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
 
-    const existingUserByEmail = UserStorage.findByEmail(email);
+    const existingUserByEmail = await Database.findUserByEmail(email);
     
     if (existingUserByEmail) {
       console.log('❌ Email already registered:', email);
@@ -121,39 +130,24 @@ export async function POST(request: NextRequest) {
     // Generate verification code and tokens
     console.log('🎲 Generating tokens...');
     
-    const verificationCode = Array.from(crypto.getRandomValues(new Uint8Array(6)))
-      .map(val => (val % 10).toString())
-      .join('');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     
     const sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map(val => val.toString(16).padStart(2, '0'))
-      .join('');
-    
-    const userId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map(val => val.toString(16).padStart(2, '0'))
       .join('');
 
     console.log('✅ Generated tokens successfully');
 
-    // Create user object
-    const newUser: User = {
-      id: userId,
+    // Create user in database
+    const newUserId = await Database.createUser({
       username,
       email: email.toLowerCase(),
       passwordHash,
-      experienceLevel,
-      isVerified: true, // Auto-verify for testing
-      verificationCode,
-      verificationExpiry: Date.now() + (15 * 60 * 1000),
-      createdAt: Date.now(),
-      lastLogin: null,
-      sessionToken
-    };
+      verificationCode
+    });
 
-    // Save user to shared storage
-    console.log('💾 Saving user to shared storage...');
-    UserStorage.addUser(newUser);
-    console.log('✅ User saved successfully. Total users:', UserStorage.count());
+    // Save user to database
+    console.log('💾 User saved successfully with ID:', newUserId);
 
     const endTime = Date.now();
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
@@ -163,12 +157,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Account created successfully! You can now log in.',
-      userId: newUser.id,
-      sessionToken: newUser.sessionToken,
+      userId: newUserId,
+      sessionToken: sessionToken,
       debug: {
         timestamp: new Date().toISOString(),
-        processingTime: endTime - startTime,
-        totalUsers: UserStorage.getAll().length
+        processingTime: endTime - startTime
       }
     }, { status: 201 });
 
@@ -212,16 +205,19 @@ export async function OPTIONS() {
 
 // Add GET handler for debugging
 export async function GET() {
-  const allUsers = UserStorage.getAll();
-  return NextResponse.json({
-    message: 'Signup API is working',
-    timestamp: new Date().toISOString(),
-    totalUsers: allUsers.length,
-    users: allUsers.map(u => ({ 
-      id: u.id, 
-      username: u.username, 
-      email: u.email, 
-      isVerified: u.isVerified 
-    }))
-  });
+  try {
+    const allUsers = await Database.query('SELECT id, username, email, is_verified, created_at FROM users');
+    return NextResponse.json({
+      message: 'Signup API is working',
+      timestamp: new Date().toISOString(),
+      totalUsers: Array.isArray(allUsers) ? allUsers.length : 0,
+      users: Array.isArray(allUsers) ? allUsers.slice(0, 10) : [] // Limit to 10 for debugging
+    });
+  } catch (error) {
+    return NextResponse.json({
+      message: 'Signup API is working but database error',
+      timestamp: new Date().toISOString(),
+      error: String(error)
+    });
+  }
 }
