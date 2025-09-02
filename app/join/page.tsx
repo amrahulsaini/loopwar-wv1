@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import LoadingSpinner from '../components/LoadingSpinner';
-import ThemeSwitcher from '../components/ThemeSwitcher';
+import Logo from '../components/Logo';
 import NProgress from 'nprogress';
 
 export default function JoinPage() {
@@ -151,9 +151,10 @@ export default function JoinPage() {
     <>
       <header className="join-header">
         <div className="container">
-          <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
+          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
+            <Logo size={55} showText={false} />
+          </Link>
           <div className="header-actions">
-            <ThemeSwitcher />
             <Link 
               href="/" 
               className="home-btn"

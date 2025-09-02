@@ -17,14 +17,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
 
+  // Cookie utility functions
+  const setCookie = (name: string, value: string, days: number = 30) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+  };
+
+  const getCookie = (name: string): string | null => {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  };
+
   // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
     
-    // Check for saved theme in localStorage or system preference
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    // Check for saved theme in cookies first, then localStorage, then system preference
+    const savedThemeFromCookie = getCookie('theme') as Theme;
+    const savedThemeFromStorage = localStorage.getItem('theme') as Theme;
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
+    const initialTheme = savedThemeFromCookie || savedThemeFromStorage || systemTheme;
     
     setTheme(initialTheme);
     applyTheme(initialTheme);
@@ -39,6 +58,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.body.classList.remove('dark-mode');
     }
     localStorage.setItem('theme', newTheme);
+    setCookie('theme', newTheme, 30); // Save to cookie for 30 days
   };
 
   const handleSetTheme = (newTheme: Theme) => {

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LoopWar Signature Brand Logo</title>
+    <style>
+        body { 
+            font-family: 'Georgia', 'Times New Roman', serif; 
+            padding: 40px; 
+            background: #fafafa;
+            min-height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        h1 { 
+            text-align: center; 
+            color: #1a1a1a; 
+            font-size: 2.8rem; 
+            margin-bottom: 10px;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            font-style: italic;
+            font-weight: 300;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            border-left: 4px solid #333;
+        }
+        .description h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .feature {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: 400;
+        }
+        .logo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 40px;
+        }
+        .logo-card { 
+            background: #ffffff; 
+            padding: 25px; 
+            border-radius: 4px; 
+            text-align: center; 
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        .logo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: #ddd;
+        }
+        .size-label { 
+            font-weight: 500; 
+            margin-bottom: 8px; 
+            color: #333;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .usage-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        button { 
+            background: #333; 
+            color: white; 
+            border: none; 
+            padding: 10px 25px; 
+            border-radius: 2px; 
+            cursor: pointer; 
+            font-weight: 400;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+        button:hover { 
+            background: #555;
+            transform: translateY(-1px);
+        }
+        .preview-area {
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 2px;
+        }
+        .dark-preview {
+            background: #1a1a1a !important;
+            margin-top: 10px;
+        }
+        .brand-statement {
+            background: #f9f9f9;
+            border-radius: 4px;
+            padding: 30px;
+            margin-top: 40px;
+            text-align: center;
+            border-top: 3px solid #333;
+        }
+        .brand-statement h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .brand-statement p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LoopWar</h1>
+        <p class="subtitle">Signature Brand Logo</p>
+        
+        <div class="description">
+            <h3>Elegant Business Signature</h3>
+            <p>A sophisticated "L" letterform with sword-end detail, designed in timeless black & white. Perfect for professional branding, business cards, and luxury positioning.</p>
+            <div class="features">
+                <div class="feature">Signature Style</div>
+                <div class="feature">Sword Detail</div>
+                <div class="feature">Black & White</div>
+                <div class="feature">Timeless Design</div>
+                <div class="feature">Professional Grade</div>
+                <div class="feature">Scalable Vector</div>
+            </div>
+        </div>
+        
+        <div class="logo-grid">
+            <!-- High Resolution 512x512 -->
+            <div class="logo-card">
+                <div class="size-label">512×512</div>
+                <div class="usage-label">High Resolution</div>
+                <div class="preview-area">
+                    <canvas id="canvas512" width="512" height="512"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas512Dark" width="100" height="100"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas512', 'loopwar-signature-512.png')">Download PNG</button>
+            </div>
+            
+            <!-- Business Card 256x256 -->
+            <div class="logo-card">
+                <div class="size-label">256×256</div>
+                <div class="usage-label">Business Cards</div>
+                <div class="preview-area">
+                    <canvas id="canvas256" width="256" height="256"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas256Dark" width="100" height="100"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas256', 'loopwar-business-256.png')">Download PNG</button>
+            </div>
+            
+            <!-- Website Header 128x128 -->
+            <div class="logo-card">
+                <div class="size-label">128×128</div>
+                <div class="usage-label">Website Header</div>
+                <div class="preview-area">
+                    <canvas id="canvas128" width="128" height="128"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas128Dark" width="80" height="80"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas128', 'loopwar-web-128.png')">Download PNG</button>
+            </div>
+            
+            <!-- Standard Icon 64x64 -->
+            <div class="logo-card">
+                <div class="size-label">64×64</div>
+                <div class="usage-label">Standard Icon</div>
+                <div class="preview-area">
+                    <canvas id="canvas64" width="64" height="64"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas64Dark" width="64" height="64"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas64', 'loopwar-icon-64.png')">Download PNG</button>
+            </div>
+            
+            <!-- Small Icon 32x32 -->
+            <div class="logo-card">
+                <div class="size-label">32×32</div>
+                <div class="usage-label">Small Icon</div>
+                <div class="preview-area">
+                    <canvas id="canvas32" width="32" height="32"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas32Dark" width="32" height="32"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas32', 'loopwar-small-32.png')">Download PNG</button>
+            </div>
+            
+            <!-- Favicon 16x16 -->
+            <div class="logo-card">
+                <div class="size-label">16×16</div>
+                <div class="usage-label">Favicon</div>
+                <div class="preview-area">
+                    <canvas id="canvas16" width="16" height="16"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas16Dark" width="16" height="16"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas16', 'loopwar-favicon-16.png')">Download PNG</button>
+            </div>
+        </div>
+
+        <div class="brand-statement">
+            <h3>Brand Philosophy</h3>
+            <p>This signature logo embodies the essence of LoopWar - elegant competition with a sharp edge. The refined "L" letterform speaks to professionalism, while the sword detail hints at the competitive spirit within. Designed in timeless black and white, it transcends trends and establishes LoopWar as a premium brand in the digital arena.</p>
+        </div>
+    </div>
+
+    <script>
+        function drawSignatureLogo(canvas, size, isDark = false) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 70; // Scale factor based on 70x70 viewBox
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Set colors based on theme
+            const fillColor = isDark ? '#ffffff' : '#000000';
+            const bgColor = isDark ? '#1a1a1a' : 'transparent';
+            
+            // Set background for dark mode
+            if (isDark) {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, size, size);
+            }
+            
+            // Set logo color
+            ctx.fillStyle = fillColor;
+            
+            // Draw stylish border frame
+            ctx.strokeStyle = fillColor;
+            ctx.globalAlpha = 0.2;
+            ctx.lineWidth = 0.5 * scale;
+            ctx.strokeRect(5 * scale, 5 * scale, 60 * scale, 60 * scale);
+            
+            // Inner decorative border
+            ctx.globalAlpha = 0.15;
+            ctx.lineWidth = 0.3 * scale;
+            ctx.strokeRect(8 * scale, 8 * scale, 54 * scale, 54 * scale);
+            
+            // Reset alpha for main logo
+            ctx.globalAlpha = 1;
+            
+            // Draw elegant shadow
+            ctx.shadowColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = 4 * scale;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 3 * scale;
+            
+            // Save context for transformations
+            ctx.save();
+            ctx.translate(35 * scale, 35 * scale);
+            
+            // Draw main vertical stroke of L - THICKER
+            ctx.beginPath();
+            ctx.moveTo(-12 * scale, -22 * scale);
+            ctx.lineTo(-7 * scale, -22 * scale);
+            ctx.lineTo(-7 * scale, 8 * scale);
+            ctx.lineTo(-12 * scale, 8 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw horizontal stroke base - THICKER
+            ctx.beginPath();
+            ctx.moveTo(-12 * scale, 8 * scale);
+            ctx.lineTo(12 * scale, 8 * scale);
+            ctx.lineTo(12 * scale, 13 * scale);
+            ctx.lineTo(-12 * scale, 13 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw sword blade extension - ENHANCED
+            ctx.beginPath();
+            ctx.moveTo(12 * scale, 8 * scale);
+            ctx.lineTo(22 * scale, 8 * scale);
+            ctx.lineTo(25 * scale, 10.5 * scale);
+            ctx.lineTo(22 * scale, 13 * scale);
+            ctx.lineTo(12 * scale, 13 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw sword point - ENHANCED
+            ctx.beginPath();
+            ctx.moveTo(22 * scale, 8 * scale);
+            ctx.lineTo(28 * scale, 10.5 * scale);
+            ctx.lineTo(22 * scale, 13 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Reset shadow for highlights
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw highlights and details
+            ctx.globalAlpha = 0.3;
+            
+            // Vertical stroke highlight
+            ctx.beginPath();
+            ctx.moveTo(-11.5 * scale, -21.5 * scale);
+            ctx.lineTo(-7.5 * scale, -21.5 * scale);
+            ctx.lineTo(-7.5 * scale, -20 * scale);
+            ctx.lineTo(-11.5 * scale, -20 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Horizontal stroke highlight
+            ctx.beginPath();
+            ctx.moveTo(-11.5 * scale, 8.5 * scale);
+            ctx.lineTo(11.5 * scale, 8.5 * scale);
+            ctx.lineTo(11.5 * scale, 9.5 * scale);
+            ctx.lineTo(-11.5 * scale, 9.5 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Sword blade highlight
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.moveTo(12.5 * scale, 9 * scale);
+            ctx.lineTo(21 * scale, 9 * scale);
+            ctx.lineTo(23 * scale, 10.5 * scale);
+            ctx.lineTo(21 * scale, 12 * scale);
+            ctx.lineTo(12.5 * scale, 12 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Sword point highlight
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(22.5 * scale, 9.5 * scale);
+            ctx.lineTo(26 * scale, 10.5 * scale);
+            ctx.lineTo(22.5 * scale, 11.5 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw decorative elements
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.arc(-9.5 * scale, -18 * scale, 1.2 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.arc(-9.5 * scale, -14 * scale, 0.8 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw signature flourish
+            ctx.globalAlpha = 0.4;
+            ctx.strokeStyle = fillColor;
+            ctx.lineWidth = 1.2 * scale;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(-8 * scale, -10 * scale);
+            ctx.quadraticCurveTo(-5 * scale, -13 * scale, -1 * scale, -10 * scale);
+            ctx.quadraticCurveTo(2 * scale, -8 * scale, 0 * scale, -6 * scale);
+            ctx.stroke();
+            
+            // Corner detail on L junction
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = fillColor;
+            ctx.beginPath();
+            ctx.moveTo(-7 * scale, 8 * scale);
+            ctx.lineTo(-4 * scale, 5 * scale);
+            ctx.lineTo(-2 * scale, 7 * scale);
+            ctx.lineTo(-5 * scale, 10 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Stylish end cap on sword
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.arc(26 * scale, 10.5 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.arc(26 * scale, 10.5 * scale, 0.8 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Restore context
+            ctx.globalAlpha = 1;
+            ctx.restore();
+            
+            // Draw corner decorative elements
+            ctx.globalAlpha = 0.15;
+            ctx.beginPath();
+            ctx.arc(12 * scale, 12 * scale, 1 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(58 * scale, 12 * scale, 1 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(12 * scale, 58 * scale, 1 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(58 * scale, 58 * scale, 1 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Additional corner lines
+            ctx.globalAlpha = 0.1;
+            ctx.strokeStyle = fillColor;
+            ctx.lineWidth = 0.5 * scale;
+            
+            ctx.beginPath();
+            ctx.moveTo(10 * scale, 15 * scale);
+            ctx.lineTo(15 * scale, 10 * scale);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(60 * scale, 10 * scale);
+            ctx.lineTo(55 * scale, 15 * scale);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(10 * scale, 55 * scale);
+            ctx.lineTo(15 * scale, 60 * scale);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(55 * scale, 55 * scale);
+            ctx.lineTo(60 * scale, 60 * scale);
+            ctx.stroke();
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function downloadLogo(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            // Light versions
+            drawSignatureLogo(document.getElementById('canvas512'), 512);
+            drawSignatureLogo(document.getElementById('canvas256'), 256);
+            drawSignatureLogo(document.getElementById('canvas128'), 128);
+            drawSignatureLogo(document.getElementById('canvas64'), 64);
+            drawSignatureLogo(document.getElementById('canvas32'), 32);
+            drawSignatureLogo(document.getElementById('canvas16'), 16);
+            
+            // Dark versions
+            drawSignatureLogo(document.getElementById('canvas512Dark'), 100, true);
+            drawSignatureLogo(document.getElementById('canvas256Dark'), 100, true);
+            drawSignatureLogo(document.getElementById('canvas128Dark'), 80, true);
+            drawSignatureLogo(document.getElementById('canvas64Dark'), 64, true);
+            drawSignatureLogo(document.getElementById('canvas32Dark'), 32, true);
+            drawSignatureLogo(document.getElementById('canvas16Dark'), 16, true);
+        };
+    </script>
+</body>
+</html>

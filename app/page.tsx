@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CookieConsent from './components/CookieConsent';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import Logo from './components/Logo';
 
 export default function Home() {
   const [isPlusMenuActive, setIsPlusMenuActive] = useState(false);
@@ -119,7 +120,9 @@ export default function Home() {
     <>
       <header className="main-header">
         <div className="container">
-          <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
+          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
+            <Logo size={60} showText={false} />
+          </Link>
           
           <nav className="main-nav">
             <ul className={`nav-links ${isMobileMenuActive ? 'active' : ''}`}>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LoopWar Ultimate Logo Generator</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 30px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            text-align: center; 
+            color: #333; 
+            font-size: 2.5rem; 
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        .logo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 30px; 
+            margin-bottom: 40px;
+        }
+        .logo-card { 
+            background: #f8fafc; 
+            padding: 25px; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .logo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: #6366f1;
+        }
+        .size-label { 
+            font-weight: 700; 
+            margin-bottom: 15px; 
+            color: #374151;
+            font-size: 1.1rem;
+        }
+        .usage-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        button { 
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+        .preview-area {
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dark-preview {
+            background: #1f2937;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .feature-list {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        .feature-list h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .feature::before {
+            content: "✨";
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 LoopWar Ultimate Logo</h1>
+        <p class="subtitle">Professional-grade logo files ready for any use case</p>
+        
+        <div class="logo-grid">
+            <!-- App Icon 512x512 -->
+            <div class="logo-card">
+                <div class="size-label">512×512px</div>
+                <div class="usage-label">App Store, Google Play, High-res</div>
+                <div class="preview-area">
+                    <canvas id="canvas512" width="512" height="512"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas512', 'loopwar-app-icon-512.png')">Download App Icon</button>
+            </div>
+            
+            <!-- Social Media 256x256 -->
+            <div class="logo-card">
+                <div class="size-label">256×256px</div>
+                <div class="usage-label">Social Media Profiles</div>
+                <div class="preview-area">
+                    <canvas id="canvas256" width="256" height="256"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas256', 'loopwar-social-256.png')">Download Social</button>
+            </div>
+            
+            <!-- Website Icon 128x128 -->
+            <div class="logo-card">
+                <div class="size-label">128×128px</div>
+                <div class="usage-label">Website Icons, Toolbars</div>
+                <div class="preview-area">
+                    <canvas id="canvas128" width="128" height="128"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas128', 'loopwar-website-128.png')">Download Website</button>
+            </div>
+            
+            <!-- Favicon 64x64 -->
+            <div class="logo-card">
+                <div class="size-label">64×64px</div>
+                <div class="usage-label">Browser Favicons</div>
+                <div class="preview-area">
+                    <canvas id="canvas64" width="64" height="64"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas64', 'loopwar-favicon-64.png')">Download Favicon</button>
+            </div>
+            
+            <!-- Small Favicon 32x32 -->
+            <div class="logo-card">
+                <div class="size-label">32×32px</div>
+                <div class="usage-label">Small Favicons, Tabs</div>
+                <div class="preview-area">
+                    <canvas id="canvas32" width="32" height="32"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas32', 'loopwar-favicon-32.png')">Download Small</button>
+            </div>
+            
+            <!-- Tiny Icon 16x16 -->
+            <div class="logo-card">
+                <div class="size-label">16×16px</div>
+                <div class="usage-label">Tiny Icons, System Tray</div>
+                <div class="preview-area">
+                    <canvas id="canvas16" width="16" height="16"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas16', 'loopwar-tiny-16.png')">Download Tiny</button>
+            </div>
+        </div>
+
+        <div class="feature-list">
+            <h3>🎨 Premium Logo Features</h3>
+            <div class="features">
+                <div class="feature">Triple gradient design</div>
+                <div class="feature">Glow & shadow effects</div>
+                <div class="feature">Modern "L" letterform</div>
+                <div class="feature">Arrow accent (progress)</div>
+                <div class="feature">Power dot (energy)</div>
+                <div class="feature">Tech accent lines</div>
+                <div class="feature">Corner decorations</div>
+                <div class="feature">Perfect scalability</div>
+                <div class="feature">Professional shadows</div>
+                <div class="feature">Brand color harmony</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function drawLogo(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 100; // Scale factor based on 100x100 viewBox
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Create main gradient
+            const mainGradient = ctx.createLinearGradient(0, 0, size, size);
+            mainGradient.addColorStop(0, '#6366f1');
+            mainGradient.addColorStop(0.5, '#8b5cf6');
+            mainGradient.addColorStop(1, '#3b82f6');
+            
+            // Create accent gradient
+            const accentGradient = ctx.createLinearGradient(0, 0, size, size);
+            accentGradient.addColorStop(0, '#f59e0b');
+            accentGradient.addColorStop(1, '#ef4444');
+            
+            // Draw shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+            ctx.shadowBlur = 4 * scale;
+            ctx.shadowOffsetX = 2 * scale;
+            ctx.shadowOffsetY = 4 * scale;
+            
+            // Draw outer circle
+            ctx.beginPath();
+            ctx.arc(50 * scale, 50 * scale, 45 * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = mainGradient;
+            ctx.fill();
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw inner ring
+            ctx.beginPath();
+            ctx.arc(50 * scale, 50 * scale, 38 * scale, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1 * scale;
+            ctx.stroke();
+            
+            // Draw L shape
+            ctx.fillStyle = 'white';
+            
+            // Vertical bar
+            const verticalX = (50 - 15) * scale;
+            const verticalY = (50 - 20) * scale;
+            const verticalW = 6 * scale;
+            const verticalH = 30 * scale;
+            const radius = 3 * scale;
+            
+            ctx.beginPath();
+            ctx.roundRect(verticalX, verticalY, verticalW, verticalH, radius);
+            ctx.fill();
+            
+            // Horizontal bar
+            const horizontalX = (50 - 15) * scale;
+            const horizontalY = (50 + 4) * scale;
+            const horizontalW = 20 * scale;
+            const horizontalH = 6 * scale;
+            
+            ctx.beginPath();
+            ctx.roundRect(horizontalX, horizontalY, horizontalW, horizontalH, radius);
+            ctx.fill();
+            
+            // Arrow accent
+            ctx.fillStyle = accentGradient;
+            ctx.beginPath();
+            ctx.moveTo((50 + 8) * scale, (50 + 7) * scale);
+            ctx.lineTo((50 + 15) * scale, (50 + 7) * scale);
+            ctx.lineTo((50 + 12) * scale, (50 + 12) * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Power dot
+            ctx.beginPath();
+            ctx.arc((50 + 5) * scale, (50 - 5) * scale, 2.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Tech lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 1.5 * scale;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo((50 - 8) * scale, (50 - 15) * scale);
+            ctx.lineTo((50 - 5) * scale, (50 - 15) * scale);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo((50 - 8) * scale, (50 - 10) * scale);
+            ctx.lineTo((50 - 5) * scale, (50 - 10) * scale);
+            ctx.stroke();
+            
+            // Corner accents
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            const cornerRadius = 0.5 * scale;
+            
+            ctx.beginPath();
+            ctx.roundRect((50 + 10) * scale, (50 + 8) * scale, 3 * scale, 1 * scale, cornerRadius);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.roundRect((50 + 15) * scale, (50 + 8) * scale, 3 * scale, 1 * scale, cornerRadius);
+            ctx.fill();
+            
+            // Decorative dots
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.beginPath();
+            ctx.arc(20 * scale, 20 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(80 * scale, 20 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(20 * scale, 80 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(80 * scale, 80 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function downloadLogo(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            drawLogo(document.getElementById('canvas512'), 512);
+            drawLogo(document.getElementById('canvas256'), 256);
+            drawLogo(document.getElementById('canvas128'), 128);
+            drawLogo(document.getElementById('canvas64'), 64);
+            drawLogo(document.getElementById('canvas32'), 32);
+            drawLogo(document.getElementById('canvas16'), 16);
+        };
+    </script>
+</body>
+</html>

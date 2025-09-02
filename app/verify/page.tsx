@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import LoadingSpinner from '../components/LoadingSpinner';
-import ThemeSwitcher from '../components/ThemeSwitcher';
+import Logo from '../components/Logo';
 
 function VerifyPageContent() {
   const [verificationCode, setVerificationCode] = useState('');
@@ -138,9 +138,10 @@ function VerifyPageContent() {
       <>
         <header className="join-header">
           <div className="container">
-            <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
+            <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
+              <Logo size={55} showText={false} />
+            </Link>
             <div className="header-actions">
-              <ThemeSwitcher />
             </div>
           </div>
         </header>
@@ -168,9 +169,10 @@ function VerifyPageContent() {
     <>
       <header className="join-header">
         <div className="container">
-          <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
+          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
+            <Logo size={55} showText={false} />
+          </Link>
           <div className="header-actions">
-            <ThemeSwitcher />
           </div>
         </div>
       </header>

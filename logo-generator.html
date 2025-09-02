@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LoopWar Logo Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .logo-container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .logo-item { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .logo-preview { margin: 10px 0; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+        .size-label { font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>LoopWar Brand Logo Generator</h1>
+    <p>Download your logos in different sizes for various use cases:</p>
+    
+    <div class="logo-container">
+        <!-- 512x512 - App Icons, Social Media -->
+        <div class="logo-item">
+            <div class="size-label">512×512px</div>
+            <div class="logo-preview">
+                <canvas id="canvas512" width="512" height="512"></canvas>
+            </div>
+            <p>App Icons, Social Media</p>
+            <button onclick="downloadLogo('canvas512', 'loopwar-logo-512.png')">Download PNG</button>
+        </div>
+        
+        <!-- 256x256 - Medium Icons -->
+        <div class="logo-item">
+            <div class="size-label">256×256px</div>
+            <div class="logo-preview">
+                <canvas id="canvas256" width="256" height="256"></canvas>
+            </div>
+            <p>Medium Icons</p>
+            <button onclick="downloadLogo('canvas256', 'loopwar-logo-256.png')">Download PNG</button>
+        </div>
+        
+        <!-- 128x128 - Small Icons -->
+        <div class="logo-item">
+            <div class="size-label">128×128px</div>
+            <div class="logo-preview">
+                <canvas id="canvas128" width="128" height="128"></canvas>
+            </div>
+            <p>Small Icons</p>
+            <button onclick="downloadLogo('canvas128', 'loopwar-logo-128.png')">Download PNG</button>
+        </div>
+        
+        <!-- 64x64 - Favicons -->
+        <div class="logo-item">
+            <div class="size-label">64×64px</div>
+            <div class="logo-preview">
+                <canvas id="canvas64" width="64" height="64"></canvas>
+            </div>
+            <p>Favicons</p>
+            <button onclick="downloadLogo('canvas64', 'loopwar-logo-64.png')">Download PNG</button>
+        </div>
+        
+        <!-- 32x32 - Small Favicons -->
+        <div class="logo-item">
+            <div class="size-label">32×32px</div>
+            <div class="logo-preview">
+                <canvas id="canvas32" width="32" height="32"></canvas>
+            </div>
+            <p>Small Favicons</p>
+            <button onclick="downloadLogo('canvas32', 'loopwar-logo-32.png')">Download PNG</button>
+        </div>
+        
+        <!-- 16x16 - Tiny Favicons -->
+        <div class="logo-item">
+            <div class="size-label">16×16px</div>
+            <div class="logo-preview">
+                <canvas id="canvas16" width="16" height="16"></canvas>
+            </div>
+            <p>Tiny Favicons</p>
+            <button onclick="downloadLogo('canvas16', 'loopwar-logo-16.png')">Download PNG</button>
+        </div>
+    </div>
+
+    <script>
+        function drawLogo(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const center = size / 2;
+            const radius = size * 0.47;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#8b5cf6');
+            
+            // Draw background circle with shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = size * 0.05;
+            ctx.shadowOffsetX = size * 0.03;
+            ctx.shadowOffsetY = size * 0.03;
+            
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw inner circle for depth
+            ctx.beginPath();
+            ctx.arc(center, center, radius * 0.87, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = size * 0.016;
+            ctx.stroke();
+            
+            // Set white color for logo elements
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineCap = 'round';
+            
+            // Draw loops and connecting elements
+            const loopRadius = size * 0.125;
+            const leftLoopX = center - size * 0.1875;
+            const rightLoopX = center + size * 0.1875;
+            const lineWidth = size * 0.047;
+            
+            ctx.lineWidth = lineWidth;
+            
+            // Left loop
+            ctx.beginPath();
+            ctx.arc(leftLoopX, center, loopRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Right loop
+            ctx.beginPath();
+            ctx.arc(rightLoopX, center, loopRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Connecting elements
+            const connectLineWidth = lineWidth * 0.83;
+            ctx.lineWidth = connectLineWidth;
+            
+            // Horizontal line
+            ctx.beginPath();
+            ctx.moveTo(center - size * 0.0625, center);
+            ctx.lineTo(center + size * 0.0625, center);
+            ctx.stroke();
+            
+            // Diagonal lines (X pattern)
+            ctx.beginPath();
+            ctx.moveTo(center - size * 0.03125, center - size * 0.0625);
+            ctx.lineTo(center + size * 0.03125, center + size * 0.0625);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(center + size * 0.03125, center - size * 0.0625);
+            ctx.lineTo(center - size * 0.03125, center + size * 0.0625);
+            ctx.stroke();
+            
+            // Central power dot
+            ctx.beginPath();
+            ctx.arc(center, center, size * 0.03125, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function downloadLogo(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            drawLogo(document.getElementById('canvas512'), 512);
+            drawLogo(document.getElementById('canvas256'), 256);
+            drawLogo(document.getElementById('canvas128'), 128);
+            drawLogo(document.getElementById('canvas64'), 64);
+            drawLogo(document.getElementById('canvas32'), 32);
+            drawLogo(document.getElementById('canvas16'), 16);
+        };
+    </script>
+</body>
+</html>

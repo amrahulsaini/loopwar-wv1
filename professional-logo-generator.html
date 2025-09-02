@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LoopWar Professional Logo - L + Infinity + Sword</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 30px; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        h1 { 
+            text-align: center; 
+            color: #1e293b; 
+            font-size: 2.5rem; 
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        .features {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+        .features h3 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            font-weight: 500;
+            color: #475569;
+        }
+        .logo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px;
+        }
+        .logo-card { 
+            background: #fafafa; 
+            padding: 25px; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .logo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-color: #3b82f6;
+        }
+        .size-label { 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        .usage-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        button { 
+            background: linear-gradient(135deg, #3b82f6, #6366f1); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        button:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.25);
+        }
+        .preview-area {
+            margin: 15px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .dark-preview {
+            background: #1f2937 !important;
+            margin-top: 10px;
+        }
+        .meaning {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .meaning h3 {
+            color: #047857;
+            margin-bottom: 10px;
+        }
+        .meaning-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .meaning-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ LoopWar Professional Logo</h1>
+        <p class="subtitle">Stylish "L" + Infinity Symbol + Sword Elements</p>
+        
+        <div class="features">
+            <h3>🎯 Perfect Professional Design</h3>
+            <div class="feature-grid">
+                <div class="feature">✨ Clean "L" letterform</div>
+                <div class="feature">∞ Infinity symbol (endless loops)</div>
+                <div class="feature">⚔️ Sword element (warfare)</div>
+                <div class="feature">🎨 Professional gradients</div>
+                <div class="feature">💼 Business-ready</div>
+                <div class="feature">📱 Perfect scaling</div>
+            </div>
+        </div>
+        
+        <div class="logo-grid">
+            <!-- App Icon 512x512 -->
+            <div class="logo-card">
+                <div class="size-label">512×512px</div>
+                <div class="usage-label">App Store Icons</div>
+                <div class="preview-area">
+                    <canvas id="canvas512" width="512" height="512"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas512Dark" width="80" height="80"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas512', 'loopwar-app-icon-512.png')">Download 512px</button>
+            </div>
+            
+            <!-- Medium 256x256 -->
+            <div class="logo-card">
+                <div class="size-label">256×256px</div>
+                <div class="usage-label">Social Media</div>
+                <div class="preview-area">
+                    <canvas id="canvas256" width="256" height="256"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas256Dark" width="80" height="80"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas256', 'loopwar-social-256.png')">Download 256px</button>
+            </div>
+            
+            <!-- Website 128x128 -->
+            <div class="logo-card">
+                <div class="size-label">128×128px</div>
+                <div class="usage-label">Website Headers</div>
+                <div class="preview-area">
+                    <canvas id="canvas128" width="128" height="128"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas128Dark" width="80" height="80"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas128', 'loopwar-web-128.png')">Download 128px</button>
+            </div>
+            
+            <!-- Favicon 64x64 -->
+            <div class="logo-card">
+                <div class="size-label">64×64px</div>
+                <div class="usage-label">Favicons</div>
+                <div class="preview-area">
+                    <canvas id="canvas64" width="64" height="64"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas64Dark" width="64" height="64"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas64', 'loopwar-favicon-64.png')">Download 64px</button>
+            </div>
+            
+            <!-- Small 32x32 -->
+            <div class="logo-card">
+                <div class="size-label">32×32px</div>
+                <div class="usage-label">Small Icons</div>
+                <div class="preview-area">
+                    <canvas id="canvas32" width="32" height="32"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas32Dark" width="32" height="32"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas32', 'loopwar-small-32.png')">Download 32px</button>
+            </div>
+            
+            <!-- Tiny 16x16 -->
+            <div class="logo-card">
+                <div class="size-label">16×16px</div>
+                <div class="usage-label">Tiny Icons</div>
+                <div class="preview-area">
+                    <canvas id="canvas16" width="16" height="16"></canvas>
+                </div>
+                <div class="preview-area dark-preview">
+                    <canvas id="canvas16Dark" width="16" height="16"></canvas>
+                </div>
+                <button onclick="downloadLogo('canvas16', 'loopwar-tiny-16.png')">Download 16px</button>
+            </div>
+        </div>
+
+        <div class="meaning">
+            <h3>🎨 Logo Symbol Meanings</h3>
+            <div class="meaning-items">
+                <div class="meaning-item">📝 <strong>L Letter:</strong> LoopWar brand identity</div>
+                <div class="meaning-item">∞ <strong>Infinity:</strong> Endless competition loops</div>
+                <div class="meaning-item">⚔️ <strong>Sword:</strong> Warfare and competition</div>
+                <div class="meaning-item">🎨 <strong>Gradients:</strong> Professional tech aesthetic</div>
+                <div class="meaning-item">💎 <strong>Clean Design:</strong> Premium brand positioning</div>
+                <div class="meaning-item">🏆 <strong>Combined:</strong> Perfect gaming/tech logo</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function drawProfessionalLogo(canvas, size, isDark = false) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 80; // Scale factor based on 80x80 viewBox
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Set background for dark mode
+            if (isDark) {
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(0, 0, size, size);
+            }
+            
+            // Create professional gradient
+            const professionalGradient = ctx.createLinearGradient(0, 0, size, size);
+            professionalGradient.addColorStop(0, '#3b82f6');
+            professionalGradient.addColorStop(0.5, '#6366f1');
+            professionalGradient.addColorStop(1, '#8b5cf6');
+            
+            // Create sword gradient
+            const swordGradient = ctx.createLinearGradient(0, 0, size, size);
+            swordGradient.addColorStop(0, '#f59e0b');
+            swordGradient.addColorStop(1, '#ef4444');
+            
+            // Draw professional shadow
+            ctx.shadowColor = 'rgba(30, 41, 59, 0.15)';
+            ctx.shadowBlur = 6 * scale;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 3 * scale;
+            
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(40 * scale, 40 * scale, 36 * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = professionalGradient;
+            ctx.fill();
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw inner ring
+            ctx.beginPath();
+            ctx.arc(40 * scale, 40 * scale, 31 * scale, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 0.5 * scale;
+            ctx.stroke();
+            
+            // Save context for transformations
+            ctx.save();
+            ctx.translate(40 * scale, 40 * scale);
+            
+            // Draw L letter
+            ctx.fillStyle = 'white';
+            
+            // Vertical stroke
+            ctx.beginPath();
+            ctx.moveTo(-12 * scale, -18 * scale);
+            ctx.lineTo(-8 * scale, -18 * scale);
+            ctx.lineTo(-8 * scale, 8 * scale);
+            ctx.lineTo(-12 * scale, 8 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Horizontal stroke with stylish extension
+            ctx.beginPath();
+            ctx.moveTo(-12 * scale, 8 * scale);
+            ctx.lineTo(8 * scale, 8 * scale);
+            ctx.lineTo(10 * scale, 12 * scale);
+            ctx.lineTo(-12 * scale, 12 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw infinity symbol
+            ctx.strokeStyle = swordGradient;
+            ctx.lineWidth = 2 * scale;
+            ctx.lineCap = 'round';
+            ctx.fillStyle = 'none';
+            
+            // Infinity path (approximated with curves)
+            ctx.beginPath();
+            ctx.moveTo(2 * scale, -12 * scale);
+            ctx.quadraticCurveTo(6 * scale, -16 * scale, 10 * scale, -12 * scale);
+            ctx.quadraticCurveTo(14 * scale, -8 * scale, 10 * scale, -4 * scale);
+            ctx.quadraticCurveTo(6 * scale, -8 * scale, 2 * scale, -4 * scale);
+            ctx.quadraticCurveTo(-2 * scale, -8 * scale, 2 * scale, -12 * scale);
+            ctx.stroke();
+            
+            // Draw sword blade
+            ctx.fillStyle = swordGradient;
+            ctx.beginPath();
+            ctx.moveTo(8 * scale, 10 * scale);
+            ctx.lineTo(16 * scale, 10 * scale);
+            ctx.lineTo(18 * scale, 8 * scale);
+            ctx.lineTo(16 * scale, 6 * scale);
+            ctx.lineTo(8 * scale, 6 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Sword hilt/guard
+            ctx.beginPath();
+            ctx.roundRect(15 * scale, 4 * scale, 2 * scale, 8 * scale, 1 * scale);
+            ctx.fill();
+            
+            // Sword pommel
+            ctx.beginPath();
+            ctx.arc(18 * scale, 8 * scale, 1.5 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Professional accent dots
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(-6 * scale, -14 * scale, 1 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.beginPath();
+            ctx.arc(-6 * scale, -10 * scale, 0.8 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.beginPath();
+            ctx.arc(-6 * scale, -6 * scale, 0.6 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Restore context
+            ctx.restore();
+            
+            // Corner elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            const cornerRadius = 0.4 * scale;
+            
+            ctx.beginPath();
+            ctx.roundRect(8 * scale, 8 * scale, 3 * scale, 0.8 * scale, cornerRadius);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.roundRect(69 * scale, 8 * scale, 3 * scale, 0.8 * scale, cornerRadius);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.roundRect(8 * scale, 71 * scale, 3 * scale, 0.8 * scale, cornerRadius);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.roundRect(69 * scale, 71 * scale, 3 * scale, 0.8 * scale, cornerRadius);
+            ctx.fill();
+        }
+        
+        function downloadLogo(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            // Light versions
+            drawProfessionalLogo(document.getElementById('canvas512'), 512);
+            drawProfessionalLogo(document.getElementById('canvas256'), 256);
+            drawProfessionalLogo(document.getElementById('canvas128'), 128);
+            drawProfessionalLogo(document.getElementById('canvas64'), 64);
+            drawProfessionalLogo(document.getElementById('canvas32'), 32);
+            drawProfessionalLogo(document.getElementById('canvas16'), 16);
+            
+            // Dark versions
+            drawProfessionalLogo(document.getElementById('canvas512Dark'), 80, true);
+            drawProfessionalLogo(document.getElementById('canvas256Dark'), 80, true);
+            drawProfessionalLogo(document.getElementById('canvas128Dark'), 80, true);
+            drawProfessionalLogo(document.getElementById('canvas64Dark'), 64, true);
+            drawProfessionalLogo(document.getElementById('canvas32Dark'), 32, true);
+            drawProfessionalLogo(document.getElementById('canvas16Dark'), 16, true);
+        };
+    </script>
+</body>
+</html>

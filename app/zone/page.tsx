@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import LoadingSpinner from '../components/LoadingSpinner';
-import ThemeSwitcher from '../components/ThemeSwitcher';
+import Logo from '../components/Logo';
 
 export default function ZonePage() {
   const [username, setUsername] = useState('');
@@ -57,7 +57,9 @@ export default function ZonePage() {
     <>
       <header className="zone-header">
         <div className="container">
-          <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
+          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
+            <Logo size={55} showText={false} />
+          </Link>
           <nav className="zone-nav">
             <button 
               className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
@@ -79,7 +81,6 @@ export default function ZonePage() {
             </button>
           </nav>
           <div className="header-actions">
-            <ThemeSwitcher />
             <button 
               className="logout-btn" 
               onClick={clearSession}

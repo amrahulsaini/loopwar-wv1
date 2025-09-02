@@ -40,6 +40,11 @@
     /* --- Logo Specific Dimensions --- */
     --logo-bar-thickness: 10px;
 
+    /* Logo image theme compatibility */
+    --logo-filter-light: none;
+    --logo-filter-dark: invert(1);
+    --logo-filter: var(--logo-filter-light);
+
     /* Warning colors */
     --warning-bg: #f5f5f5;
     --warning-border: var(--color-secondary);
@@ -123,6 +128,9 @@ body.dark-mode {
     --color-primary-rgb: var(--color-primary-rgb-dark);
     --color-bg-rgb: var(--color-bg-rgb-dark);
     
+    /* Logo filter for dark mode */
+    --logo-filter: var(--logo-filter-dark);
+    
     /* Dark mode warning colors */
     --warning-bg: #2a2a2a;
     --warning-border: var(--color-secondary);
@@ -181,101 +189,134 @@ body {
     align-items: center;
 }
 
-/* STYLISH LOGO 'L' - Refined Styling */
+/* SIGNATURE BRAND LOGO - BLACK & WHITE */
 .logo {
-    font-size: 0; /* Hide the 'L' text visually for custom shape */
-    width: calc(var(--logo-bar-thickness) * 4.8); /* Adjusted width */
-    height: calc(var(--logo-bar-thickness) * 5.8); /* Adjusted height */
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-family: var(--font-primary);
     position: relative;
     display: inline-flex;
-    vertical-align: middle;
+    align-items: center;
+    transition: all var(--transition-speed);
+    letter-spacing: -0.5px;
+}
+
+/* New logo component styles */
+.logo-link {
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
     transition: all var(--transition-speed);
-    overflow: visible; /* Allow drop-shadow filter to extend beyond bounds */
-    
-    /* Initial drop shadow for light mode */
-    filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.25));
+    color: var(--text-primary);
 }
 
-/* Dark mode specific drop shadow */
+.logo-link:hover {
+    transform: scale(1.05) translateY(-1px);
+    opacity: 0.8;
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon {
+    transition: all var(--transition-speed);
+    color: var(--text-primary);
+}
+
+.logo-text {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: serif;
+    letter-spacing: 0.5px;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .logo-link {
+    color: var(--text-primary);
+}
+
+body.dark-mode .logo-icon {
+    color: var(--text-primary);
+}
+
+body.dark-mode .logo-text {
+    color: var(--text-primary);
+}
+
+/* Dark mode logo styling */
 body.dark-mode .logo {
-    filter: drop-shadow(0px 3px 6px rgba(255,255,255,0.15));
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1));
 }
 
-.logo::before, /* Vertical bar of the L */
-.logo::after {  /* Horizontal bar of the L */
-    content: '';
-    position: absolute;
-    background-color: var(--color-primary); /* Base color adapts to theme */
-    transition: all var(--transition-speed);
-    
-    /* Box-shadow for the 3D 'chiseled' effect - Light Mode defaults */
-    box-shadow: 
-        inset 1px 1px 2px rgba(255,255,255,0.3), /* Inner highlight */
-        inset -1px -1px 2px rgba(0,0,0,0.4),    /* Inner shadow */
-        0px 1px 2px rgba(0,0,0,0.1);             /* Subtle lift */
-}
-
-/* Box-shadow for the 3D 'chiseled' effect - Dark Mode */
-body.dark-mode .logo::before,
-body.dark-mode .logo::after {
-    box-shadow: 
-        inset 1px 1px 2px rgba(0,0,0,0.3),      /* Inner highlight (darker for white logo) */
-        inset -1px -1px 2px rgba(255,255,255,0.4), /* Inner shadow (lighter for white logo) */
-        0px 1px 2px rgba(255,255,255,0.08);       /* Subtle lift */
-}
-
-.logo::before { /* Vertical bar */
-    width: var(--logo-bar-thickness);
-    height: 100%;
-    left: 0;
-    top: 0;
-    /* Rounded top, sharp bottom for clean inner corner */
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-bottom-left-radius: 0; 
-    border-bottom-right-radius: 0; 
-}
-
-.logo::after { /* Horizontal bar */
-    width: 100%;
-    height: var(--logo-bar-thickness);
-    bottom: 0;
-    left: 0;
-    /* Sharp left for clean inner corner, rounded right */
-    border-bottom-left-radius: 0; 
-    border-top-left-radius: 0; 
-    border-bottom-right-radius: 6px;
-    border-top-right-radius: 6px;
-}
-
+/* Logo hover effects */
 .logo:hover {
-    transform: scale(1.08) translateY(-2px); /* Lift and scale for more interactivity */
-    /* Stronger drop shadow on hover - Light Mode */
-    filter: drop-shadow(0px 6px 12px rgba(0,0,0,0.4));
+    transform: scale(1.05) translateY(-1px);
+    filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.2));
 }
 
-/* Stronger drop shadow on hover - Dark Mode */
 body.dark-mode .logo:hover {
-    filter: drop-shadow(0px 6px 12px rgba(255,255,255,0.25));
+    filter: drop-shadow(0px 4px 8px rgba(255,255,255,0.2));
 }
 
-.logo:hover::before,
-.logo:hover::after {
-    /* More pronounced inner shadows on hover - Light Mode */
-    box-shadow: 
-        inset 2px 2px 4px rgba(255,255,255,0.4), 
-        inset -2px -2px 4px rgba(0,0,0,0.5),    
-        0px 3px 8px rgba(0,0,0,0.2); 
+/* Alternative logo with accent styling */
+.logo-alt {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-family: var(--font-primary);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    transition: all var(--transition-speed);
 }
 
-/* More pronounced inner shadows on hover - Dark Mode */
-body.dark-mode .logo:hover::before,
-body.dark-mode .logo:hover::after {
-    box-shadow: 
-        inset 2px 2px 4px rgba(0,0,0,0.4),      
-        inset -2px -2px 4px rgba(255,255,255,0.5), 
-        0px 3px 8px rgba(255,255,255,0.15);       
+.logo-alt::before {
+    content: "⚡";
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.logo-alt:hover {
+    transform: scale(1.05);
+    color: var(--color-secondary);
+}
+
+/* Logo Image Styles */
+.logo-image {
+    transition: all var(--transition-speed);
+    border: 2px solid transparent;
+}
+
+.logo-image:hover {
+    transform: scale(1.05);
+    border-color: var(--color-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .logo-image:hover {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.logo-wrapper {
+    transition: all var(--transition-speed);
+}
+
+.logo-wrapper:hover {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+}
+
+body.dark-mode .logo-wrapper:hover {
+    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.15));
 }
 
 .main-nav {
