@@ -34,15 +34,26 @@ interface GitHubEmail {
 // Required env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, OAUTH_REDIRECT_URL
 
 export async function GET(request: NextRequest) {
+  // Add debug logging
+  console.log('🔍 OAuth Route Hit:', {
+    url: request.url,
+    method: request.method,
+    timestamp: new Date().toISOString()
+  });
+
   const url = new URL(request.url);
   const provider = url.searchParams.get('provider');
   const action = url.searchParams.get('action'); // 'start' or 'callback'
+  
+  console.log('📋 OAuth Parameters:', { provider, action });
 
   if (!provider) {
+    console.log('❌ OAuth Error: Missing provider');
     return NextResponse.json({ error: 'Missing provider' }, { status: 400 });
   }
 
   if (action === 'start') {
+    console.log('🚀 Starting OAuth flow for provider:', provider);
     if (provider === 'google') {
       const state = Math.random().toString(36).slice(2);
       const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
@@ -52,9 +63,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (provider === 'github') {
+      console.log('🔗 Generating GitHub OAuth URL');
       const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
       const redirectUri = `${baseUrl}/api/auth/oauth?provider=github&action=callback`;
       const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      console.log('🎯 GitHub OAuth URL:', authUrl);
       return NextResponse.redirect(authUrl);
     }
 
@@ -62,8 +75,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (action === 'callback') {
+    console.log('🔙 Processing OAuth callback for provider:', provider);
     // Google returns ?code=...&state=...
     const code = url.searchParams.get('code');
+    console.log('📝 Received code parameter:', code ? 'YES' : 'NO');
     if (provider === 'google') {
       if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
 
@@ -112,9 +127,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (provider === 'github') {
+      console.log('🔍 Processing GitHub callback');
       // simple github flow
       const code = url.searchParams.get('code');
-      if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
+      if (!code) {
+        console.log('❌ GitHub OAuth Error: Missing code parameter');
+        return NextResponse.json({ error: 'Missing code' }, { status: 400 });
+      }
 
       const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
       const redirectUri = `${baseUrl}/api/auth/oauth?provider=github&action=callback`;

@@ -13,6 +13,11 @@ const publicRoutes = ['/', '/api'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // Debug: Log if this is an API route that somehow hit middleware
+  if (pathname.startsWith('/api')) {
+    console.log('⚠️ MIDDLEWARE: API route hit middleware (should not happen):', pathname);
+  }
+  
   // Get session token from cookies
   const sessionToken = request.cookies.get('sessionToken')?.value;
   const username = request.cookies.get('username')?.value;
