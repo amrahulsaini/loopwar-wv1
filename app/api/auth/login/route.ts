@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
-import { UserStorage, type User } from '../../../../lib/userStorage';
+import Database from '../../../../lib/database';
 
 interface LoginRequest {
   username: string;
@@ -15,7 +15,16 @@ export async function POST(request: NextRequest) {
   try {
     console.log('=== LOGIN API CALLED ===');
     console.log('Timestamp:', new Date().toISOString());
-    console.log('Current users in memory:', UserStorage.getAll().length);
+    
+    // Health check for database
+    const dbHealthy = await Database.healthCheck();
+    if (!dbHealthy) {
+      console.error('❌ Database connection failed');
+      return NextResponse.json(
+        { error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
     
     // Parse request body
     let body: LoginRequest;
@@ -44,8 +53,8 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Searching for user...');
     
-    // Find user by username using UserStorage
-    const user = UserStorage.findByUsername(username);
+    // Find user by username using Database
+    const user = await Database.findUserByUsername(username);
 
     if (!user) {
       console.log('❌ User not found:', username);
@@ -54,11 +63,11 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    console.log('✅ User found:', user.username);
+    console.log('✅ User found:', (user as any).username);
 
     // Verify password
     console.log('🔐 Verifying password...');
-    const passwordMatch = await bcryptjs.compare(password, user.passwordHash);
+    const passwordMatch = await bcryptjs.compare(password, (user as any).password_hash);
 
     if (!passwordMatch) {
       console.log('❌ Password verification failed');
@@ -76,8 +85,7 @@ export async function POST(request: NextRequest) {
       .join('');
 
     // Update user's session token and last login
-    user.sessionToken = sessionToken;
-    user.lastLogin = Date.now();
+    await Database.createSession((user as any).id, sessionToken);
 
     console.log('✅ Session token generated and user updated');
 
@@ -90,20 +98,19 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login successful!',
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        experienceLevel: user.experienceLevel,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt,
-        lastLogin: user.lastLogin
+        id: (user as any).id,
+        username: (user as any).username,
+        email: (user as any).email,
+        experienceLevel: (user as any).experience_level || 'beginner',
+        isVerified: (user as any).is_verified,
+        createdAt: (user as any).created_at,
+        lastLogin: new Date().toISOString()
       },
       sessionToken: sessionToken,
       rememberMe,
       debug: {
         timestamp: new Date().toISOString(),
-        processingTime: endTime - startTime,
-        totalUsers: UserStorage.getAll().length
+        processingTime: endTime - startTime
       }
     }, { status: 200 });
 
@@ -147,17 +154,19 @@ export async function OPTIONS() {
 
 // Add GET handler for debugging
 export async function GET() {
-  const allUsers = UserStorage.getAll();
-  return NextResponse.json({
-    message: 'Login API is working',
-    timestamp: new Date().toISOString(),
-    totalUsers: allUsers.length,
-    users: allUsers.map(u => ({ 
-      id: u.id, 
-      username: u.username, 
-      email: u.email, 
-      isVerified: u.isVerified,
-      lastLogin: u.lastLogin 
-    }))
-  });
+  try {
+    const allUsers = await Database.query('SELECT id, username, email, is_verified, created_at FROM users');
+    return NextResponse.json({
+      message: 'Login API is working',
+      timestamp: new Date().toISOString(),
+      totalUsers: Array.isArray(allUsers) ? allUsers.length : 0,
+      users: Array.isArray(allUsers) ? allUsers.slice(0, 10) : [] // Limit to 10 for debugging
+    });
+  } catch (error) {
+    return NextResponse.json({
+      message: 'Login API is working but database error',
+      timestamp: new Date().toISOString(),
+      error: String(error)
+    });
+  }
 }
