@@ -21,15 +21,17 @@ const EMAIL_TEMPLATES = {
   }
 };
 
-// SMTP configuration
+// SMTP configuration with debugging enabled
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
     pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2'
-  }
+  },
+  debug: true, // Enable debug output
+  logger: true // Log to console
 });
 
 export class EmailService {
@@ -151,6 +153,9 @@ export class EmailService {
     metadata: string;
   }): Promise<void> {
     try {
+      console.log(`📧 Attempting to send email to: ${emailRecord.recipient_email}`);
+      console.log(`📧 SMTP Config: Host=${process.env.SMTP_HOST}, Port=${process.env.SMTP_PORT}, User=${process.env.SMTP_USER}`);
+      
       // Update status to sent (since we're about to send)
       await Database.query(
         'UPDATE email_sender SET status = ?, sent_at = NOW() WHERE id = ?',
@@ -158,7 +163,7 @@ export class EmailService {
       );
 
       const mailOptions = {
-        from: `"LoopWar Team" <${process.env.SMTP_USER}>`,
+        from: `"LoopWar Team" <${process.env.SMTP_FROM || 'verify@loopwar.dev'}>`,
         to: emailRecord.recipient_email,
         subject: emailRecord.subject,
         html: emailRecord.email_content
