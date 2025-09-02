@@ -1038,6 +1038,32 @@ body.dark-mode .join-option-btn:disabled .option-icon svg {
     opacity: 0.9;
 }
 
+/* Auth Redirect Section */
+.auth-redirect {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+.auth-redirect p {
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.signin-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all var(--transition-speed);
+}
+
+.signin-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
 /* Right Side - Form */
 .join-right {
     padding: 40px 20px;
@@ -3210,6 +3236,35 @@ body.dark-mode select:focus {
   }
 }
 
+/* Desktop Layout (769px and above) */
+@media (min-width: 769px) {
+  .join-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    min-height: 80vh;
+  }
+
+  .join-left {
+    order: 1;
+  }
+
+  .join-right {
+    order: 2;
+    opacity: 1;
+    pointer-events: all;
+    transform: none;
+    visibility: visible;
+    height: auto;
+    overflow: visible;
+  }
+
+  .auth-redirect {
+    margin-top: 40px;
+  }
+}
+
 /* Join Page Mobile Improvements */
 @media (max-width: 768px) {
   .join-content-wrapper {
@@ -3262,6 +3317,16 @@ body.dark-mode select:focus {
     min-height: 50px;
     font-size: 16px;
     font-weight: 600;
+  }
+
+  .auth-redirect {
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .auth-redirect p {
+    font-size: 0.9rem;
   }
 }
 

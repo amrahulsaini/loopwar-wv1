@@ -45,6 +45,24 @@ export default function JoinPage() {
         NProgress.start();
         window.location.href = '/verify';
       }
+
+      // Show form by default on desktop screens (769px and above)
+      const handleResize = () => {
+        if (window.innerWidth >= 769) {
+          setShowForm(true);
+        } else {
+          setShowForm(false);
+        }
+      };
+
+      // Initial check
+      handleResize();
+
+      // Listen for window resize
+      window.addEventListener('resize', handleResize);
+
+      // Cleanup
+      return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
 
@@ -237,13 +255,13 @@ export default function JoinPage() {
                   </button>
                 </div>
               </div>
-            </div>
 
-            <div className="auth-redirect">
-              <p>
-                Already have an account?{' '}
-                <a href="/login" className="signin-link">Login here</a>
-              </p>
+              <div className="auth-redirect">
+                <p>
+                  Already have an account?{' '}
+                  <Link href="/login" className="signin-link">Login here</Link>
+                </p>
+              </div>
             </div>
 
             {/* Right Side - Signup Form */}
