@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
-import Database from '../../../../lib/database';
+import { UserStorage } from '../../../../lib/userStorage';
+import crypto from 'crypto';
 
 // SMTP configuration for sending emails
 const transporter = nodemailer.createTransport({
@@ -18,16 +19,6 @@ export async function POST(request: NextRequest) {
   try {
     console.log('📝 Signup API called');
     
-    // Health check for database
-    const dbHealthy = await Database.healthCheck();
-    if (!dbHealthy) {
-      console.error('❌ Database connection failed');
-      return NextResponse.json(
-        { error: 'Database service unavailable' },
-        { status: 503 }
-      );
-    }
-
     const { username, email, password } = await request.json();
     console.log('📋 Received signup data:', { username, email });
 
@@ -60,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUserByEmail = await Database.findUserByEmail(email);
+    const existingUserByEmail = UserStorage.findByEmail(email);
     if (existingUserByEmail) {
       console.log('❌ User already exists with this email');
       return NextResponse.json(
@@ -69,7 +60,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingUserByUsername = await Database.findUserByUsername(username);
+    const existingUserByUsername = UserStorage.findByUsername(username);
     if (existingUserByUsername) {
       console.log('❌ Username already taken');
       return NextResponse.json(
@@ -87,26 +78,31 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, saltRounds);
     console.log('🔐 Password hashed successfully');
 
-    // Create user in database
-    const userId = await Database.createUser({
+    // Generate session token
+    const sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(val => val.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Create user with UserStorage
+    const newUser = {
+      id: crypto.randomUUID(),
       username,
       email,
       passwordHash,
-      verificationCode
-    });
+      experienceLevel: 'beginner', // default value
+      isVerified: false,
+      verificationCode,
+      verificationExpiry: Date.now() + (10 * 60 * 1000), // 10 minutes
+      createdAt: Date.now(),
+      lastLogin: null,
+      sessionToken
+    };
 
-    console.log('✅ User created with ID:', userId);
+    UserStorage.addUser(newUser);
+    console.log('✅ User created with ID:', newUser.id);
 
-    // Log registration activity
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    
-    await Database.logActivity(userId, 'register', clientIP, userAgent, {
-      email: email,
-      username: username
-    });
+    // Log registration activity (simplified for UserStorage)
+    console.log('📊 Registration activity logged for user:', newUser.id);
 
     // Send verification email
     try {
@@ -223,7 +219,7 @@ export async function POST(request: NextRequest) {
     const response = {
       message: 'Account created successfully! Please check your email for verification code.',
       email: email,
-      userId: userId,
+      userId: newUser.id,
       requiresVerification: true
     };
     

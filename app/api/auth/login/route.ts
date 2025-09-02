@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
-
-// Types
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-  experienceLevel: string;
-  isVerified: boolean;
-  verificationCode: string;
-  verificationExpiry: number;
-  createdAt: number;
-  lastLogin: number | null;
-  sessionToken: string;
-}
+import { UserStorage, type User } from '../../../../lib/userStorage';
 
 interface LoginRequest {
   username: string;
@@ -23,16 +9,13 @@ interface LoginRequest {
   rememberMe?: boolean;
 }
 
-// Global in-memory storage - same as signup (this should be replaced with a real database)
-const globalUsers: User[] = [];
-
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
     console.log('=== LOGIN API CALLED ===');
     console.log('Timestamp:', new Date().toISOString());
-    console.log('Current users in memory:', globalUsers.length);
+    console.log('Current users in memory:', UserStorage.getAll().length);
     
     // Parse request body
     let body: LoginRequest;
@@ -61,10 +44,8 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Searching for user...');
     
-    // Find user by username (case insensitive)
-    const user = globalUsers.find(u => 
-      u.username.toLowerCase() === username.toLowerCase()
-    );
+    // Find user by username using UserStorage
+    const user = UserStorage.findByUsername(username);
 
     if (!user) {
       console.log('❌ User not found:', username);
@@ -122,7 +103,7 @@ export async function POST(request: NextRequest) {
       debug: {
         timestamp: new Date().toISOString(),
         processingTime: endTime - startTime,
-        totalUsers: globalUsers.length
+        totalUsers: UserStorage.getAll().length
       }
     }, { status: 200 });
 
@@ -166,11 +147,12 @@ export async function OPTIONS() {
 
 // Add GET handler for debugging
 export async function GET() {
+  const allUsers = UserStorage.getAll();
   return NextResponse.json({
     message: 'Login API is working',
     timestamp: new Date().toISOString(),
-    totalUsers: globalUsers.length,
-    users: globalUsers.map(u => ({ 
+    totalUsers: allUsers.length,
+    users: allUsers.map(u => ({ 
       id: u.id, 
       username: u.username, 
       email: u.email, 

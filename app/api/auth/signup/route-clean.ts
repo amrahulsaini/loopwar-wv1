@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
-
-// Types
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-  experienceLevel: string;
-  isVerified: boolean;
-  verificationCode: string;
-  verificationExpiry: number;
-  createdAt: number;
-  lastLogin: number | null;
-  sessionToken: string;
-}
+import { UserStorage, type User } from '../../../../lib/userStorage';
 
 interface SignupRequest {
   username: string;
@@ -23,10 +9,6 @@ interface SignupRequest {
   password: string;
   experienceLevel: string;
 }
-
-// Global in-memory storage - this will persist for the lifetime of the serverless function
-// Note: Data will be lost when the function cold starts, but this is for testing only
-const globalUsers: User[] = [];
 
 // Validation functions
 function validateUsername(username: string): string | null {
@@ -61,9 +43,9 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    console.log('=== VERCEL FIXED SIGNUP API - NO FILE SYSTEM ===');
+    console.log('=== VERCEL FIXED SIGNUP API - SHARED STORAGE ===');
     console.log('Timestamp:', new Date().toISOString());
-    console.log('Current users in memory:', globalUsers.length);
+    console.log('Current users in memory:', UserStorage.count());
     
     // Parse request body
     let body: SignupRequest;
@@ -111,21 +93,17 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ All validations passed');
 
-    // Check for duplicates in global array
+    // Check for duplicates using shared storage
     console.log('🔍 Checking for duplicates...');
     
-    const existingUserByUsername = globalUsers.find(user => 
-      user.username.toLowerCase() === username.toLowerCase()
-    );
+    const existingUserByUsername = UserStorage.findByUsername(username);
     
     if (existingUserByUsername) {
       console.log('❌ Username already exists:', username);
       return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
 
-    const existingUserByEmail = globalUsers.find(user => 
-      user.email.toLowerCase() === email.toLowerCase()
-    );
+    const existingUserByEmail = UserStorage.findByEmail(email);
     
     if (existingUserByEmail) {
       console.log('❌ Email already registered:', email);
@@ -172,10 +150,10 @@ export async function POST(request: NextRequest) {
       sessionToken
     };
 
-    // Save user to global array (NO FILE SYSTEM OPERATIONS)
-    console.log('💾 Saving user to memory...');
-    globalUsers.push(newUser);
-    console.log('✅ User saved successfully. Total users:', globalUsers.length);
+    // Save user to shared storage
+    console.log('💾 Saving user to shared storage...');
+    UserStorage.addUser(newUser);
+    console.log('✅ User saved successfully. Total users:', UserStorage.count());
 
     const endTime = Date.now();
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
@@ -190,7 +168,7 @@ export async function POST(request: NextRequest) {
       debug: {
         timestamp: new Date().toISOString(),
         processingTime: endTime - startTime,
-        totalUsers: globalUsers.length
+        totalUsers: UserStorage.getAll().length
       }
     }, { status: 201 });
 
@@ -234,11 +212,12 @@ export async function OPTIONS() {
 
 // Add GET handler for debugging
 export async function GET() {
+  const allUsers = UserStorage.getAll();
   return NextResponse.json({
     message: 'Signup API is working',
     timestamp: new Date().toISOString(),
-    totalUsers: globalUsers.length,
-    users: globalUsers.map(u => ({ 
+    totalUsers: allUsers.length,
+    users: allUsers.map(u => ({ 
       id: u.id, 
       username: u.username, 
       email: u.email, 
