@@ -53,8 +53,8 @@ export default function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
       const expires = new Date();
       expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000));
       document.cookie = `theme=${encodeURIComponent(newTheme)};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
-    } catch (e) {
-      // ignore
+    } catch {
+      // ignore cookie setting errors
     }
     setTheme(newTheme);
   };

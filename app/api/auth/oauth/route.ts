@@ -3,6 +3,33 @@ import { Database } from '../../../../lib/database';
 // Use global fetch provided by Next.js runtime
 import NodeCrypto from 'crypto';
 
+// Define types for better type safety
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  isVerified?: boolean;
+}
+
+interface GoogleProfile {
+  sub: string;
+  email: string;
+  name?: string;
+  picture?: string;
+}
+
+interface GitHubProfile {
+  id: number;
+  login: string;
+  email?: string;
+  avatar_url?: string;
+}
+
+interface GitHubEmail {
+  email: string;
+  primary: boolean;
+}
+
 // Simple OAuth handler for Google (authorization code flow)
 // Required env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, OAUTH_REDIRECT_URL
 
@@ -52,7 +79,7 @@ export async function GET(request: NextRequest) {
       const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${tokenData.access_token}` }
       });
-      const profile = await userinfoRes.json();
+      const profile = await userinfoRes.json() as GoogleProfile;
 
       // Upsert user in DB
       const userEntry = await Database.upsertOAuthUser({
@@ -60,19 +87,20 @@ export async function GET(request: NextRequest) {
         oauthId: profile.sub,
         email: profile.email,
         username: profile.name || profile.email.split('@')[0],
-        profilePicture: profile.picture || null
+        profilePicture: profile.picture || undefined
       });
 
       // Create a session token and set cookies similar to login route
       const sessionToken = cryptoRandom();
-      if (userEntry && (userEntry as any).id) {
-        await Database.createSession((userEntry as any).id, sessionToken);
+      const user = userEntry as User;
+      if (user?.id) {
+        await Database.createSession(user.id, sessionToken);
       }
 
       const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
       res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('username', (userEntry as any).username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('userId', String((userEntry as any).id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
+      res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+      res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
       res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
 
       return res;
@@ -93,12 +121,12 @@ export async function GET(request: NextRequest) {
       if (!tokenData || !tokenData.access_token) return NextResponse.json({ error: 'Failed to get access token', details: tokenData }, { status: 400 });
 
       const userRes = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
-      const profile = await userRes.json();
+      const profile = await userRes.json() as GitHubProfile;
 
       // get primary email
       const emailsRes = await fetch('https://api.github.com/user/emails', { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
-      const emails = await emailsRes.json();
-      const primary = emails && Array.isArray(emails) ? emails.find((e: any) => e.primary) : null;
+      const emails = await emailsRes.json() as GitHubEmail[];
+      const primary = emails && Array.isArray(emails) ? emails.find((e: GitHubEmail) => e.primary) : null;
       const email = primary ? primary.email : (profile.email || '');
 
       const userEntry = await Database.upsertOAuthUser({
@@ -106,18 +134,19 @@ export async function GET(request: NextRequest) {
         oauthId: String(profile.id),
         email,
         username: profile.login,
-        profilePicture: profile.avatar_url || null
+        profilePicture: profile.avatar_url || undefined
       });
 
       const sessionToken = cryptoRandom();
-      if (userEntry && (userEntry as any).id) {
-        await Database.createSession((userEntry as any).id, sessionToken);
+      const user = userEntry as User;
+      if (user?.id) {
+        await Database.createSession(user.id, sessionToken);
       }
 
       const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
       res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('username', (userEntry as any).username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('userId', String((userEntry as any).id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
+      res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+      res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
       res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
 
       return res;
@@ -133,15 +162,13 @@ function cryptoRandom() {
   try {
     const arr = new Uint8Array(32);
     // Use web crypto if available
-    // @ts-ignore
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      // @ts-ignore
-      crypto.getRandomValues(arr);
+    if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+      globalThis.crypto.getRandomValues(arr);
       return Array.from(arr).map(v => v.toString(16).padStart(2, '0')).join('');
     }
     // Fallback to Node's crypto
     return NodeCrypto.randomBytes(32).toString('hex');
-  } catch (e) {
+  } catch {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 }

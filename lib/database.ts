@@ -101,16 +101,17 @@ export class Database {
     email: string;
     username?: string;
     profilePicture?: string;
-  }) {
+  }): Promise<unknown> {
     // Try find existing by oauth provider/id or email
     const existingByOauth = await this.findUserByOAuth(user.provider, user.oauthId);
-    if (existingByOauth) return existingByOauth as any;
+    if (existingByOauth) return existingByOauth;
 
     const existingByEmail = await this.findUserByEmail(user.email);
     if (existingByEmail) {
       // Link oauth to existing account
+      const existingUser = existingByEmail as { id: number };
       const sql = `UPDATE users SET oauth_provider = ?, oauth_id = ?, profile_picture = ? WHERE id = ?`;
-      await this.query(sql, [user.provider, user.oauthId, user.profilePicture || null, (existingByEmail as any).id]);
+      await this.query(sql, [user.provider, user.oauthId, user.profilePicture || null, existingUser.id]);
       return await this.findUserByEmail(user.email);
     }
 
