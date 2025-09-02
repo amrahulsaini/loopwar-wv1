@@ -104,7 +104,7 @@ export class Database {
   }): Promise<unknown> {
     // Try find existing by oauth provider/id or email
     const existingByOauth = await this.findUserByOAuth(user.provider, user.oauthId);
-    if (existingByOauth) return existingByOauth;
+    if (existingByOauth) return { ...(existingByOauth as object), isNewUser: false };
 
     const existingByEmail = await this.findUserByEmail(user.email);
     if (existingByEmail) {
@@ -112,7 +112,8 @@ export class Database {
       const existingUser = existingByEmail as { id: number };
       const sql = `UPDATE users SET oauth_provider = ?, oauth_id = ?, profile_picture = ? WHERE id = ?`;
       await this.query(sql, [user.provider, user.oauthId, user.profilePicture || null, existingUser.id]);
-      return await this.findUserByEmail(user.email);
+      const updatedUser = await this.findUserByEmail(user.email);
+      return { ...(updatedUser as object), isNewUser: false };
     }
 
     // Create new user
@@ -123,7 +124,8 @@ export class Database {
       VALUES (?, ?, ?, TRUE, ?, ?, ?)
     `;
     const res = await this.query(sql, [username, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
-    return await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
+    const newUser = await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
+    return { ...(newUser as object), isNewUser: true };
   }
 
   static async findUserBySessionToken(sessionToken: string) {

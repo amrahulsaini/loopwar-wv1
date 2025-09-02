@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Database } from '../../../../lib/database';
+import { EmailService } from '../../../../lib/email-service';
 // Use global fetch provided by Next.js runtime
 import NodeCrypto from 'crypto';
 
@@ -110,9 +111,20 @@ export async function GET(request: NextRequest) {
         profilePicture: profile.picture || undefined
       });
 
+      // Send welcome email for new users
+      const user = userEntry as User & { isNewUser?: boolean };
+      if (user?.id && user.isNewUser) {
+        try {
+          await EmailService.sendWelcomeEmail(user.id, profile.email, user.username);
+          console.log('📧 Welcome email queued for new Google OAuth user:', profile.email);
+        } catch (emailError) {
+          console.error('📧 Failed to queue welcome email for Google OAuth user:', emailError);
+          // Don't fail the OAuth flow if email fails
+        }
+      }
+
       // Create a session token and set cookies similar to login route
       const sessionToken = cryptoRandom();
-      const user = userEntry as User;
       if (user?.id) {
         await Database.createSession(user.id, sessionToken);
       }
@@ -164,8 +176,19 @@ export async function GET(request: NextRequest) {
         profilePicture: profile.avatar_url || undefined
       });
 
+      // Send welcome email for new users
+      const user = userEntry as User & { isNewUser?: boolean };
+      if (user?.id && user.isNewUser && email) {
+        try {
+          await EmailService.sendWelcomeEmail(user.id, email, user.username);
+          console.log('📧 Welcome email queued for new GitHub OAuth user:', email);
+        } catch (emailError) {
+          console.error('📧 Failed to queue welcome email for GitHub OAuth user:', emailError);
+          // Don't fail the OAuth flow if email fails
+        }
+      }
+
       const sessionToken = cryptoRandom();
-      const user = userEntry as User;
       if (user?.id) {
         await Database.createSession(user.id, sessionToken);
       }

@@ -162,8 +162,17 @@ export class EmailService {
         ['sent', emailRecord.id]
       );
 
+      // Determine the sender email and display name based on email type
+      let fromEmail = 'verify@loopwar.dev';
+      let fromName = 'LoopWar Verification';
+      
+      if (emailRecord.email_type === 'welcome') {
+        fromEmail = 'care@loopwar.dev';
+        fromName = 'LoopWar Care Team';
+      }
+
       const mailOptions = {
-        from: `"LoopWar Team" <${process.env.SMTP_FROM || 'verify@loopwar.dev'}>`,
+        from: `"${fromName}" <${fromEmail}>`,
         to: emailRecord.recipient_email,
         subject: emailRecord.subject,
         html: emailRecord.email_content
@@ -250,7 +259,7 @@ export class EmailService {
           </div>
           
           <div class="footer">
-            <p>🤖 LoopWar Team</p>
+            <p>🤖 LoopWar Verification Team</p>
             <p style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
               If you didn't create this account, please ignore this email.
             </p>
@@ -288,7 +297,7 @@ export class EmailService {
         <div class="email-container">
           <div class="header">
             <h1>🎉 Welcome to LoopWar!</h1>
-            <p>Your account has been successfully verified</p>
+            <p>You've successfully joined our AI-powered coding community</p>
           </div>
           
           <div class="content">
@@ -337,7 +346,7 @@ export class EmailService {
           
           <div class="footer">
             <p>Happy coding! 🚀</p>
-            <p><strong>The LoopWar Team</strong></p>
+            <p><strong>The LoopWar Care Team</strong></p>
             <p style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
               Need help? Reply to this email or visit our support center.
             </p>
