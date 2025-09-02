@@ -23,6 +23,33 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.variable} antialiased`}>
+        {/* Inline script to apply theme early (pre-hydration) so dark mode persists across pages */}
+        <script dangerouslySetInnerHTML={{ __html: `(() => {
+          try {
+            var theme = null;
+            // Try cookie first
+            var m = document.cookie.match('(?:^|;)\\s*theme=([^;]+)');
+            if (m) theme = decodeURIComponent(m[1]);
+            // Fallback to localStorage
+            if (!theme) {
+              try { theme = localStorage.getItem('theme'); } catch(e) { theme = null; }
+            }
+            // Fallback to system preference
+            if (!theme && window.matchMedia) {
+              theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            if (theme === 'dark') {
+              document.documentElement.classList.add('dark-mode');
+              document.body.classList.add('dark-mode');
+            } else {
+              document.documentElement.classList.remove('dark-mode');
+              document.body.classList.remove('dark-mode');
+            }
+          } catch (err) {
+            // noop
+          }
+        })();` }} />
+
         <ThemeProvider>
           <NotificationProvider>
             {children}

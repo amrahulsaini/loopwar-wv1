@@ -13,10 +13,12 @@ export default function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
   useEffect(() => {
     setIsMounted(true);
     
-    // Initialize theme from localStorage or system preference
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const currentTheme = savedTheme || systemTheme;
+  // Initialize theme from cookie, then localStorage, then system preference
+  const cookieMatch = document.cookie.match('(?:^|;)\\s*theme=([^;]+)');
+  const cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) as 'light' | 'dark' : null;
+  const savedTheme = cookieTheme || (localStorage.getItem('theme') as 'light' | 'dark' | null);
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const currentTheme = savedTheme || systemTheme;
     setTheme(currentTheme);
 
     // Apply theme to document
@@ -46,6 +48,14 @@ export default function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
     }
     
     localStorage.setItem('theme', newTheme);
+    // Also set cookie for server-side navigation persistence
+    try {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000));
+      document.cookie = `theme=${encodeURIComponent(newTheme)};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+    } catch (e) {
+      // ignore
+    }
     setTheme(newTheme);
   };
 
