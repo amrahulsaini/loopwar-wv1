@@ -127,6 +127,57 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- ================================
+-- EMAIL SENDER TABLE
+-- ================================
+CREATE TABLE IF NOT EXISTS email_sender (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    email_type ENUM('verification', 'welcome', 'password_reset', 'notification', 'marketing', 'security_alert') NOT NULL,
+    recipient_email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    email_content TEXT,
+    status ENUM('pending', 'sent', 'delivered', 'failed', 'bounced') DEFAULT 'pending',
+    sent_at TIMESTAMP NULL,
+    delivered_at TIMESTAMP NULL,
+    opened_at TIMESTAMP NULL,
+    clicked_at TIMESTAMP NULL,
+    error_message TEXT NULL,
+    smtp_response TEXT NULL,
+    priority ENUM('low', 'normal', 'high', 'urgent') DEFAULT 'normal',
+    scheduled_for TIMESTAMP NULL,
+    template_id VARCHAR(50) NULL,
+    metadata JSON DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_email_type (email_type),
+    INDEX idx_status (status),
+    INDEX idx_sent_at (sent_at),
+    INDEX idx_scheduled_for (scheduled_for),
+    INDEX idx_recipient_email (recipient_email)
+);
+
+-- ================================
+-- API SECURITY TABLE (Rate Limiting)
+-- ================================
+CREATE TABLE IF NOT EXISTS api_rate_limits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    request_count INT DEFAULT 1,
+    window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    blocked_until TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_ip_endpoint (ip_address, endpoint),
+    INDEX idx_ip_address (ip_address),
+    INDEX idx_endpoint (endpoint),
+    INDEX idx_window_start (window_start),
+    INDEX idx_blocked_until (blocked_until)
+);
+
+-- ================================
 -- COOKIE CONSENTS TABLE
 -- ================================
 CREATE TABLE IF NOT EXISTS cookie_consents (
@@ -135,13 +186,15 @@ CREATE TABLE IF NOT EXISTS cookie_consents (
     ip_address VARCHAR(45),
     consent_given BOOLEAN NOT NULL,
     consent_types JSON DEFAULT '{"necessary": true, "analytics": false, "marketing": false}',
+    action VARCHAR(50) DEFAULT 'unknown',
     user_agent TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_ip_address (ip_address),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_action (action)
 );
 
 -- ================================

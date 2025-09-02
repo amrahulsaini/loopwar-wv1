@@ -158,16 +158,118 @@ export class Database {
     await this.query(sql, [notificationId, userId]);
   }
 
-  static async storeCookieConsent(userId: number | null, ipAddress: string, consentGiven: boolean, consentTypes: Record<string, boolean>, userAgent?: string) {
+  static async storeCookieConsent(
+    userId: number | null, 
+    ipAddress: string, 
+    consentGiven: boolean, 
+    consentTypes: Record<string, boolean>, 
+    userAgent?: string,
+    action?: string
+  ) {
     const sql = `
-      INSERT INTO cookie_consents (user_id, ip_address, consent_given, consent_types, user_agent)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO cookie_consents (user_id, ip_address, consent_given, consent_types, action, user_agent)
+      VALUES (?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
       consent_given = VALUES(consent_given),
       consent_types = VALUES(consent_types),
+      action = VALUES(action),
       updated_at = NOW()
     `;
-    await this.query(sql, [userId, ipAddress, consentGiven, JSON.stringify(consentTypes), userAgent]);
+    await this.query(sql, [userId, ipAddress, consentGiven, JSON.stringify(consentTypes), action || 'unknown', userAgent]);
+  }
+
+  static async getCookieConsent(userId: number | null, ipAddress: string): Promise<{
+    id: number;
+    user_id: number | null;
+    ip_address: string;
+    consent_given: boolean;
+    consent_types: string;
+    user_agent: string;
+    created_at: string;
+    updated_at: string;
+  } | null> {
+    const sql = `
+      SELECT * FROM cookie_consents 
+      WHERE (user_id = ? OR ip_address = ?) 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `;
+    return await this.queryOne(sql, [userId, ipAddress]) as {
+      id: number;
+      user_id: number | null;
+      ip_address: string;
+      consent_given: boolean;
+      consent_types: string;
+      user_agent: string;
+      created_at: string;
+      updated_at: string;
+    } | null;
+  }
+
+  static async storeSecureSession(userId: number, sessionData: {
+    sessionToken: string;
+    ipAddress: string;
+    userAgent: string;
+    expiresAt: Date;
+  }): Promise<void> {
+    const sql = `
+      INSERT INTO user_sessions (user_id, session_token, ip_address, user_agent, expires_at)
+      VALUES (?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+      session_token = VALUES(session_token),
+      expires_at = VALUES(expires_at),
+      last_activity = NOW()
+    `;
+    await this.query(sql, [
+      userId,
+      sessionData.sessionToken,
+      sessionData.ipAddress,
+      sessionData.userAgent,
+      sessionData.expiresAt
+    ]);
+  }
+
+  static async getActiveSession(sessionToken: string): Promise<{
+    id: number;
+    user_id: number;
+    session_token: string;
+    ip_address: string;
+    user_agent: string;
+    expires_at: string;
+    created_at: string;
+    last_activity: string;
+    is_active: boolean;
+    username: string;
+    email: string;
+    is_verified: boolean;
+  } | null> {
+    const sql = `
+      SELECT s.*, u.username, u.email, u.is_verified
+      FROM user_sessions s
+      JOIN users u ON s.user_id = u.id
+      WHERE s.session_token = ? 
+      AND s.expires_at > NOW() 
+      AND s.is_active = TRUE
+    `;
+    return await this.queryOne(sql, [sessionToken]) as {
+      id: number;
+      user_id: number;
+      session_token: string;
+      ip_address: string;
+      user_agent: string;
+      expires_at: string;
+      created_at: string;
+      last_activity: string;
+      is_active: boolean;
+      username: string;
+      email: string;
+      is_verified: boolean;
+    } | null;
+  }
+
+  static async invalidateAllUserSessions(userId: number): Promise<void> {
+    const sql = 'UPDATE user_sessions SET is_active = FALSE WHERE user_id = ?';
+    await this.query(sql, [userId]);
   }
 
   // Cleanup functions

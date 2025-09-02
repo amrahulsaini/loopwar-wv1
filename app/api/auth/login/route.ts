@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
-import Database from '../../../../lib/database';
+import { Database } from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
 
 interface LoginRequest {
   username: string;
@@ -25,6 +26,22 @@ export async function POST(request: NextRequest) {
   try {
     console.log('=== LOGIN API CALLED ===');
     console.log('Timestamp:', new Date().toISOString());
+    
+    // Security checks
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    
+    // Rate limiting check
+    const rateLimit = await SecurityService.checkRateLimit(request);
+    if (!rateLimit.allowed) {
+      console.log('🚫 Rate limit exceeded for IP:', clientIP);
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
     
     // Health check for database
     const dbHealthy = await Database.healthCheck();
@@ -53,9 +70,31 @@ export async function POST(request: NextRequest) {
       rememberMe 
     });
 
-    // Input validation
-    if (!username || !password) {
-      console.log('❌ Missing username or password');
+    // Input validation using SecurityService
+    if (!SecurityService.validateUsername(username)) {
+      console.log('❌ Invalid username format');
+      return NextResponse.json(
+        { error: 'Invalid username format' },
+        { status: 400 }
+      );
+    }
+
+    const passwordValidation = SecurityService.validatePassword(password);
+    if (!passwordValidation.valid) {
+      console.log('❌ Password validation failed:', passwordValidation.errors);
+      return NextResponse.json(
+        { error: 'Invalid password format', details: passwordValidation.errors },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize inputs
+    const sanitizedUsername = SecurityService.sanitizeInput(username);
+    const sanitizedPassword = SecurityService.sanitizeInput(password);
+
+    // Legacy check for backwards compatibility
+    if (!sanitizedUsername || !sanitizedPassword) {
+      console.log('❌ Missing username or password after sanitization');
       return NextResponse.json({ 
         message: 'Username and password are required' 
       }, { status: 400 });
@@ -63,11 +102,11 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Searching for user...');
     
-    // Find user by username using Database
-    const user = await Database.findUserByUsername(username) as DatabaseUser | null;
+    // Find user by username using Database with sanitized input
+    const user = await Database.findUserByUsername(sanitizedUsername) as DatabaseUser | null;
 
     if (!user) {
-      console.log('❌ User not found:', username);
+      console.log('❌ User not found:', sanitizedUsername);
       return NextResponse.json({ 
         message: 'Invalid username or password' 
       }, { status: 401 });
@@ -97,11 +136,18 @@ export async function POST(request: NextRequest) {
     // Update user's session token and last login
     await Database.createSession(user.id, sessionToken);
 
+    // Log successful login activity
+    await Database.logActivity(user.id, 'login', clientIP, userAgent, {
+      username: user.username,
+      success: true,
+      sessionToken: sessionToken.substring(0, 8) + '...' // Log partial token for debugging
+    });
+
     console.log('✅ Session token generated and user updated');
 
     const endTime = Date.now();
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
-    console.log('🎉 Login completed successfully for user:', username);
+    console.log('🎉 Login completed successfully for user:', sanitizedUsername);
 
     // Return success with user data (excluding sensitive information)
     return NextResponse.json({

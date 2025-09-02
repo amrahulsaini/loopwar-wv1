@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import Database from '../../../../lib/database';
+import { Database } from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
+import { EmailService } from '../../../../lib/email-service';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔐 Verification API called (MySQL version)');
+    
+    // Security checks
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    
+    // Rate limiting check
+    const rateLimit = await SecurityService.checkRateLimit(request);
+    if (!rateLimit.allowed) {
+      console.log('🚫 Rate limit exceeded for IP:', clientIP);
+      return NextResponse.json(
+        { error: 'Too many verification attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
     
     // Health check for database
     const dbHealthy = await Database.healthCheck();
@@ -22,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Accept either 'code' or 'verificationCode' field
     const codeToVerify = verificationCode || code;
 
-    // Validation
+    // Input validation and sanitization
     if (!codeToVerify) {
       console.log('❌ Missing verification code');
       return NextResponse.json(
@@ -31,8 +49,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Sanitize the code input
+    const sanitizedCode = SecurityService.sanitizeInput(codeToVerify);
+
     // Validate code format
-    if (!/^\d{6}$/.test(codeToVerify)) {
+    if (!/^\d{6}$/.test(sanitizedCode)) {
       console.log('❌ Invalid verification code format');
       return NextResponse.json(
         { error: 'Invalid verification code format' },
@@ -40,10 +61,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by verification code
+    // Find user by verification code using sanitized input
     const user = await Database.queryOne(
       'SELECT * FROM users WHERE verification_code = ? AND verification_code_expires > NOW() AND is_verified = FALSE',
-      [codeToVerify]
+      [sanitizedCode]
     ) as { id: number; username: string; email: string } | null;
 
     if (!user) {
@@ -69,23 +90,24 @@ export async function POST(request: NextRequest) {
 
     // Generate session token
     const sessionToken = crypto.randomBytes(64).toString('hex');
-    
-    // Get client information
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    // Create session
+    // Create session (using existing clientIP and userAgent from above)
     await Database.createSession(user.id, sessionToken, clientIP, userAgent);
 
     // Log verification activity
     await Database.logActivity(user.id, 'verify_email', clientIP, userAgent, {
-      verificationCode: codeToVerify
+      verificationCode: sanitizedCode,
+      success: true
     });
 
-    // Skip notification creation to avoid charset issues temporarily
-    console.log('⏭️ Skipping verification notification to avoid charset issues');
+    // Send welcome email using EmailService
+    try {
+      await EmailService.sendWelcomeEmail(user.id, user.email, user.username);
+      console.log('📧 Welcome email queued successfully');
+    } catch (emailError) {
+      console.error('📧 Failed to queue welcome email:', emailError);
+      // Don't fail the verification if email fails
+    }
 
     console.log('✅ User verified successfully and saved to MySQL:', user.username);
 
