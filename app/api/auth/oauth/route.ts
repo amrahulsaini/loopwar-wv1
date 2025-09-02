@@ -45,15 +45,17 @@ export async function GET(request: NextRequest) {
   if (action === 'start') {
     if (provider === 'google') {
       const state = Math.random().toString(36).slice(2);
-      const redirectUri = encodeURIComponent(process.env.OAUTH_REDIRECT_URL || (process.env.NEXTAUTH_URL + '/api/auth/oauth?provider=google&action=callback'));
-      const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&response_type=code&scope=openid%20email%20profile&redirect_uri=${redirectUri}&state=${state}&prompt=select_account`;
-      return NextResponse.redirect(url);
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
+      const redirectUri = `${baseUrl}/api/auth/oauth?provider=google&action=callback`;
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&response_type=code&scope=openid%20email%20profile&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&prompt=select_account`;
+      return NextResponse.redirect(authUrl);
     }
 
     if (provider === 'github') {
-      const redirectUri = encodeURIComponent(process.env.OAUTH_REDIRECT_URL || (process.env.NEXTAUTH_URL + '/api/auth/oauth?provider=github&action=callback'));
-      const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redirectUri}`;
-      return NextResponse.redirect(url);
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
+      const redirectUri = `${baseUrl}/api/auth/oauth?provider=github&action=callback`;
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      return NextResponse.redirect(authUrl);
     }
 
     return NextResponse.json({ error: 'Unsupported provider' }, { status: 400 });
@@ -65,10 +67,13 @@ export async function GET(request: NextRequest) {
     if (provider === 'google') {
       if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
 
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
+      const redirectUri = `${baseUrl}/api/auth/oauth?provider=google&action=callback`;
+
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `code=${encodeURIComponent(code)}&client_id=${encodeURIComponent(process.env.GOOGLE_CLIENT_ID || '')}&client_secret=${encodeURIComponent(process.env.GOOGLE_CLIENT_SECRET || '')}&redirect_uri=${encodeURIComponent(process.env.OAUTH_REDIRECT_URL || (process.env.NEXTAUTH_URL + '/api/auth/oauth?provider=google&action=callback'))}&grant_type=authorization_code`
+        body: `code=${encodeURIComponent(code)}&client_id=${encodeURIComponent(process.env.GOOGLE_CLIENT_ID || '')}&client_secret=${encodeURIComponent(process.env.GOOGLE_CLIENT_SECRET || '')}&redirect_uri=${encodeURIComponent(redirectUri)}&grant_type=authorization_code`
       });
 
       const tokenData = await tokenRes.json();
@@ -111,10 +116,13 @@ export async function GET(request: NextRequest) {
       const code = url.searchParams.get('code');
       if (!code) return NextResponse.json({ error: 'Missing code' }, { status: 400 });
 
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://loopwar.dev';
+      const redirectUri = `${baseUrl}/api/auth/oauth?provider=github&action=callback`;
+
       const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
         method: 'POST',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ client_id: process.env.GITHUB_CLIENT_ID, client_secret: process.env.GITHUB_CLIENT_SECRET, code, redirect_uri: process.env.OAUTH_REDIRECT_URL || (process.env.NEXTAUTH_URL + '/api/auth/oauth?provider=github&action=callback') })
+        body: JSON.stringify({ client_id: process.env.GITHUB_CLIENT_ID, client_secret: process.env.GITHUB_CLIENT_SECRET, code, redirect_uri: redirectUri })
       });
 
       const tokenData = await tokenRes.json();
