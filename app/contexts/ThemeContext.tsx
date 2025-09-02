@@ -35,6 +35,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return null;
   };
 
+  const applyTheme = React.useCallback((newTheme: Theme) => {
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+      document.body.classList.remove('dark-mode');
+    }
+    localStorage.setItem('theme', newTheme);
+    setCookie('theme', newTheme, 30); // Save to cookie for 30 days
+  }, []);
+
   // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -47,19 +59,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     setTheme(initialTheme);
     applyTheme(initialTheme);
-  }, []);
-
-  const applyTheme = (newTheme: Theme) => {
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark-mode');
-      document.body.classList.add('dark-mode');
-    } else {
-      document.documentElement.classList.remove('dark-mode');
-      document.body.classList.remove('dark-mode');
-    }
-    localStorage.setItem('theme', newTheme);
-    setCookie('theme', newTheme, 30); // Save to cookie for 30 days
-  };
+  }, [applyTheme]);
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);

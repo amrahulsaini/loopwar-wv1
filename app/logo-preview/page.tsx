@@ -74,10 +74,10 @@ export default function LogoPreviews() {
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Icon Only</h4>
                 <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center' }}>
-                  <Logo size={24} variant={logoData.variant} />
-                  <Logo size={32} variant={logoData.variant} />
-                  <Logo size={48} variant={logoData.variant} />
-                  <Logo size={64} variant={logoData.variant} />
+                  <Logo size={24} />
+                  <Logo size={32} />
+                  <Logo size={48} />
+                  <Logo size={64} />
                 </div>
               </div>
 
@@ -85,9 +85,9 @@ export default function LogoPreviews() {
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ fontSize: '1rem', marginBottom: '15px' }}>With Text</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
-                  <Logo size={32} showText={true} variant={logoData.variant} />
-                  <Logo size={40} showText={true} variant={logoData.variant} />
-                  <Logo size={48} showText={true} variant={logoData.variant} />
+                  <Logo size={32} showText={true} />
+                  <Logo size={40} showText={true} />
+                  <Logo size={48} showText={true} />
                 </div>
               </div>
 
@@ -99,7 +99,7 @@ export default function LogoPreviews() {
                 marginTop: '20px'
               }}>
                 <h4 style={{ fontSize: '0.9rem', marginBottom: '10px', color: 'white' }}>Dark Background</h4>
-                <Logo size={40} showText={true} variant={logoData.variant} />
+                <Logo size={40} showText={true} />
               </div>
 
               <button
@@ -134,7 +134,7 @@ export default function LogoPreviews() {
           border: '2px dashed var(--border-color)',
           textAlign: 'center'
         }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '15px' }}>Don't Like Any of These?</h3>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '15px' }}>Don&apos;t Like Any of These?</h3>
           <p style={{ fontSize: '1rem', opacity: 0.8, marginBottom: '20px' }}>
             Tell me what style you want! I can create:
           </p>
@@ -152,7 +152,7 @@ export default function LogoPreviews() {
             <div>• Custom color schemes</div>
           </div>
           <p style={{ fontSize: '0.9rem', opacity: 0.6 }}>
-            Just describe what you want and I'll create it!
+            Just describe what you want and I&apos;ll create it!
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface LogoProps {
   size?: number;
@@ -9,7 +10,7 @@ interface LogoProps {
 const Logo: React.FC<LogoProps> = ({ size = 48, className = '', showText = false }) => {
   return (
     <div className={`logo-wrapper ${className}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <img 
+      <Image 
         src="/logo-final.jpg"
         alt="LoopWar Logo"
         width={size} 
@@ -21,6 +22,7 @@ const Logo: React.FC<LogoProps> = ({ size = 48, className = '', showText = false
           background: 'transparent'
         }}
         className="logo-image"
+        priority={size > 50}
       />
       
       {showText && (
