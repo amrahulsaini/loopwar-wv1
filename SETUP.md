@@ -23,6 +23,24 @@ NEXTAUTH_SECRET=your-super-secret-key-here-change-in-production
 NEXTAUTH_URL=http://localhost:3001
 ```
 
+### OAuth (Google & GitHub)
+If you want to enable Google and GitHub sign-in, add these variables to `.env.local` (values from Google/GitHub console):
+
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+OAUTH_REDIRECT_URL=https://your-domain.com/api/auth/oauth?provider=google&action=callback
+```
+
+You can copy `.env.example` to `.env.local` and fill values:
+
+```powershell
+copy .env.example .env.local
+# then open .env.local and paste your secrets
+```
+
 ### 3. **Data Directory**
 The system will automatically create a `data/` directory to store:
 - `users.json` - User account data

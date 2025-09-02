@@ -90,6 +90,41 @@ export class Database {
     return await this.queryOne(sql, [username]);
   }
 
+  static async findUserByOAuth(provider: string, oauthId: string) {
+    const sql = 'SELECT * FROM users WHERE oauth_provider = ? AND oauth_id = ?';
+    return await this.queryOne(sql, [provider, oauthId]);
+  }
+
+  static async upsertOAuthUser(user: {
+    provider: string;
+    oauthId: string;
+    email: string;
+    username?: string;
+    profilePicture?: string;
+  }) {
+    // Try find existing by oauth provider/id or email
+    const existingByOauth = await this.findUserByOAuth(user.provider, user.oauthId);
+    if (existingByOauth) return existingByOauth as any;
+
+    const existingByEmail = await this.findUserByEmail(user.email);
+    if (existingByEmail) {
+      // Link oauth to existing account
+      const sql = `UPDATE users SET oauth_provider = ?, oauth_id = ?, profile_picture = ? WHERE id = ?`;
+      await this.query(sql, [user.provider, user.oauthId, user.profilePicture || null, (existingByEmail as any).id]);
+      return await this.findUserByEmail(user.email);
+    }
+
+    // Create new user
+    const username = user.username || user.email.split('@')[0];
+    const passwordHash = ''; // no password for oauth users
+    const sql = `
+      INSERT INTO users (username, email, password_hash, is_verified, oauth_provider, oauth_id, profile_picture)
+      VALUES (?, ?, ?, TRUE, ?, ?, ?)
+    `;
+    const res = await this.query(sql, [username, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
+    return await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
+  }
+
   static async findUserBySessionToken(sessionToken: string) {
     const sql = `
       SELECT u.*, s.expires_at as session_expires 

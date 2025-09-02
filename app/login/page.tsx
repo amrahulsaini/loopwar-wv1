@@ -153,11 +153,13 @@ export default function LoginPage() {
   };
 
   const handleGitHubLogin = () => {
-    setMessage({ type: 'info', text: 'GitHub login coming soon!' });
+  // Start GitHub OAuth
+  window.location.href = '/api/auth/oauth?provider=github&action=start';
   };
 
   const handleGoogleLogin = () => {
-    setMessage({ type: 'info', text: 'Google login coming soon!' });
+  // Start Google OAuth
+  window.location.href = '/api/auth/oauth?provider=google&action=start';
   };
 
   return (

@@ -23,11 +23,16 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
     profile_picture VARCHAR(255) NULL,
+    -- OAuth provider fields
+    oauth_provider VARCHAR(50) NULL,
+    oauth_id VARCHAR(255) NULL,
     bio TEXT NULL,
     theme_preference ENUM('light', 'dark', 'auto') DEFAULT 'auto',
     notification_preferences JSON DEFAULT '{"email": true, "push": true}',
     INDEX idx_username (username),
     INDEX idx_email (email),
+    INDEX idx_oauth_provider (oauth_provider),
+    INDEX idx_oauth_id (oauth_id),
     INDEX idx_session_token (session_token),
     INDEX idx_verification_code (verification_code)
 );
