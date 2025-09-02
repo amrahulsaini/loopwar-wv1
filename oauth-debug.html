@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth URL Debugger</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 800px; }
+        .url-box { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #007bff; }
+        .url-box code { color: #d63384; word-break: break-all; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 OAuth URL Debugger for LoopWar</h1>
+        <p>This tool helps you verify the exact OAuth URLs being used by your application.</p>
+        
+        <div class="warning">
+            <strong>⚠️ Current Issue:</strong> GitHub OAuth showing "404 not found" error.<br>
+            <strong>Solution:</strong> Update your GitHub OAuth app callback URL to match the generated URL below.
+        </div>
+
+        <h2>🚀 Generated OAuth URLs</h2>
+        
+        <h3>Google OAuth Start URL:</h3>
+        <div class="url-box">
+            <code id="google-start-url">Loading...</code>
+        </div>
+        
+        <h3>GitHub OAuth Start URL:</h3>
+        <div class="url-box">
+            <code id="github-start-url">Loading...</code>
+        </div>
+        
+        <h3>Google Callback URL (for Google Cloud Console):</h3>
+        <div class="url-box">
+            <code id="google-callback-url">Loading...</code>
+        </div>
+        
+        <h3>GitHub Callback URL (for GitHub OAuth App):</h3>
+        <div class="url-box">
+            <code id="github-callback-url">Loading...</code>
+        </div>
+
+        <h2>🧪 Test OAuth</h2>
+        <button onclick="testGoogleOAuth()">Test Google OAuth</button>
+        <button onclick="testGitHubOAuth()">Test GitHub OAuth</button>
+        
+        <h2>📋 GitHub OAuth App Settings</h2>
+        <p>In your GitHub OAuth app (<a href="https://github.com/settings/developers" target="_blank">GitHub Developer Settings</a>), set:</p>
+        <div class="url-box">
+            <strong>Homepage URL:</strong><br>
+            <code id="homepage-url">Loading...</code>
+        </div>
+        <div class="url-box">
+            <strong>Authorization callback URL:</strong><br>
+            <code id="auth-callback-url">Loading...</code>
+        </div>
+    </div>
+
+    <script>
+        // Get the current domain
+        const currentDomain = window.location.origin;
+        const baseUrl = currentDomain.includes('localhost') ? 'http://localhost:3000' : 'https://loopwar.dev';
+
+        // Generate URLs
+        const googleCallbackUrl = `${baseUrl}/api/auth/oauth?provider=google&action=callback`;
+        const githubCallbackUrl = `${baseUrl}/api/auth/oauth?provider=github&action=callback`;
+        
+        const googleStartUrl = `${baseUrl}/api/auth/oauth?provider=google&action=start`;
+        const githubStartUrl = `${baseUrl}/api/auth/oauth?provider=github&action=start`;
+
+        // Update the page
+        document.getElementById('google-start-url').textContent = googleStartUrl;
+        document.getElementById('github-start-url').textContent = githubStartUrl;
+        document.getElementById('google-callback-url').textContent = googleCallbackUrl;
+        document.getElementById('github-callback-url').textContent = githubCallbackUrl;
+        document.getElementById('homepage-url').textContent = baseUrl;
+        document.getElementById('auth-callback-url').textContent = githubCallbackUrl;
+
+        function testGoogleOAuth() {
+            window.open(googleStartUrl, '_blank');
+        }
+
+        function testGitHubOAuth() {
+            window.open(githubStartUrl, '_blank');
+        }
+
+        // Add copy functionality
+        document.querySelectorAll('.url-box code').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.title = 'Click to copy';
+            el.onclick = function() {
+                navigator.clipboard.writeText(this.textContent).then(() => {
+                    const original = this.textContent;
+                    this.textContent = '✅ Copied!';
+                    setTimeout(() => this.textContent = original, 1000);
+                });
+            };
+        });
+    </script>
+</body>
+</html>
