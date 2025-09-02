@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import { NotificationProvider } from "./components/NotificationContext";
-import { ThemeProvider } from "./components/ThemeProvider";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const sora = Sora({
   subsets: ["latin"],

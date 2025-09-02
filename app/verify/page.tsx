@@ -4,9 +4,9 @@ import { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 
 function VerifyPageContent() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -15,15 +15,9 @@ function VerifyPageContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
 
-  // Check theme and existing session on mount
+  // Check existing session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        setIsDarkMode(true);
-        document.body.classList.add('dark-mode');
-      }
-      
       // Only redirect if user is already verified and has a valid session
       const sessionToken = getCookie('sessionToken');
       const username = getCookie('username');
@@ -146,22 +140,7 @@ function VerifyPageContent() {
           <div className="container">
             <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
             <div className="header-actions">
-              <button 
-                className="theme-switcher" 
-                onClick={() => {
-                  setIsDarkMode(!isDarkMode);
-                  if (!isDarkMode) {
-                    document.body.classList.add('dark-mode');
-                    localStorage.setItem('theme', 'dark');
-                  } else {
-                    document.body.classList.remove('dark-mode');
-                    localStorage.setItem('theme', 'light');
-                  }
-                }}
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? '☀️' : '🌙'}
-              </button>
+              <ThemeSwitcher />
             </div>
           </div>
         </header>
@@ -191,22 +170,7 @@ function VerifyPageContent() {
         <div className="container">
           <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
           <div className="header-actions">
-            <button 
-              className="theme-switcher" 
-              onClick={() => {
-                setIsDarkMode(!isDarkMode);
-                if (!isDarkMode) {
-                  document.body.classList.add('dark-mode');
-                  localStorage.setItem('theme', 'dark');
-                } else {
-                  document.body.classList.remove('dark-mode');
-                  localStorage.setItem('theme', 'light');
-                }
-              }}
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
+            <ThemeSwitcher />
           </div>
         </div>
       </header>

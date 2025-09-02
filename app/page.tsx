@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CookieConsent from './components/CookieConsent';
-import { useTheme } from './components/ThemeProvider';
+import ThemeSwitcher from './components/ThemeSwitcher';
 
 export default function Home() {
-  const { isDarkMode, toggleTheme } = useTheme();
   const [isPlusMenuActive, setIsPlusMenuActive] = useState(false);
   const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
 
@@ -129,13 +128,7 @@ export default function Home() {
               <li><a href="#community" onClick={closeMobileMenu}>Community</a></li>
             </ul>
             <div className="nav-actions">
-              <button 
-                className="theme-switcher theme-toggle hover-lift icon" 
-                onClick={toggleTheme}
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? '☀️' : '🌙'}
-              </button>
+              <ThemeSwitcher className="theme-toggle hover-lift icon" />
               <div 
                 className={`plus-button-container ${isPlusMenuActive ? 'active' : ''}`}
                 onMouseLeave={handleContainerMouseLeave}

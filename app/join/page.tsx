@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import NProgress from 'nprogress';
 
 export default function JoinPage() {
@@ -15,6 +16,7 @@ export default function JoinPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Configure NProgress
   useEffect(() => {
@@ -62,6 +64,19 @@ export default function JoinPage() {
       if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
+  };
+
+  const handleJoinWithLoopwar = () => {
+    setShowForm(true);
+    // Scroll to form on mobile devices
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -138,6 +153,7 @@ export default function JoinPage() {
         <div className="container">
           <Link href="/" className="logo" aria-label="LoopWar.dev Home">L</Link>
           <div className="header-actions">
+            <ThemeSwitcher />
             <Link 
               href="/" 
               className="home-btn"
@@ -164,7 +180,7 @@ export default function JoinPage() {
                 
                 <div className="join-options">
                   <button 
-                    onClick={() => setShowForm(true)}
+                    onClick={handleJoinWithLoopwar}
                     className={`join-option-btn ${showForm ? 'active' : ''}`}
                   >
                     <span className="option-icon">⚔️</span>
@@ -205,7 +221,7 @@ export default function JoinPage() {
             </div>
 
             {/* Right Side - Signup Form */}
-            <div className={`join-right ${showForm ? 'active' : ''}`}>
+            <div ref={formRef} className={`join-right ${showForm ? 'active' : ''}`}>
               <div className="join-card">
                 <div className="card-header">
                   <span className="card-icon">⚔️</span>
@@ -299,16 +315,13 @@ export default function JoinPage() {
 
                   <button 
                     type="submit" 
-                    className="btn-primary btn-submit gradient-animate"
+                    className="btn-primary btn-submit gradient-animate btn-center"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <LoadingSpinner size="small" color="white" text="Creating Account..." />
                     ) : (
-                      <>
-                        <span className="btn-icon">🚀</span>
-                        <span>Join the War</span>
-                      </>
+                      'Join'
                     )}
                   </button>
 
