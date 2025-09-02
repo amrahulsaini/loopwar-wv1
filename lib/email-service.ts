@@ -151,10 +151,10 @@ export class EmailService {
     metadata: string;
   }): Promise<void> {
     try {
-      // Update status to sending
+      // Update status to sent (since we're about to send)
       await Database.query(
-        'UPDATE email_sender SET status = ? WHERE id = ?',
-        ['sending', emailRecord.id]
+        'UPDATE email_sender SET status = ?, sent_at = NOW() WHERE id = ?',
+        ['sent', emailRecord.id]
       );
 
       const mailOptions = {
