@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     const sessionToken = crypto.randomBytes(64).toString('hex');
 
     // Create session (using existing clientIP and userAgent from above)
-    await Database.createSession(user.id, sessionToken, clientIP, userAgent);
+    await Database.createSession(user.id, sessionToken, clientIP, userAgent, 7); // 7 days for verification
 
     // Log verification activity
     await Database.logActivity(user.id, 'verify_email', clientIP, userAgent, {

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Create session
-    await Database.createSession(user.id, sessionToken, clientIP, userAgent);
+    await Database.createSession(user.id, sessionToken, clientIP, userAgent, 7); // 7 days for verification
 
     // Log verification activity
     await Database.logActivity(user.id, 'verify_email', clientIP, userAgent, {

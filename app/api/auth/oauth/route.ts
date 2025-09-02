@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       // Create a session token and set cookies similar to login route
       const sessionToken = cryptoRandom();
       if (user?.id) {
-        await Database.createSession(user.id, sessionToken);
+        await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
       }
 
       const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
 
       const sessionToken = cryptoRandom();
       if (user?.id) {
-        await Database.createSession(user.id, sessionToken);
+        await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
       }
 
       const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');

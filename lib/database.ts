@@ -148,12 +148,12 @@ export class Database {
     return result.affectedRows > 0;
   }
 
-  static async createSession(userId: number, sessionToken: string, ipAddress?: string, userAgent?: string) {
+  static async createSession(userId: number, sessionToken: string, ipAddress?: string, userAgent?: string, durationDays: number = 7) {
     const sql = `
       INSERT INTO user_sessions (user_id, session_token, ip_address, user_agent, expires_at)
-      VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))
+      VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY))
     `;
-    await this.query(sql, [userId, sessionToken, ipAddress || null, userAgent || null]);
+    await this.query(sql, [userId, sessionToken, ipAddress || null, userAgent || null, durationDays]);
   }
 
   static async invalidateSession(sessionToken: string) {

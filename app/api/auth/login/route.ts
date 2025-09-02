@@ -134,7 +134,8 @@ export async function POST(request: NextRequest) {
       .join('');
 
     // Update user's session token and last login
-    await Database.createSession(user.id, sessionToken);
+    const sessionDuration = rememberMe ? 30 : 7; // 30 days if remember me, otherwise 7 days
+    await Database.createSession(user.id, sessionToken, clientIP, userAgent, sessionDuration);
 
     // Log successful login activity
     await Database.logActivity(user.id, 'login', clientIP, userAgent, {
