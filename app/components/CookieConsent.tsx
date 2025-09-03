@@ -94,7 +94,6 @@ export default function CookieConsent() {
             </p>
             <ul className="cookie-consent-list">
               <li>• Remember your login status and preferences</li>
-              <li>• Save your theme selection (dark/light mode)</li>
               <li>• Keep you logged in across sessions</li>
               <li>• Improve our services and user experience</li>
             </ul>

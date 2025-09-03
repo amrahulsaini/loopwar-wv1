@@ -1,88 +1,96 @@
 'use client';
 
 import Link from 'next/link';
+import { Home } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function AboutPage() {
   return (
-    <>
+    <div className="min-h-screen bg-white text-black">
+      {/* Header */}
       <header className="main-header">
         <div className="container">
-          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
-            <Logo size={60} showText={false} />
-          </Link>
-          
-          <nav className="main-nav">
-            <ul className="nav-links">
-              <li><Link href="/#showcase">Languages</Link></li>
-              <li><Link href="/#meetup">Features</Link></li>
-              <li><Link href="/#community">Community</Link></li>
-            </ul>
-            <div className="nav-actions">
-              <div className="auth-buttons">
-                <Link href="/join" className="btn btn-join">Join the War</Link>
-                <Link href="/login" className="btn btn-login">Login</Link>
-              </div>
-            </div>
-          </nav>
+          <Logo />
+          <div className="nav-actions">
+            <Link href="/" className="home-btn" title="Home">
+              <Home size={20} />
+            </Link>
+          </div>
         </div>
       </header>
 
-      <main className="page-content">
-        <section className="hero-page">
-          <div className="container">
-            <h1 className="page-title">About LoopWar</h1>
-            <p className="page-subtitle">Your personal AI coding dojo where legends are forged</p>
-          </div>
-        </section>
+      {/* Main Content */}
+      <main className="join-main">
+        <div className="container">
+          <div className="page-content-wrapper">
+            <div className="page-header">
+              <h1 className="page-title">About LoopWar</h1>
+              <p className="page-subtitle">Your personal AI coding dojo where legends are forged</p>
+            </div>
 
-        <section className="content-section">
-          <div className="container">
             <div className="content-grid">
               <div className="content-main">
-                <h2>What is LoopWar?</h2>
-                <p>LoopWar is not just another coding platform—it&apos;s a revolutionary AI-powered learning ecosystem designed to transform how developers master their craft. We combine cutting-edge artificial intelligence with gamified learning experiences to create the ultimate coding education platform.</p>
+                <div className="content-section">
+                  <h2>What is LoopWar?</h2>
+                  <p>LoopWar is not just another coding platform—it&apos;s a revolutionary AI-powered learning ecosystem designed to transform how developers master their craft. We combine cutting-edge artificial intelligence with gamified learning experiences to create the ultimate coding education platform.</p>
+                </div>
 
-                <h3>Our Mission</h3>
-                <p>To democratize coding education by providing personalized, AI-driven learning experiences that adapt to each student&apos;s unique learning style, pace, and goals. We believe that everyone deserves access to world-class programming education, regardless of their background or experience level.</p>
+                <div className="content-section">
+                  <h3>Our Mission</h3>
+                  <p>To democratize coding education by providing personalized, AI-driven learning experiences that adapt to each student&apos;s unique learning style, pace, and goals. We believe that everyone deserves access to world-class programming education, regardless of their background or experience level.</p>
+                </div>
 
-                <h3>Why LoopWar?</h3>
-                <div className="feature-list">
-                  <div className="feature-item">
-                    <h4>🤖 AI-Powered Learning</h4>
-                    <p>Our advanced AI tutors provide personalized guidance, generate infinite practice problems, and offer intelligent code reviews that help you understand not just what to code, but why.</p>
-                  </div>
-                  
-                  <div className="feature-item">
-                    <h4>🎮 Gamified Experience</h4>
-                    <p>Learning becomes addictive with our battle-based challenges, achievement systems, and competitive coding wars that make skill development feel like playing your favorite game.</p>
-                  </div>
-                  
-                  <div className="feature-item">
-                    <h4>🗺️ Adaptive Pathways</h4>
-                    <p>Dynamic learning paths that evolve based on your progress, ensuring you&apos;re always challenged at the right level while building upon solid foundations.</p>
-                  </div>
-                  
-                  <div className="feature-item">
-                    <h4>💻 Real-World Skills</h4>
-                    <p>From algorithms and data structures to system design and modern frameworks, we cover everything you need to become a professional developer.</p>
+                <div className="content-section">
+                  <h3>Why LoopWar?</h3>
+                  <div className="feature-grid">
+                    <div className="feature-card">
+                      <div className="feature-icon">🤖</div>
+                      <h4>AI-Powered Learning</h4>
+                      <p>Our advanced AI tutors provide personalized guidance, generate infinite practice problems, and offer intelligent code reviews that help you understand not just what to code, but why.</p>
+                    </div>
+                    
+                    <div className="feature-card">
+                      <div className="feature-icon">🎮</div>
+                      <h4>Gamified Experience</h4>
+                      <p>Learning becomes addictive with our battle-based challenges, achievement systems, and competitive coding wars that make skill development feel like playing your favorite game.</p>
+                    </div>
+                    
+                    <div className="feature-card">
+                      <div className="feature-icon">🗺️</div>
+                      <h4>Adaptive Pathways</h4>
+                      <p>Dynamic learning paths that evolve based on your progress, ensuring you&apos;re always challenged at the right level while building upon solid foundations.</p>
+                    </div>
+                    
+                    <div className="feature-card">
+                      <div className="feature-icon">💻</div>
+                      <h4>Real-World Skills</h4>
+                      <p>From algorithms and data structures to system design and modern frameworks, we cover everything you need to become a professional developer.</p>
+                    </div>
                   </div>
                 </div>
 
-                <h3>Our Technology Stack</h3>
-                <p>LoopWar supports a comprehensive range of programming languages and technologies:</p>
-                <ul className="tech-list">
-                  <li><strong>Languages:</strong> Python, Java, C++, JavaScript, TypeScript, PHP, Go, Rust</li>
-                  <li><strong>Web Technologies:</strong> HTML5, CSS3, React, Next.js, Node.js, Express</li>
-                  <li><strong>Data & AI:</strong> Machine Learning, Data Science, SQL, MongoDB</li>
-                  <li><strong>DevOps:</strong> Docker, Kubernetes, CI/CD, Cloud Platforms</li>
-                  <li><strong>Mobile:</strong> React Native, Flutter, iOS, Android</li>
-                </ul>
-
-                <h3>Join the Revolution</h3>
-                <p>Whether you&apos;re a complete beginner taking your first steps into programming, or an experienced developer looking to master new technologies, LoopWar adapts to your needs. Our AI-powered platform ensures that every minute you spend learning is optimized for maximum growth and retention.</p>
-                
-                <p>Ready to transform your coding journey? <Link href="/join" className="inline-link">Join the war</Link> and discover what it means to learn with the power of AI on your side.</p>
+                <div className="content-section">
+                  <h3>Our Technology Stack</h3>
+                  <p>LoopWar supports a comprehensive range of programming languages and technologies:</p>
+                  <div className="tech-categories">
+                    <div className="tech-category">
+                      <h4>Languages</h4>
+                      <p>Python, Java, C++, JavaScript, TypeScript, PHP, Go, Rust</p>
+                    </div>
+                    <div className="tech-category">
+                      <h4>Web Technologies</h4>
+                      <p>HTML5, CSS3, React, Next.js, Node.js, Express</p>
+                    </div>
+                    <div className="tech-category">
+                      <h4>Data & AI</h4>
+                      <p>Machine Learning, Data Science, SQL, MongoDB</p>
+                    </div>
+                    <div className="tech-category">
+                      <h4>DevOps</h4>
+                      <p>Docker, Kubernetes, CI/CD, Cloud Platforms</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="content-sidebar">
@@ -109,14 +117,15 @@ export default function AboutPage() {
                 <div className="cta-card">
                   <h4>Ready to Start?</h4>
                   <p>Join thousands of developers who are already sharpening their skills in the LoopWar arena.</p>
-                  <Link href="/join" className="btn btn-primary">Start Learning Now</Link>
+                  <Link href="/join" className="btn-primary">Start Learning Now</Link>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </main>
 
+      {/* Footer */}
       <footer className="main-footer">
         <div className="container">
           <div className="footer-left">
@@ -132,6 +141,6 @@ export default function AboutPage() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

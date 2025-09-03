@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Home, Mail, MessageCircle, Shield, Users } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function ContactPage() {
@@ -66,148 +67,140 @@ export default function ContactPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-white text-black">
+      {/* Header */}
       <header className="main-header">
         <div className="container">
-          <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
-            <Logo size={60} showText={false} />
-          </Link>
-          
-          <nav className="main-nav">
-            <ul className="nav-links">
-              <li><Link href="/#showcase">Languages</Link></li>
-              <li><Link href="/#meetup">Features</Link></li>
-              <li><Link href="/#community">Community</Link></li>
-            </ul>
-            <div className="nav-actions">
-              <div className="auth-buttons">
-                <Link href="/join" className="btn btn-join">Join the War</Link>
-                <Link href="/login" className="btn btn-login">Login</Link>
-              </div>
-            </div>
-          </nav>
+          <Logo />
+          <div className="nav-actions">
+            <Link href="/" className="home-btn" title="Home">
+              <Home size={20} />
+            </Link>
+          </div>
         </div>
       </header>
 
-      <main className="page-content">
-        <section className="hero-page">
-          <div className="container">
-            <h1 className="page-title">Contact Us</h1>
-            <p className="page-subtitle">Get in touch with the LoopWar team</p>
-          </div>
-        </section>
+      {/* Main Content */}
+      <main className="join-main">
+        <div className="container">
+          <div className="page-content-wrapper">
+            <div className="page-header">
+              <h1 className="page-title">Contact Us</h1>
+              <p className="page-subtitle">Get in touch with the LoopWar team</p>
+            </div>
 
-        <section className="content-section">
-          <div className="container">
-            <div className="contact-grid">
-              <div className="contact-info">
-                <h2>Get in Touch</h2>
-                <p>Have questions about LoopWar? Need technical support? Want to provide feedback? We&apos;d love to hear from you!</p>
+            <div className="content-grid">
+              <div className="content-main">
+                <div className="content-section">
+                  <h2>Get in Touch</h2>
+                  <p>Have questions about LoopWar? Need technical support? Want to provide feedback? We&apos;d love to hear from you!</p>
+                </div>
 
-                <div className="contact-methods">
-                  <div className="contact-item">
-                    <h3>📧 General Inquiries</h3>
-                    <p>For general questions, feedback, or suggestions:</p>
-                    <a href="mailto:contact@loopwar.dev" className="contact-link">contact@loopwar.dev</a>
-                  </div>
+                <div className="content-section">
+                  <h3>Contact Methods</h3>
+                  <div className="contact-methods-grid">
+                    <div className="contact-method-card">
+                      <div className="contact-icon">
+                        <Mail size={24} />
+                      </div>
+                      <h4>General Inquiries</h4>
+                      <p>For general questions, feedback, or suggestions</p>
+                      <a href="mailto:contact@loopwar.dev" className="contact-link">contact@loopwar.dev</a>
+                    </div>
 
-                  <div className="contact-item">
-                    <h3>🛠️ Technical Support</h3>
-                    <p>Having trouble with the platform? Need technical assistance?</p>
-                    <a href="mailto:support@loopwar.dev" className="contact-link">support@loopwar.dev</a>
-                  </div>
+                    <div className="contact-method-card">
+                      <div className="contact-icon">
+                        <MessageCircle size={24} />
+                      </div>
+                      <h4>Technical Support</h4>
+                      <p>Having trouble with the platform? Need technical assistance?</p>
+                      <a href="mailto:support@loopwar.dev" className="contact-link">support@loopwar.dev</a>
+                    </div>
 
-                  <div className="contact-item">
-                    <h3>👨‍💼 Administration</h3>
-                    <p>For account issues, billing, or administrative matters:</p>
-                    <a href="mailto:admin@loopwar.dev" className="contact-link">admin@loopwar.dev</a>
-                  </div>
+                    <div className="contact-method-card">
+                      <div className="contact-icon">
+                        <Shield size={24} />
+                      </div>
+                      <h4>Privacy & Legal</h4>
+                      <p>For privacy concerns, legal matters, or data requests</p>
+                      <a href="mailto:legal@loopwar.dev" className="contact-link">legal@loopwar.dev</a>
+                    </div>
 
-                  <div className="contact-item">
-                    <h3>🔒 Privacy & Legal</h3>
-                    <p>For privacy concerns, legal matters, or data requests:</p>
-                    <a href="mailto:legal@loopwar.dev" className="contact-link">legal@loopwar.dev</a>
-                  </div>
-
-                  <div className="contact-item">
-                    <h3>🤝 Partnerships</h3>
-                    <p>Interested in partnering with LoopWar?</p>
-                    <a href="mailto:partnerships@loopwar.dev" className="contact-link">partnerships@loopwar.dev</a>
+                    <div className="contact-method-card">
+                      <div className="contact-icon">
+                        <Users size={24} />
+                      </div>
+                      <h4>Partnerships</h4>
+                      <p>Interested in partnering with LoopWar?</p>
+                      <a href="mailto:partnerships@loopwar.dev" className="contact-link">partnerships@loopwar.dev</a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="response-time">
-                  <h3>📅 Response Times</h3>
-                  <ul>
-                    <li><strong>General Inquiries:</strong> Within 24-48 hours</li>
-                    <li><strong>Technical Support:</strong> Within 12-24 hours</li>
-                    <li><strong>Critical Issues:</strong> Within 2-4 hours</li>
-                    <li><strong>Partnership Inquiries:</strong> Within 3-5 business days</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="contact-form-section">
-                <div className="contact-form-container">
-                  <h2>Send us a Message</h2>
+                <div className="content-section">
+                  <h3>Send us a Message</h3>
                   <form onSubmit={handleSubmit} className="contact-form">
-                    <div className="form-group">
-                      <label htmlFor="name">Full Name *</label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Your full name"
-                      />
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="name">Full Name *</label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="Your full name"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="email">Email Address *</label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="your.email@example.com"
+                        />
+                      </div>
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="email">Email Address *</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="type">Inquiry Type *</label>
+                        <select
+                          id="type"
+                          name="type"
+                          value={formData.type}
+                          onChange={handleInputChange}
+                          required
+                        >
+                          <option value="general">General Inquiry</option>
+                          <option value="support">Technical Support</option>
+                          <option value="bug">Bug Report</option>
+                          <option value="feature">Feature Request</option>
+                          <option value="billing">Billing & Account</option>
+                          <option value="partnership">Partnership</option>
+                          <option value="feedback">Feedback</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
 
-                    <div className="form-group">
-                      <label htmlFor="type">Inquiry Type *</label>
-                      <select
-                        id="type"
-                        name="type"
-                        value={formData.type}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="general">General Inquiry</option>
-                        <option value="support">Technical Support</option>
-                        <option value="bug">Bug Report</option>
-                        <option value="feature">Feature Request</option>
-                        <option value="billing">Billing & Account</option>
-                        <option value="partnership">Partnership</option>
-                        <option value="feedback">Feedback</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="subject">Subject *</label>
-                      <input
-                        type="text"
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Brief description of your inquiry"
-                      />
+                      <div className="form-group">
+                        <label htmlFor="subject">Subject *</label>
+                        <input
+                          type="text"
+                          id="subject"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="Brief description of your inquiry"
+                        />
+                      </div>
                     </div>
 
                     <div className="form-group">
@@ -239,8 +232,8 @@ export default function ContactPage() {
                   </form>
                 </div>
 
-                <div className="additional-info">
-                  <h3>💡 Before You Contact Us</h3>
+                <div className="content-section">
+                  <h3>Before You Contact Us</h3>
                   <ul>
                     <li>Check our <Link href="/about" className="inline-link">About page</Link> for general platform information</li>
                     <li>Review our <Link href="/privacy" className="inline-link">Privacy Policy</Link> for data-related questions</li>
@@ -249,26 +242,44 @@ export default function ContactPage() {
                   </ul>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section className="emergency-contact">
-          <div className="container">
-            <div className="emergency-info">
-              <h2>🚨 Need Immediate Help?</h2>
-              <p>For urgent technical issues affecting your learning or account security:</p>
-              <div className="emergency-contacts">
-                <a href="mailto:urgent@loopwar.dev" className="emergency-btn">urgent@loopwar.dev</a>
-                <span className="or">or</span>
-                <a href="mailto:admin@loopwar.dev" className="emergency-btn">admin@loopwar.dev</a>
+              <div className="content-sidebar">
+                <div className="stats-card">
+                  <h4>Response Times</h4>
+                  <div className="stat-item">
+                    <span className="stat-label">General Inquiries</span>
+                    <span className="stat-number">24-48h</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Technical Support</span>
+                    <span className="stat-number">12-24h</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Critical Issues</span>
+                    <span className="stat-number">2-4h</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Partnership Inquiries</span>
+                    <span className="stat-number">3-5 days</span>
+                  </div>
+                </div>
+
+                <div className="cta-card emergency-card">
+                  <h4>🚨 Need Immediate Help?</h4>
+                  <p>For urgent technical issues affecting your learning or account security:</p>
+                  <div className="emergency-contacts">
+                    <a href="mailto:urgent@loopwar.dev" className="btn-primary">urgent@loopwar.dev</a>
+                    <a href="mailto:admin@loopwar.dev" className="btn-secondary">admin@loopwar.dev</a>
+                  </div>
+                  <p className="emergency-note">We monitor these addresses 24/7 and will respond within 2-4 hours.</p>
+                </div>
               </div>
-              <p className="emergency-note">We monitor these addresses 24/7 and will respond within 2-4 hours.</p>
             </div>
           </div>
-        </section>
+        </div>
       </main>
 
+      {/* Footer */}
       <footer className="main-footer">
         <div className="container">
           <div className="footer-left">
@@ -284,6 +295,6 @@ export default function ContactPage() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import CookieConsent from './components/CookieConsent';
 import Logo from './components/Logo';
 
 export default function Home() {
-  const [isPlusMenuActive, setIsPlusMenuActive] = useState(false);
-  const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
-
   // Check existing session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,35 +54,6 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const togglePlusMenu = () => {
-    setIsPlusMenuActive(!isPlusMenuActive);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuActive(!isMobileMenuActive);
-    // Close the plus menu when mobile menu opens
-    if (!isMobileMenuActive) {
-      setIsPlusMenuActive(false);
-    }
-  };
-
-  // Close mobile menu when clicking on a link
-  const closeMobileMenu = () => {
-    setIsMobileMenuActive(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.plus-button-container')) {
-        setIsPlusMenuActive(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
   return (
     <>
       <header className="main-header">
@@ -95,78 +63,58 @@ export default function Home() {
           </Link>
           
           <nav className="main-nav">
-            <ul className={`nav-links ${isMobileMenuActive ? 'active' : ''}`}>
-              <li><a href="#showcase" onClick={closeMobileMenu}>Showcase</a></li>
-              <li><a href="#meetup" onClick={closeMobileMenu}>AI Meetup</a></li>
-              <li><a href="#community" onClick={closeMobileMenu}>Community</a></li>
+            <ul className="nav-links">
+              <li><a href="#showcase">Showcase</a></li>
+              <li><a href="#meetup">AI Meetup</a></li>
+              <li><a href="#community">Community</a></li>
             </ul>
             <div className="nav-actions">
-              <div 
-                className={`plus-button-container ${isPlusMenuActive ? 'active' : ''}`}
-              >
-                <button 
-                  className="plus-button hover-lift glow" 
-                  onClick={togglePlusMenu}
-                  aria-label="Open menu"
-                >
-                  +
-                </button>
-                <div className="dropdown-menu scale-in">
-                  <Link href="/join" className="dropdown-btn btn-join hover-lift-small gradient-animate">Join the War</Link>
-                  <Link href="/login" className="dropdown-btn btn-login hover-lift-small">Login</Link>
-                </div>
-              </div>
+              <Link href="/join" className="btn btn-join">Join the War</Link>
+              <Link href="/login" className="btn btn-login">Login</Link>
             </div>
-             <button 
-              className="hamburger" 
-              onClick={toggleMobileMenu}
-              aria-label="Toggle navigation menu"
-            >
-              &#9776;
-            </button>
           </nav>
         </div>
       </header>
 
       <main>
         {/* Hero Section */}
-        <section className="hero fade-in-section">
+        <section className="hero">
           <div className="container">
-            <div className="hero-text stagger-children">
-              <span className="fade-in-up">Welcome to the Arena</span>
-              <h1 className="fade-in-up typewriter">What is LoopWar?</h1>
-              <p className="fade-in-up">It&apos;s not just a platform; it&apos;s your personal AI coding dojo. We&apos;re redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
+            <div className="hero-text">
+              <span>Welcome to the Arena</span>
+              <h1>What is LoopWar?</h1>
+              <p>It&apos;s not just a platform; it&apos;s your personal AI coding dojo. We&apos;re redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers. Stop memorizing, start building.</p>
             </div>
-            <div className="hero-card card-hover float">
+            <div className="hero-card">
               <p>&ldquo;LoopWar is an online AI learning platform that helps students learn coding in all languages and build software skills in a fun and personalized way. It&apos;s like having a smart AI tutor that gives you hints, helps fix your code, and guides you through projects. You can also compete in coding battles, making learning feel like a game!&rdquo;</p>
             </div>
           </div>
         </section>
 
         {/* Languages & Tracks Section */}
-        <section id="showcase" className="section fade-in-section">
+        <section id="showcase" className="section">
           <div className="container">
-            <h2 className="section-title scale-in">Master Your Arsenal</h2>
-            <p className="section-subtitle fade-in-up">From foundational syntax to complex system architecture, we provide the tracks you need to conquer the tech world.</p>
-            <div className="languages-grid stagger-children">
-              <div className="lang-card card-hover hover-lift">Python</div>
-              <div className="lang-card card-hover hover-lift">Java</div>
-              <div className="lang-card card-hover hover-lift">C++</div>
-              <div className="lang-card card-hover hover-lift">JavaScript</div>
-              <div className="lang-card card-hover hover-lift">Data Structures</div>
-              <div className="lang-card card-hover hover-lift">Algorithms</div>
-              <div className="lang-card card-hover hover-lift">System Design</div>
-              <div className="lang-card card-hover hover-lift">Databases (SQL)</div>
-              <div className="lang-card card-hover hover-lift">Web Development</div>
-              <div className="lang-card card-hover hover-lift">AI / Machine Learning</div>
-              <div className="lang-card card-hover hover-lift">DevOps & CI/CD</div>
+            <h2 className="section-title">Master Your Arsenal</h2>
+            <p className="section-subtitle">From foundational syntax to complex system architecture, we provide the tracks you need to conquer the tech world.</p>
+            <div className="languages-grid">
+              <div className="lang-card">Python</div>
+              <div className="lang-card">Java</div>
+              <div className="lang-card">C++</div>
+              <div className="lang-card">JavaScript</div>
+              <div className="lang-card">Data Structures</div>
+              <div className="lang-card">Algorithms</div>
+              <div className="lang-card">System Design</div>
+              <div className="lang-card">Databases (SQL)</div>
+              <div className="lang-card">Web Development</div>
+              <div className="lang-card">AI / Machine Learning</div>
+              <div className="lang-card">DevOps & CI/CD</div>
               <div className="lang-card">PHP</div>
             </div>
           </div>
         </section>
         
         {/* AI Features Section */}
-        <section id="meetup" className="section ai-features fade-in-section">
+        <section id="meetup" className="section ai-features">
           <div className="container">
             <h2 className="section-title">How LoopAI Sharpens Your Skills</h2>
             <p className="section-subtitle">Our AI is more than a tool—it&apos;s your mentor, sparring partner, and strategist, available 24/7.</p>
@@ -191,7 +139,7 @@ export default function Home() {
         </section>
 
         {/* Call to Action Section */}
-        <section id="community" className="section cta fade-in-section">
+        <section id="community" className="section cta">
           <div className="container">
             <h2 className="section-title">Ready to Join the Battle?</h2>
             <p className="section-subtitle">Your journey from beginner to pro starts here. Sign up for free and start your first challenge today. The arena awaits.</p>
