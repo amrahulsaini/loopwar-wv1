@@ -108,6 +108,15 @@ export class Database {
     return await this.queryOne(sql, [provider, oauthId]);
   }
 
+  // Clean and normalize username for consistency
+  static cleanUsername(rawUsername: string): string {
+    return rawUsername
+      .toLowerCase() // Convert to lowercase
+      .replace(/\s+/g, '') // Remove all spaces
+      .replace(/[^a-z0-9]/g, '') // Remove special characters, keep only letters and numbers
+      .substring(0, 20); // Limit length to 20 characters
+  }
+
   static async upsertOAuthUser(user: {
     provider: string;
     oauthId: string;
@@ -130,13 +139,16 @@ export class Database {
     }
 
     // Create new user with unique username
-    const username = user.username || user.email.split('@')[0];
+    let baseUsername = user.username || user.email.split('@')[0];
+    
+    // Clean and normalize the username
+    baseUsername = this.cleanUsername(baseUsername);
     
     // Ensure username is unique by checking and appending numbers if needed
-    let uniqueUsername = username;
+    let uniqueUsername = baseUsername;
     let counter = 1;
     while (await this.findUserByUsername(uniqueUsername)) {
-      uniqueUsername = `${username}_${counter}`;
+      uniqueUsername = `${baseUsername}${counter}`;
       counter++;
     }
 
@@ -155,7 +167,7 @@ export class Database {
       const dbError = error as { code?: string; sqlMessage?: string };
       if (dbError.code === 'ER_DUP_ENTRY' && dbError.sqlMessage?.includes('username')) {
         const randomSuffix = Math.random().toString(36).substring(2, 8);
-        const fallbackUsername = `${username}_${randomSuffix}`;
+        const fallbackUsername = `${baseUsername}${randomSuffix}`;
         
         const res = await this.query(sql, [fallbackUsername, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
         const newUser = await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
