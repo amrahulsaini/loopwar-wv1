@@ -55,10 +55,10 @@ export default function AboutPage() {
             <div className="content-grid">
               <div className="content-main">
                 <h2>What is LoopWar?</h2>
-                <p>LoopWar is not just another coding platform—it's a revolutionary AI-powered learning ecosystem designed to transform how developers master their craft. We combine cutting-edge artificial intelligence with gamified learning experiences to create the ultimate coding education platform.</p>
+                <p>LoopWar is not just another coding platform—it&apos;s a revolutionary AI-powered learning ecosystem designed to transform how developers master their craft. We combine cutting-edge artificial intelligence with gamified learning experiences to create the ultimate coding education platform.</p>
 
                 <h3>Our Mission</h3>
-                <p>To democratize coding education by providing personalized, AI-driven learning experiences that adapt to each student's unique learning style, pace, and goals. We believe that everyone deserves access to world-class programming education, regardless of their background or experience level.</p>
+                <p>To democratize coding education by providing personalized, AI-driven learning experiences that adapt to each student&apos;s unique learning style, pace, and goals. We believe that everyone deserves access to world-class programming education, regardless of their background or experience level.</p>
 
                 <h3>Why LoopWar?</h3>
                 <div className="feature-list">
@@ -74,7 +74,7 @@ export default function AboutPage() {
                   
                   <div className="feature-item">
                     <h4>🗺️ Adaptive Pathways</h4>
-                    <p>Dynamic learning paths that evolve based on your progress, ensuring you're always challenged at the right level while building upon solid foundations.</p>
+                    <p>Dynamic learning paths that evolve based on your progress, ensuring you&apos;re always challenged at the right level while building upon solid foundations.</p>
                   </div>
                   
                   <div className="feature-item">
@@ -94,7 +94,7 @@ export default function AboutPage() {
                 </ul>
 
                 <h3>Join the Revolution</h3>
-                <p>Whether you're a complete beginner taking your first steps into programming, or an experienced developer looking to master new technologies, LoopWar adapts to your needs. Our AI-powered platform ensures that every minute you spend learning is optimized for maximum growth and retention.</p>
+                <p>Whether you&apos;re a complete beginner taking your first steps into programming, or an experienced developer looking to master new technologies, LoopWar adapts to your needs. Our AI-powered platform ensures that every minute you spend learning is optimized for maximum growth and retention.</p>
                 
                 <p>Ready to transform your coding journey? <Link href="/join" className="inline-link">Join the war</Link> and discover what it means to learn with the power of AI on your side.</p>
               </div>

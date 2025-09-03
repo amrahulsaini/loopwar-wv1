@@ -67,7 +67,7 @@ export default function ContactPage() {
       } else {
         throw new Error('Failed to send message');
       }
-    } catch (error) {
+    } catch (err) {
       setSubmitStatus({
         type: 'error',
         message: 'Failed to send message. Please try again or email us directly.'
@@ -115,7 +115,7 @@ export default function ContactPage() {
             <div className="contact-grid">
               <div className="contact-info">
                 <h2>Get in Touch</h2>
-                <p>Have questions about LoopWar? Need technical support? Want to provide feedback? We'd love to hear from you!</p>
+                <p>Have questions about LoopWar? Need technical support? Want to provide feedback? We&apos;d love to hear from you!</p>
 
                 <div className="contact-methods">
                   <div className="contact-item">

@@ -55,7 +55,7 @@ export default function PrivacyPage() {
           <div className="container">
             <div className="content-main privacy-content">
               <h2>Introduction</h2>
-              <p>At LoopWar.dev ("we," "our," or "us"), we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our AI-powered coding education platform.</p>
+              <p>At LoopWar.dev (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our AI-powered coding education platform.</p>
 
               <h2>Information We Collect</h2>
               
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
               <h2>International Data Transfers</h2>
               <p>Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your privacy rights and comply with applicable data protection laws.</p>
 
-              <h2>Children's Privacy</h2>
+              <h2>Children&apos;s Privacy</h2>
               <p>LoopWar is intended for users 13 years of age and older. We do not knowingly collect personal information from children under 13. If we discover we have collected information from a child under 13, we will delete it immediately.</p>
 
               <h2>Changes to This Policy</h2>

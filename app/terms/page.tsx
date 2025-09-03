@@ -55,7 +55,7 @@ export default function TermsPage() {
           <div className="container">
             <div className="content-main terms-content">
               <h2>Agreement to Terms</h2>
-              <p>By accessing and using LoopWar.dev ("the Platform," "our Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+              <p>By accessing and using LoopWar.dev (&quot;the Platform,&quot; &quot;our Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
 
               <h2>Description of Service</h2>
               <p>LoopWar.dev is an AI-powered coding education platform that provides:</p>
@@ -82,7 +82,7 @@ export default function TermsPage() {
                 <li>Each person may maintain only one account</li>
                 <li>You are responsible for all activity that occurs under your account</li>
                 <li>You may not share your account credentials with others</li>
-                <li>You may not use another person's account without permission</li>
+                <li>You may not use another person&apos;s account without permission</li>
               </ul>
 
               <h2>Acceptable Use Policy</h2>
@@ -100,7 +100,7 @@ export default function TermsPage() {
               <ul>
                 <li><strong>Cheat or Exploit:</strong> Use external assistance, automated tools, or exploit system vulnerabilities in challenges</li>
                 <li><strong>Harmful Content:</strong> Submit malicious code, viruses, or content that could harm our systems or other users</li>
-                <li><strong>Intellectual Property Violation:</strong> Submit code that infringes on others' copyrights, patents, or proprietary rights</li>
+                <li><strong>Intellectual Property Violation:</strong> Submit code that infringes on others&apos; copyrights, patents, or proprietary rights</li>
                 <li><strong>Harassment:</strong> Engage in abusive, threatening, or discriminatory behavior toward other users</li>
                 <li><strong>Spam or Misuse:</strong> Send unsolicited communications or misuse platform features</li>
                 <li><strong>Reverse Engineering:</strong> Attempt to reverse engineer, decompile, or hack our platform or AI systems</li>
@@ -113,7 +113,7 @@ export default function TermsPage() {
               <ul>
                 <li>You retain ownership of the code and content you create</li>
                 <li>By submitting code, you grant us a license to analyze, process, and provide feedback through our AI systems</li>
-                <li>You are responsible for ensuring your submissions don't violate any third-party rights</li>
+                <li>You are responsible for ensuring your submissions don&apos;t violate any third-party rights</li>
                 <li>We may use anonymized, aggregated data from submissions to improve our AI and educational content</li>
               </ul>
 
@@ -180,7 +180,7 @@ export default function TermsPage() {
               <h2>Limitation of Liability</h2>
               <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
               <ul>
-                <li>LoopWar.dev is provided "AS IS" without warranties of any kind</li>
+                <li>LoopWar.dev is provided &quot;AS IS&quot; without warranties of any kind</li>
                 <li>We do not guarantee the accuracy of AI-generated educational content</li>
                 <li>We are not liable for any indirect, incidental, or consequential damages</li>
                 <li>Our total liability to you shall not exceed the amount you paid us in the past 12 months</li>
@@ -208,7 +208,7 @@ export default function TermsPage() {
               <h3>Termination by Us</h3>
               <ul>
                 <li>We may suspend or terminate accounts that violate these Terms</li>
-                <li>We may terminate the service entirely with 30 days' notice</li>
+                <li>We may terminate the service entirely with 30 days&apos; notice</li>
                 <li>Immediate termination may occur for serious violations or legal requirements</li>
               </ul>
 
