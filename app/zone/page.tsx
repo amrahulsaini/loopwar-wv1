@@ -2,13 +2,205 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
+
+interface TopicData {
+  name: string;
+  problems: number;
+  completed: number;
+  subtopics?: string[];
+}
+
+interface CategoryData {
+  name: string;
+  icon: string;
+  topics: TopicData[];
+}
 
 export default function ZonePage() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('questions');
+  const [selectedCategory, setSelectedCategory] = useState('Core DSA');
+
+  // Mock data for categories and topics
+  const categories: CategoryData[] = [
+    {
+      name: 'Core DSA',
+      icon: '🧠',
+      topics: [
+        { 
+          name: 'Array', 
+          problems: 45, 
+          completed: 0,
+          subtopics: ['Two Pointers', 'Sliding Window', 'Prefix Sum', 'Kadane\'s Algorithm']
+        },
+        { 
+          name: 'String', 
+          problems: 38, 
+          completed: 0,
+          subtopics: ['Pattern Matching', 'KMP Algorithm', 'String Manipulation', 'Palindromes']
+        },
+        { 
+          name: 'Hash Table', 
+          problems: 32, 
+          completed: 0,
+          subtopics: ['HashMap', 'HashSet', 'Frequency Count', 'Two Sum Variations']
+        },
+        { 
+          name: 'Sorting', 
+          problems: 25, 
+          completed: 0,
+          subtopics: ['Quick Sort', 'Merge Sort', 'Counting Sort', 'Custom Comparators']
+        },
+        { 
+          name: 'Searching / Binary Search', 
+          problems: 42, 
+          completed: 0,
+          subtopics: ['Binary Search on Array', 'Search in Rotated Array', 'Lower/Upper Bound', 'Peak Element']
+        },
+        { 
+          name: 'Two Pointers', 
+          problems: 28, 
+          completed: 0,
+          subtopics: ['Opposite Direction', 'Same Direction', 'Fast & Slow', 'Three Pointers']
+        },
+        { 
+          name: 'Stack', 
+          problems: 35, 
+          completed: 0,
+          subtopics: ['Monotonic Stack', 'Next Greater Element', 'Valid Parentheses', 'Expression Evaluation']
+        },
+        { 
+          name: 'Queue', 
+          problems: 22, 
+          completed: 0,
+          subtopics: ['Deque', 'Priority Queue', 'Circular Queue', 'BFS Applications']
+        },
+        { 
+          name: 'Linked List', 
+          problems: 40, 
+          completed: 0,
+          subtopics: ['Singly Linked List', 'Doubly Linked List', 'Cycle Detection', 'Reverse Operations']
+        },
+        { 
+          name: 'Tree', 
+          problems: 55, 
+          completed: 0,
+          subtopics: ['Tree Traversal', 'Binary Tree', 'N-ary Tree', 'Tree Construction']
+        },
+        { 
+          name: 'Binary Tree', 
+          problems: 48, 
+          completed: 0,
+          subtopics: ['Preorder', 'Inorder', 'Postorder', 'Level Order', 'Tree Properties']
+        },
+        { 
+          name: 'Binary Search Tree', 
+          problems: 30, 
+          completed: 0,
+          subtopics: ['BST Operations', 'BST Validation', 'BST Iterator', 'Balanced BST']
+        },
+        { 
+          name: 'Graph', 
+          problems: 65, 
+          completed: 0,
+          subtopics: ['Graph Representation', 'Connected Components', 'Shortest Path', 'Minimum Spanning Tree']
+        },
+        { 
+          name: 'DFS / BFS', 
+          problems: 52, 
+          completed: 0,
+          subtopics: ['Graph DFS', 'Graph BFS', 'Tree DFS', 'Matrix DFS/BFS', 'Topological Sort']
+        },
+        { 
+          name: 'Dynamic Programming', 
+          problems: 75, 
+          completed: 0,
+          subtopics: ['1D DP', '2D DP', 'LCS/LIS', 'Knapsack', 'Tree DP', 'Digit DP']
+        }
+      ]
+    },
+    {
+      name: 'Databases',
+      icon: '🗃️',
+      topics: [
+        { name: 'SQL Basics', problems: 20, completed: 0 },
+        { name: 'Joins & Subqueries', problems: 25, completed: 0 },
+        { name: 'Indexing & Optimization', problems: 15, completed: 0 },
+        { name: 'NoSQL Databases', problems: 18, completed: 0 },
+        { name: 'Database Design', problems: 12, completed: 0 }
+      ]
+    },
+    {
+      name: 'OS & Shell',
+      icon: '💻',
+      topics: [
+        { name: 'Process Management', problems: 15, completed: 0 },
+        { name: 'Memory Management', problems: 12, completed: 0 },
+        { name: 'File Systems', problems: 10, completed: 0 },
+        { name: 'Shell Scripting', problems: 18, completed: 0 },
+        { name: 'System Calls', problems: 14, completed: 0 }
+      ]
+    },
+    {
+      name: 'Networking & Concurrency',
+      icon: '🌐',
+      topics: [
+        { name: 'TCP/IP Protocol', problems: 12, completed: 0 },
+        { name: 'HTTP/HTTPS', problems: 15, completed: 0 },
+        { name: 'Multithreading', problems: 20, completed: 0 },
+        { name: 'Synchronization', problems: 18, completed: 0 },
+        { name: 'Socket Programming', problems: 10, completed: 0 }
+      ]
+    },
+    {
+      name: 'Programming Languages',
+      icon: '🔤',
+      topics: [
+        { name: 'Python Advanced', problems: 25, completed: 0 },
+        { name: 'JavaScript/TypeScript', problems: 30, completed: 0 },
+        { name: 'Java Core', problems: 28, completed: 0 },
+        { name: 'C++ STL', problems: 22, completed: 0 },
+        { name: 'Go Fundamentals', problems: 15, completed: 0 }
+      ]
+    },
+    {
+      name: 'Debugging & Optimization',
+      icon: '🐛',
+      topics: [
+        { name: 'Code Profiling', problems: 8, completed: 0 },
+        { name: 'Memory Debugging', problems: 10, completed: 0 },
+        { name: 'Performance Optimization', problems: 12, completed: 0 },
+        { name: 'Testing Strategies', problems: 15, completed: 0 },
+        { name: 'Static Analysis', problems: 6, completed: 0 }
+      ]
+    },
+    {
+      name: 'System Design',
+      icon: '🏗️',
+      topics: [
+        { name: 'Scalability Patterns', problems: 15, completed: 0 },
+        { name: 'Load Balancing', problems: 8, completed: 0 },
+        { name: 'Caching Strategies', problems: 12, completed: 0 },
+        { name: 'Microservices', problems: 10, completed: 0 },
+        { name: 'Database Sharding', problems: 6, completed: 0 }
+      ]
+    },
+    {
+      name: 'AI & ML',
+      icon: '🤖',
+      topics: [
+        { name: 'Machine Learning Basics', problems: 20, completed: 0 },
+        { name: 'Neural Networks', problems: 15, completed: 0 },
+        { name: 'Natural Language Processing', problems: 12, completed: 0 },
+        { name: 'Computer Vision', problems: 10, completed: 0 },
+        { name: 'Deep Learning', problems: 18, completed: 0 }
+      ]
+    }
+  ];
 
   // Check theme and get user info on mount
   useEffect(() => {
@@ -40,18 +232,14 @@ export default function ZonePage() {
     return null;
   };
 
-  const clearSession = () => {
-    // Clear cookies
-    document.cookie = 'sessionToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
-    document.cookie = 'username=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
-    document.cookie = 'userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
-    
-    // Clear localStorage
-    localStorage.removeItem('username');
-    
-    // Redirect to home
-    window.location.href = '/';
+  // Removed unused clearSession function
+
+  const handleProfileClick = () => {
+    // Navigate to user profile page
+    window.location.href = `/${username}`;
   };
+
+  const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
 
   return (
     <>
@@ -62,31 +250,61 @@ export default function ZonePage() {
           </Link>
           <nav className="zone-nav">
             <button 
-              className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
+              className={`nav-btn ${activeTab === 'questions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('questions')}
             >
-              Dashboard
+              Questions
             </button>
             <button 
-              className={`nav-btn ${activeTab === 'challenges' ? 'active' : ''}`}
-              onClick={() => setActiveTab('challenges')}
+              className={`nav-btn loopai-btn ${activeTab === 'loopai' ? 'active' : ''}`}
+              onClick={() => setActiveTab('loopai')}
             >
-              Challenges
+              <span className="loopai-text">LoopAI</span>
+              <div className="loopai-border-animation"></div>
             </button>
             <button 
-              className={`nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
+              className={`nav-btn ${activeTab === 'contest' ? 'active' : ''}`}
+              onClick={() => setActiveTab('contest')}
             >
-              Profile
+              Contest
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'allranks' ? 'active' : ''}`}
+              onClick={() => setActiveTab('allranks')}
+            >
+              AllRanks
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'report' ? 'active' : ''}`}
+              onClick={() => setActiveTab('report')}
+            >
+              Report
             </button>
           </nav>
           <div className="header-actions">
             <button 
-              className="logout-btn" 
-              onClick={clearSession}
-              aria-label="Logout"
+              className="profile-btn" 
+              onClick={handleProfileClick}
+              aria-label="View Profile"
+              title={`Go to ${username}'s profile`}
             >
-              🚪 Logout
+              <div className="profile-avatar">
+                <Image 
+                  src="/default-pfp.svg" 
+                  alt={`${username}'s profile`}
+                  width={40}
+                  height={40}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = username.charAt(0).toUpperCase();
+                      parent.classList.add('default-avatar');
+                    }
+                  }}
+                />
+              </div>
             </button>
           </div>
         </div>
@@ -98,200 +316,253 @@ export default function ZonePage() {
             <LoadingSpinner size="large" text="Loading your zone..." />
           ) : (
             <>
-              {/* Welcome Section */}
-              <section className="zone-welcome">
-                <div className="welcome-content">
-                  <h1>Welcome to The Zone, {username}! 🚀</h1>
-                  <p>Your personalized coding battlefield awaits. Ready to level up your skills?</p>
-                </div>
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <div className="stat-icon">⚡</div>
-                    <div className="stat-info">
-                      <h3>0</h3>
-                      <p>Challenges Completed</p>
-                    </div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">🏆</div>
-                    <div className="stat-info">
-                      <h3>0</h3>
-                      <p>Points Earned</p>
-                    </div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">🔥</div>
-                    <div className="stat-info">
-                      <h3>0</h3>
-                      <p>Day Streak</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
               {/* Tab Content */}
               <section className="zone-content">
-                {activeTab === 'dashboard' && (
-                  <div className="tab-content">
-                    <h2>Dashboard</h2>
-                    <div className="dashboard-grid">
-                      <div className="feature-card">
-                        <div className="card-header">
-                          <div className="card-icon">🎮</div>
-                          <h3>Quick Challenge</h3>
+                {activeTab === 'questions' && (
+                  <div className="questions-content">
+                    <div className="questions-layout">
+                      {/* Categories Sidebar */}
+                      <div className="categories-sidebar">
+                        <h3>Categories</h3>
+                        <div className="categories-list">
+                          {categories.map((category) => (
+                            <button
+                              key={category.name}
+                              className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
+                              onClick={() => setSelectedCategory(category.name)}
+                            >
+                              <span className="category-icon">{category.icon}</span>
+                              <span className="category-name">{category.name}</span>
+                            </button>
+                          ))}
                         </div>
-                        <p>Jump into a coding challenge based on your skill level</p>
-                        <button className="btn-primary" disabled>
-                          Start Challenge (Coming Soon)
-                        </button>
                       </div>
-                      
-                      <div className="feature-card">
-                        <div className="card-header">
-                          <div className="card-icon">🤖</div>
-                          <h3>AI Tutor</h3>
+
+                      {/* Topics Content */}
+                      <div className="topics-content">
+                        <div className="topics-header">
+                          <h2>{selectedCategoryData?.icon} {selectedCategory}</h2>
+                          <p>{selectedCategoryData?.topics.length} topics available</p>
                         </div>
-                        <p>Get personalized help and explanations from AI</p>
-                        <button className="btn-primary" disabled>
-                          Ask AI (Coming Soon)
-                        </button>
-                      </div>
-                      
-                      <div className="feature-card">
-                        <div className="card-header">
-                          <div className="card-icon">⚔️</div>
-                          <h3>Battle Arena</h3>
+                        
+                        <div className="topics-grid">
+                          {selectedCategoryData?.topics.map((topic) => (
+                            <div key={topic.name} className="topic-card">
+                              <div className="topic-header">
+                                <h4>{topic.name}</h4>
+                                <div className="topic-stats">
+                                  <span className="completed">{topic.completed}</span>
+                                  <span className="separator">/</span>
+                                  <span className="total">{topic.problems}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="progress-bar">
+                                <div 
+                                  className="progress-fill" 
+                                  style={{ width: `${(topic.completed / topic.problems) * 100}%` }}
+                                ></div>
+                              </div>
+                              
+                              {topic.subtopics && (
+                                <div className="subtopics">
+                                  <p className="subtopics-label">Key areas:</p>
+                                  <div className="subtopics-list">
+                                    {topic.subtopics.slice(0, 3).map((subtopic, index) => (
+                                      <span key={index} className="subtopic-tag">
+                                        {subtopic}
+                                      </span>
+                                    ))}
+                                    {topic.subtopics.length > 3 && (
+                                      <span className="subtopic-more">
+                                        +{topic.subtopics.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <button className="start-topic-btn">
+                                Start Practice
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                        <p>Challenge other developers in real-time coding battles</p>
-                        <button className="btn-primary" disabled>
-                          Enter Arena (Coming Soon)
-                        </button>
-                      </div>
-                      
-                      <div className="feature-card">
-                        <div className="card-header">
-                          <div className="card-icon">📚</div>
-                          <h3>Learning Paths</h3>
-                        </div>
-                        <p>Follow structured paths to master new technologies</p>
-                        <button className="btn-primary" disabled>
-                          Browse Paths (Coming Soon)
-                        </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {activeTab === 'challenges' && (
+                {activeTab === 'loopai' && (
                   <div className="tab-content">
-                    <h2>Challenges</h2>
-                    <div className="challenges-grid">
-                      <div className="challenge-card">
-                        <div className="challenge-difficulty easy">Easy</div>
-                        <h3>Two Sum</h3>
-                        <p>Find two numbers in an array that add up to a target sum</p>
-                        <div className="challenge-tags">
-                          <span className="tag">Array</span>
-                          <span className="tag">Hash Map</span>
-                        </div>
-                        <button className="btn-secondary" disabled>
-                          Solve (Coming Soon)
-                        </button>
+                    <div className="loopai-container">
+                      <div className="loopai-header">
+                        <h2>🤖 LoopAI - Your Coding Assistant</h2>
+                        <p>Get instant help with coding problems, explanations, and personalized guidance</p>
                       </div>
                       
-                      <div className="challenge-card">
-                        <div className="challenge-difficulty medium">Medium</div>
-                        <h3>Longest Substring</h3>
-                        <p>Find the length of the longest substring without repeating characters</p>
-                        <div className="challenge-tags">
-                          <span className="tag">String</span>
-                          <span className="tag">Sliding Window</span>
+                      <div className="loopai-features">
+                        <div className="feature-card">
+                          <div className="feature-icon">💡</div>
+                          <h3>Problem Hints</h3>
+                          <p>Get strategic hints without spoiling the solution</p>
+                          <button className="btn-secondary" disabled>Coming Soon</button>
                         </div>
-                        <button className="btn-secondary" disabled>
-                          Solve (Coming Soon)
-                        </button>
-                      </div>
-                      
-                      <div className="challenge-card">
-                        <div className="challenge-difficulty hard">Hard</div>
-                        <h3>Merge K Lists</h3>
-                        <p>Merge k sorted linked lists and return it as one sorted list</p>
-                        <div className="challenge-tags">
-                          <span className="tag">Linked List</span>
-                          <span className="tag">Divide & Conquer</span>
+                        
+                        <div className="feature-card">
+                          <div className="feature-icon">🔍</div>
+                          <h3>Code Review</h3>
+                          <p>Get your solutions reviewed and optimized</p>
+                          <button className="btn-secondary" disabled>Coming Soon</button>
                         </div>
-                        <button className="btn-secondary" disabled>
-                          Solve (Coming Soon)
-                        </button>
+                        
+                        <div className="feature-card">
+                          <div className="feature-icon">📚</div>
+                          <h3>Concept Explanation</h3>
+                          <p>Learn algorithms and data structures with AI guidance</p>
+                          <button className="btn-secondary" disabled>Coming Soon</button>
+                        </div>
+                        
+                        <div className="feature-card">
+                          <div className="feature-icon">🎯</div>
+                          <h3>Personalized Learning</h3>
+                          <p>Get custom practice recommendations based on your progress</p>
+                          <button className="btn-secondary" disabled>Coming Soon</button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {activeTab === 'profile' && (
+                {activeTab === 'contest' && (
                   <div className="tab-content">
-                    <h2>Profile</h2>
-                    <div className="profile-grid">
-                      <div className="profile-info">
-                        <div className="profile-avatar">
-                          <div className="avatar-placeholder">
-                            {username.charAt(0).toUpperCase()}
+                    <div className="contest-container">
+                      <h2>🏆 Contests</h2>
+                      <div className="contest-grid">
+                        <div className="contest-card upcoming">
+                          <div className="contest-status">Upcoming</div>
+                          <h3>Weekly Challenge #1</h3>
+                          <p>Starts in 2 days, 14 hours</p>
+                          <div className="contest-details">
+                            <span>Duration: 2 hours</span>
+                            <span>Problems: 4</span>
+                            <span>Participants: 1,250+</span>
                           </div>
+                          <button className="btn-primary" disabled>Register (Coming Soon)</button>
                         </div>
-                        <div className="profile-details">
-                          <h3>{username}</h3>
-                          <p>Beginner Developer</p>
-                          <div className="profile-stats">
-                            <div className="stat">
-                              <strong>0</strong>
-                              <span>Problems Solved</span>
-                            </div>
-                            <div className="stat">
-                              <strong>0</strong>
-                              <span>Contests Won</span>
-                            </div>
-                            <div className="stat">
-                              <strong>Member since</strong>
-                              <span>Today</span>
-                            </div>
+                        
+                        <div className="contest-card past">
+                          <div className="contest-status">Past</div>
+                          <h3>Algorithm Showdown</h3>
+                          <p>Completed 1 week ago</p>
+                          <div className="contest-details">
+                            <span>Duration: 3 hours</span>
+                            <span>Problems: 5</span>
+                            <span>Participants: 2,100</span>
                           </div>
+                          <button className="btn-secondary" disabled>View Results (Coming Soon)</button>
                         </div>
                       </div>
-                      
-                      <div className="achievements">
-                        <h3>Achievements</h3>
-                        <div className="achievement-grid">
-                          <div className="achievement locked">
-                            <div className="achievement-icon">🏆</div>
-                            <h4>First Solve</h4>
-                            <p>Complete your first challenge</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'allranks' && (
+                  <div className="tab-content">
+                    <div className="ranks-container">
+                      <h2>📊 All Ranks</h2>
+                      <div className="leaderboard">
+                        <div className="leaderboard-header">
+                          <h3>Global Leaderboard</h3>
+                          <p>Top performers this month</p>
+                        </div>
+                        
+                        <div className="leaderboard-list">
+                          <div className="rank-item">
+                            <div className="rank-position">1</div>
+                            <div className="rank-info">
+                              <span className="rank-name">CodeMaster2024</span>
+                              <span className="rank-points">2,847 points</span>
+                            </div>
+                            <div className="rank-badge gold">🥇</div>
                           </div>
-                          <div className="achievement locked">
-                            <div className="achievement-icon">🔥</div>
-                            <h4>Streak Master</h4>
-                            <p>Maintain a 7-day solving streak</p>
+                          
+                          <div className="rank-item">
+                            <div className="rank-position">2</div>
+                            <div className="rank-info">
+                              <span className="rank-name">AlgoNinja</span>
+                              <span className="rank-points">2,642 points</span>
+                            </div>
+                            <div className="rank-badge silver">🥈</div>
                           </div>
-                          <div className="achievement locked">
-                            <div className="achievement-icon">⚔️</div>
-                            <h4>Battle Victor</h4>
-                            <p>Win your first coding battle</p>
+                          
+                          <div className="rank-item">
+                            <div className="rank-position">3</div>
+                            <div className="rank-info">
+                              <span className="rank-name">DevExplorer</span>
+                              <span className="rank-points">2,401 points</span>
+                            </div>
+                            <div className="rank-badge bronze">🥉</div>
+                          </div>
+                          
+                          <div className="rank-item your-rank">
+                            <div className="rank-position">--</div>
+                            <div className="rank-info">
+                              <span className="rank-name">{username} (You)</span>
+                              <span className="rank-points">0 points</span>
+                            </div>
+                            <div className="rank-badge">🔰</div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
-              </section>
 
-              {/* Development Notice */}
-              <section className="dev-notice">
-                <div className="notice-card">
-                  <h3>🚧 Under Development</h3>
-                  <p>The Zone is currently being built with amazing features. We&apos;ll notify you when it&apos;s ready!</p>
-                  <Link href="/" className="btn-secondary">
-                    Back to Homepage
-                  </Link>
-                </div>
+                {activeTab === 'report' && (
+                  <div className="tab-content">
+                    <div className="report-container">
+                      <h2>📋 Report</h2>
+                      <div className="report-grid">
+                        <div className="report-card">
+                          <h3>Progress Report</h3>
+                          <div className="stats-list">
+                            <div className="stat-item">
+                              <span className="stat-label">Problems Solved</span>
+                              <span className="stat-value">0</span>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-label">Current Streak</span>
+                              <span className="stat-value">0 days</span>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-label">Best Streak</span>
+                              <span className="stat-value">0 days</span>
+                            </div>
+                            <div className="stat-item">
+                              <span className="stat-label">Total Points</span>
+                              <span className="stat-value">0</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="report-card">
+                          <h3>Skill Distribution</h3>
+                          <div className="skill-chart">
+                            <p className="chart-placeholder">📊 Skills chart will appear here once you start solving problems</p>
+                          </div>
+                        </div>
+                        
+                        <div className="report-card">
+                          <h3>Recent Activity</h3>
+                          <div className="activity-list">
+                            <p className="activity-placeholder">No recent activity. Start solving problems to see your progress!</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </section>
             </>
           )}
