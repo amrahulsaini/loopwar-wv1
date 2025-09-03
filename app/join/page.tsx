@@ -47,22 +47,10 @@ export default function JoinPage() {
       }
 
       // Show form by default on desktop screens (769px and above)
-      const handleResize = () => {
-        if (window.innerWidth >= 769) {
-          setShowForm(true);
-        } else {
-          setShowForm(false);
-        }
-      };
-
-      // Initial check
-      handleResize();
-
-      // Listen for window resize
-      window.addEventListener('resize', handleResize);
-
-      // Cleanup
-      return () => window.removeEventListener('resize', handleResize);
+      // Set initial state based on screen size but don't add resize listener
+      if (window.innerWidth >= 769) {
+        setShowForm(true);
+      }
     }
   }, []);
 

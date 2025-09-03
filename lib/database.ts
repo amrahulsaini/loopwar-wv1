@@ -129,16 +129,40 @@ export class Database {
       return { ...(updatedUser as object), isNewUser: false };
     }
 
-    // Create new user
+    // Create new user with unique username
     const username = user.username || user.email.split('@')[0];
+    
+    // Ensure username is unique by checking and appending numbers if needed
+    let uniqueUsername = username;
+    let counter = 1;
+    while (await this.findUserByUsername(uniqueUsername)) {
+      uniqueUsername = `${username}_${counter}`;
+      counter++;
+    }
+
     const passwordHash = ''; // no password for oauth users
     const sql = `
       INSERT INTO users (username, email, password_hash, is_verified, oauth_provider, oauth_id, profile_picture)
       VALUES (?, ?, ?, TRUE, ?, ?, ?)
     `;
-    const res = await this.query(sql, [username, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
-    const newUser = await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
-    return { ...(newUser as object), isNewUser: true };
+    
+    try {
+      const res = await this.query(sql, [uniqueUsername, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
+      const newUser = await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
+      return { ...(newUser as object), isNewUser: true };
+    } catch (error: unknown) {
+      // If still duplicate error, try with a random suffix
+      const dbError = error as { code?: string; sqlMessage?: string };
+      if (dbError.code === 'ER_DUP_ENTRY' && dbError.sqlMessage?.includes('username')) {
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const fallbackUsername = `${username}_${randomSuffix}`;
+        
+        const res = await this.query(sql, [fallbackUsername, user.email, passwordHash, user.provider, user.oauthId, user.profilePicture || null]) as { insertId: number };
+        const newUser = await this.queryOne('SELECT * FROM users WHERE id = ?', [res.insertId]);
+        return { ...(newUser as object), isNewUser: true };
+      }
+      throw error;
+    }
   }
 
   static async findUserBySessionToken(sessionToken: string) {

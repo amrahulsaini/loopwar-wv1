@@ -75,35 +75,6 @@ export default function Home() {
     setIsMobileMenuActive(false);
   };
 
-  // Add hover event handlers for better dropdown behavior
-  const handlePlusButtonMouseEnter = () => {
-    setIsPlusMenuActive(true);
-  };
-
-  const handlePlusButtonMouseLeave = () => {
-    // Don't close immediately, let the dropdown handle its own hover
-  };
-
-  const handleDropdownMouseEnter = () => {
-    setIsPlusMenuActive(true);
-  };
-
-  const handleDropdownMouseLeave = () => {
-    // Small delay to allow moving cursor back to button
-    setTimeout(() => {
-      if (!document.querySelector('.plus-button-container:hover')) {
-        setIsPlusMenuActive(false);
-      }
-    }, 150);
-  };
-
-  const handleContainerMouseLeave = () => {
-    // Close dropdown when leaving the entire container
-    setTimeout(() => {
-      setIsPlusMenuActive(false);
-    }, 100);
-  };
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -134,22 +105,15 @@ export default function Home() {
               <ThemeSwitcher className="theme-toggle hover-lift icon" />
               <div 
                 className={`plus-button-container ${isPlusMenuActive ? 'active' : ''}`}
-                onMouseLeave={handleContainerMouseLeave}
               >
                 <button 
                   className="plus-button hover-lift glow" 
                   onClick={togglePlusMenu}
-                  onMouseEnter={handlePlusButtonMouseEnter}
-                  onMouseLeave={handlePlusButtonMouseLeave}
                   aria-label="Open menu"
                 >
                   +
                 </button>
-                <div 
-                  className="dropdown-menu scale-in"
-                  onMouseEnter={handleDropdownMouseEnter}
-                  onMouseLeave={handleDropdownMouseLeave}
-                >
+                <div className="dropdown-menu scale-in">
                   <a href="/join" className="dropdown-btn btn-join hover-lift-small gradient-animate">Join the War</a>
                   <a href="/login" className="dropdown-btn btn-login hover-lift-small">Login</a>
                 </div>

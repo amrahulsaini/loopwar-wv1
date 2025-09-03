@@ -102,40 +102,61 @@ export async function GET(request: NextRequest) {
       });
       const profile = await userinfoRes.json() as GoogleProfile;
 
-      // Upsert user in DB
-      const userEntry = await Database.upsertOAuthUser({
-        provider: 'google',
-        oauthId: profile.sub,
-        email: profile.email,
-        username: profile.name || profile.email.split('@')[0],
-        profilePicture: profile.picture || undefined
-      });
+      console.log('👤 Google Profile:', { email: profile.email, name: profile.name, sub: profile.sub });
 
-      // Send welcome email for new users
-      const user = userEntry as User & { isNewUser?: boolean };
-      if (user?.id && user.isNewUser) {
-        try {
-          await EmailService.sendWelcomeEmail(user.id, profile.email, user.username);
-          console.log('📧 Welcome email queued for new Google OAuth user:', profile.email);
-        } catch (emailError) {
-          console.error('📧 Failed to queue welcome email for Google OAuth user:', emailError);
-          // Don't fail the OAuth flow if email fails
+      try {
+        // Upsert user in DB
+        const userEntry = await Database.upsertOAuthUser({
+          provider: 'google',
+          oauthId: profile.sub,
+          email: profile.email,
+          username: profile.name || profile.email.split('@')[0],
+          profilePicture: profile.picture || undefined
+        });
+
+        // Send welcome email for new users
+        const user = userEntry as User & { isNewUser?: boolean };
+        if (user?.id && user.isNewUser) {
+          try {
+            await EmailService.sendWelcomeEmail(user.id, profile.email, user.username);
+            console.log('📧 Welcome email queued for new Google OAuth user:', profile.email);
+          } catch (emailError) {
+            console.error('📧 Failed to queue welcome email for Google OAuth user:', emailError);
+            // Don't fail the OAuth flow if email fails
+          }
         }
+
+        // Create a session token and set cookies similar to login route
+        const sessionToken = cryptoRandom();
+        if (user?.id) {
+          await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
+        }
+
+        const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
+        res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+
+        return res;
+      } catch (error: unknown) {
+        console.error('❌ Database error during Google OAuth user creation:', error);
+        
+        // If it's a duplicate username error, redirect with error message
+        const dbError = error as { code?: string; sqlMessage?: string };
+        if (dbError.code === 'ER_DUP_ENTRY') {
+          const errorUrl = new URL('/login', process.env.NEXTAUTH_URL || 'https://loopwar.dev');
+          errorUrl.searchParams.set('error', 'account_exists');
+          errorUrl.searchParams.set('message', 'An account with this information already exists. Please try logging in directly.');
+          return NextResponse.redirect(errorUrl.toString());
+        }
+        
+        // For other errors, redirect to login with generic error
+        const errorUrl = new URL('/login', process.env.NEXTAUTH_URL || 'https://loopwar.dev');
+        errorUrl.searchParams.set('error', 'oauth_failed');
+        errorUrl.searchParams.set('message', 'Failed to complete OAuth login. Please try again.');
+        return NextResponse.redirect(errorUrl.toString());
       }
-
-      // Create a session token and set cookies similar to login route
-      const sessionToken = cryptoRandom();
-      if (user?.id) {
-        await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
-      }
-
-      const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
-      res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-
-      return res;
     }
 
     if (provider === 'github') {
@@ -172,38 +193,59 @@ export async function GET(request: NextRequest) {
       const primary = emails && Array.isArray(emails) ? emails.find((e: GitHubEmail) => e.primary) : null;
       const email = primary ? primary.email : (profile.email || '');
 
-      const userEntry = await Database.upsertOAuthUser({
-        provider: 'github',
-        oauthId: String(profile.id),
-        email,
-        username: profile.login,
-        profilePicture: profile.avatar_url || undefined
-      });
+      console.log('👤 GitHub Profile:', { login: profile.login, email, id: profile.id });
 
-      // Send welcome email for new users
-      const user = userEntry as User & { isNewUser?: boolean };
-      if (user?.id && user.isNewUser && email) {
-        try {
-          await EmailService.sendWelcomeEmail(user.id, email, user.username);
-          console.log('📧 Welcome email queued for new GitHub OAuth user:', email);
-        } catch (emailError) {
-          console.error('📧 Failed to queue welcome email for GitHub OAuth user:', emailError);
-          // Don't fail the OAuth flow if email fails
+      try {
+        const userEntry = await Database.upsertOAuthUser({
+          provider: 'github',
+          oauthId: String(profile.id),
+          email,
+          username: profile.login,
+          profilePicture: profile.avatar_url || undefined
+        });
+
+        // Send welcome email for new users
+        const user = userEntry as User & { isNewUser?: boolean };
+        if (user?.id && user.isNewUser && email) {
+          try {
+            await EmailService.sendWelcomeEmail(user.id, email, user.username);
+            console.log('📧 Welcome email queued for new GitHub OAuth user:', email);
+          } catch (emailError) {
+            console.error('📧 Failed to queue welcome email for GitHub OAuth user:', emailError);
+            // Don't fail the OAuth flow if email fails
+          }
         }
+
+        const sessionToken = cryptoRandom();
+        if (user?.id) {
+          await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
+        }
+
+        const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
+        res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
+        res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
+
+        return res;
+      } catch (error: unknown) {
+        console.error('❌ Database error during GitHub OAuth user creation:', error);
+        
+        // If it's a duplicate username error, redirect with error message
+        const dbError = error as { code?: string; sqlMessage?: string };
+        if (dbError.code === 'ER_DUP_ENTRY') {
+          const errorUrl = new URL('/login', process.env.NEXTAUTH_URL || 'https://loopwar.dev');
+          errorUrl.searchParams.set('error', 'account_exists');
+          errorUrl.searchParams.set('message', 'An account with this information already exists. Please try logging in directly.');
+          return NextResponse.redirect(errorUrl.toString());
+        }
+        
+        // For other errors, redirect to login with generic error
+        const errorUrl = new URL('/login', process.env.NEXTAUTH_URL || 'https://loopwar.dev');
+        errorUrl.searchParams.set('error', 'oauth_failed');
+        errorUrl.searchParams.set('message', 'Failed to complete OAuth login. Please try again.');
+        return NextResponse.redirect(errorUrl.toString());
       }
-
-      const sessionToken = cryptoRandom();
-      if (user?.id) {
-        await Database.createSession(user.id, sessionToken, undefined, undefined, 30); // 30 days for OAuth
-      }
-
-      const res = NextResponse.redirect(process.env.NEXTAUTH_URL || '/');
-      res.cookies.set('sessionToken', sessionToken, { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('username', user.username || '', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('userId', String(user.id || ''), { path: '/', maxAge: 60 * 60 * 24 * 30 });
-      res.cookies.set('isVerified', 'true', { path: '/', maxAge: 60 * 60 * 24 * 30 });
-
-      return res;
     }
 
     return NextResponse.json({ error: 'Unsupported callback provider' }, { status: 400 });
