@@ -1,0 +1,22 @@
+{
+  "name": "LoopWar.dev - AI-Powered Coding Education",
+  "short_name": "LoopWar",
+  "description": "Your personal AI coding dojo. Redefining learning with AI-guidance and gamified challenges.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/loopwar-logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
