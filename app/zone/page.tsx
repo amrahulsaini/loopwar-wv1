@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import NProgress from 'nprogress';
 import { 
   Workflow, 
   Database, 
@@ -237,13 +236,6 @@ export default function ZonePage() {
 
   // Initialize component
   useEffect(() => {
-    // Configure NProgress
-    NProgress.configure({ 
-      showSpinner: true,
-      speed: 500,
-      minimum: 0.3
-    });
-
     // Check if user is logged in
     const token = getCookie('auth_token');
     if (!token) {
@@ -273,29 +265,23 @@ export default function ZonePage() {
 
   // Removed unused clearSession function
 
-  // Navigation with progress
-  const navigateWithProgress = (url: string) => {
-    NProgress.start();
-    router.push(url);
-  };
-
   const handleLogout = () => {
     // Clear cookies
     document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     
-    // Redirect to home with progress
-    navigateWithProgress('/');
+    // Redirect to home
+    window.location.href = '/';
   };
 
   const handleSettingsClick = () => {
     // Navigate to user settings page
-    navigateWithProgress(`/${username}/settings`);
+    router.push(`/${username}/settings`);
   };
 
   const handleProfileClick = () => {
     // Navigate to user profile page
-    navigateWithProgress(`/${username}`);
+    router.push(`/${username}`);
   };
 
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);

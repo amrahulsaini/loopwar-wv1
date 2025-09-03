@@ -3,6 +3,7 @@ import { Sora } from "next/font/google";
 import "./globals.css";
 import { NotificationProvider } from "./components/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ProgressBar from "./components/ProgressBar";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -58,6 +59,7 @@ export default function RootLayout({
 
         <ThemeProvider>
           <NotificationProvider>
+            <ProgressBar />
             {children}
           </NotificationProvider>
         </ThemeProvider>
