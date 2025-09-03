@@ -3,6 +3,18 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { 
+  Workflow, 
+  Database, 
+  TerminalSquare, 
+  Network, 
+  Code2, 
+  Bug, 
+  Server, 
+  Bot,
+  LogOut,
+  Settings
+} from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
 
@@ -15,7 +27,7 @@ interface TopicData {
 
 interface CategoryData {
   name: string;
-  icon: string;
+  icon: string; // This will be the Lucide icon name
   topics: TopicData[];
 }
 
@@ -24,12 +36,14 @@ export default function ZonePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('questions');
   const [selectedCategory, setSelectedCategory] = useState('Core DSA');
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Mock data for categories and topics
   const categories: CategoryData[] = [
     {
       name: 'Core DSA',
-      icon: '🧠',
+      icon: 'Workflow',
       topics: [
         { 
           name: 'Array', 
@@ -125,7 +139,7 @@ export default function ZonePage() {
     },
     {
       name: 'Databases',
-      icon: '🗃️',
+      icon: 'Database',
       topics: [
         { name: 'SQL Basics', problems: 20, completed: 0 },
         { name: 'Joins & Subqueries', problems: 25, completed: 0 },
@@ -136,7 +150,7 @@ export default function ZonePage() {
     },
     {
       name: 'OS & Shell',
-      icon: '💻',
+      icon: 'TerminalSquare',
       topics: [
         { name: 'Process Management', problems: 15, completed: 0 },
         { name: 'Memory Management', problems: 12, completed: 0 },
@@ -147,7 +161,7 @@ export default function ZonePage() {
     },
     {
       name: 'Networking & Concurrency',
-      icon: '🌐',
+      icon: 'Network',
       topics: [
         { name: 'TCP/IP Protocol', problems: 12, completed: 0 },
         { name: 'HTTP/HTTPS', problems: 15, completed: 0 },
@@ -158,7 +172,7 @@ export default function ZonePage() {
     },
     {
       name: 'Programming Languages',
-      icon: '🔤',
+      icon: 'Code2',
       topics: [
         { name: 'Python Advanced', problems: 25, completed: 0 },
         { name: 'JavaScript/TypeScript', problems: 30, completed: 0 },
@@ -169,7 +183,7 @@ export default function ZonePage() {
     },
     {
       name: 'Debugging & Optimization',
-      icon: '🐛',
+      icon: 'Bug',
       topics: [
         { name: 'Code Profiling', problems: 8, completed: 0 },
         { name: 'Memory Debugging', problems: 10, completed: 0 },
@@ -180,7 +194,7 @@ export default function ZonePage() {
     },
     {
       name: 'System Design',
-      icon: '🏗️',
+      icon: 'Server',
       topics: [
         { name: 'Scalability Patterns', problems: 15, completed: 0 },
         { name: 'Load Balancing', problems: 8, completed: 0 },
@@ -191,7 +205,7 @@ export default function ZonePage() {
     },
     {
       name: 'AI & ML',
-      icon: '🤖',
+      icon: 'Bot',
       topics: [
         { name: 'Machine Learning Basics', problems: 20, completed: 0 },
         { name: 'Neural Networks', problems: 15, completed: 0 },
@@ -220,6 +234,24 @@ export default function ZonePage() {
     }
   }, []);
 
+  // Handle header visibility on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY || currentScrollY < 100) {
+        setHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   // Cookie utility functions
   const getCookie = (name: string): string | null => {
     const nameEQ = name + "=";
@@ -234,6 +266,20 @@ export default function ZonePage() {
 
   // Removed unused clearSession function
 
+  const handleLogout = () => {
+    // Clear cookies
+    document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Redirect to home
+    window.location.href = '/';
+  };
+
+  const handleSettingsClick = () => {
+    // Navigate to user settings page
+    window.location.href = `/${username}/settings`;
+  };
+
   const handleProfileClick = () => {
     // Navigate to user profile page
     window.location.href = `/${username}`;
@@ -241,9 +287,26 @@ export default function ZonePage() {
 
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
 
+  // Function to render Lucide icons based on icon name
+  const renderIcon = (iconName: string, size: number = 20) => {
+    const icons: { [key: string]: React.ComponentType<{ size?: number }> } = {
+      Workflow,
+      Database,
+      TerminalSquare,
+      Network,
+      Code2,
+      Bug,
+      Server,
+      Bot
+    };
+    
+    const IconComponent = icons[iconName];
+    return IconComponent ? <IconComponent size={size} /> : null;
+  };
+
   return (
     <>
-      <header className="zone-header">
+      <header className={`zone-header ${headerVisible ? 'visible' : 'hidden'}`}>
         <div className="container">
           <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
             <Logo size={55} showText={false} />
@@ -282,6 +345,22 @@ export default function ZonePage() {
             </button>
           </nav>
           <div className="header-actions">
+            <button 
+              className="action-btn settings-btn" 
+              onClick={handleSettingsClick}
+              aria-label="Settings"
+              title="User Settings"
+            >
+              <Settings size={20} />
+            </button>
+            <button 
+              className="action-btn logout-btn" 
+              onClick={handleLogout}
+              aria-label="Logout"
+              title="Logout"
+            >
+              <LogOut size={20} />
+            </button>
             <button 
               className="profile-btn" 
               onClick={handleProfileClick}
@@ -331,7 +410,7 @@ export default function ZonePage() {
                               className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
                               onClick={() => setSelectedCategory(category.name)}
                             >
-                              <span className="category-icon">{category.icon}</span>
+                              <span className="category-icon">{renderIcon(category.icon)}</span>
                               <span className="category-name">{category.name}</span>
                             </button>
                           ))}
@@ -341,7 +420,7 @@ export default function ZonePage() {
                       {/* Topics Content */}
                       <div className="topics-content">
                         <div className="topics-header">
-                          <h2>{selectedCategoryData?.icon} {selectedCategory}</h2>
+                          <h2>{renderIcon(selectedCategoryData?.icon || '', 24)} {selectedCategory}</h2>
                           <p>{selectedCategoryData?.topics.length} topics available</p>
                         </div>
                         
