@@ -38,12 +38,12 @@ let verificationCodes: VerificationCodeData[] = [];
 
 // SMTP Configuration
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+  host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
-    pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2',
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 

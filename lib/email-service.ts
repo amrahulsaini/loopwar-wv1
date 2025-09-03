@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import Database from './database';
+import EnvironmentValidator from './env-validator';
 
 // Email templates
 const EMAIL_TEMPLATES = {
@@ -21,18 +22,25 @@ const EMAIL_TEMPLATES = {
   }
 };
 
-// SMTP configuration with debugging enabled
+// SMTP configuration - requires environment variables
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+  host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER || '903fd4002@smtp-brevo.com',
-    pass: process.env.SMTP_PASS || '7rxfNbnRm1OCjUW2'
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   },
-  debug: true, // Enable debug output
-  logger: true // Log to console
+  debug: process.env.NODE_ENV === 'development',
+  logger: process.env.NODE_ENV === 'development'
 });
+
+// Validate SMTP configuration at startup
+const smtpValidation = EnvironmentValidator.validate();
+if (!smtpValidation.isValid) {
+  console.error('❌ SMTP configuration validation failed');
+  smtpValidation.errors.forEach(error => console.error(error));
+}
 
 export class EmailService {
   // Send verification email

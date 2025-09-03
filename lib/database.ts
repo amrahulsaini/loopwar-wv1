@@ -1,11 +1,15 @@
 import mysql from 'mysql2/promise';
+import EnvironmentValidator from './env-validator';
+
+// Validate environment variables
+EnvironmentValidator.logValidationResults();
 
 // Database configuration from environment variables
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'wv1',
-  password: process.env.DB_PASSWORD || 'wv1',
-  database: process.env.DB_NAME || 'loop_wv1',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 10,
@@ -15,6 +19,15 @@ const dbConfig = {
   reconnect: true,
   charset: 'utf8mb4'
 };
+
+// Validate required environment variables
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required database environment variables:', missingEnvVars.join(', '));
+  throw new Error(`Missing database configuration: ${missingEnvVars.join(', ')}`);
+}
 
 // Create connection pool
 let pool: mysql.Pool;
