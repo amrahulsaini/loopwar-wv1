@@ -274,12 +274,12 @@ export default function ZonePage() {
 
   const handleSettingsClick = () => {
     // Navigate to user settings page
-    window.location.href = `/${username}/settings`;
+    window.location.href = `/profiles/${username}/settings`;
   };
 
   const handleProfileClick = () => {
     // Navigate to user profile page
-    window.location.href = `/${username}`;
+    window.location.href = `/profiles/${username}`;
   };
 
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
