@@ -13,21 +13,6 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "LoopWar.dev - The Future of AI-Powered Coding Education",
   description: "Your personal AI coding dojo. We're redefining learning by combining AI-guidance with gamified challenges to forge career-ready developers.",
-  icons: {
-    icon: [
-      {
-        url: '/favicon.ico',
-        type: 'image/x-icon',
-        sizes: '16x16 32x32',
-      },
-      {
-        url: '/favicon-simple.svg',
-        type: 'image/svg+xml',
-      }
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({
@@ -38,19 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* LoopWar Simple L Favicon - Our Custom Logo */}
-        <link rel="icon" type="image/svg+xml" href="/favicon-simple.svg" />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicon-simple.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-simple.svg" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-simple.svg" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-      </head>
-      <body className={`${sora.variable} antialiased`}>
-        {/* Inline script to apply theme early (pre-hydration) so dark mode persists across pages */}
+        {/* Theme detection script - must run before body renders */}
         <script dangerouslySetInnerHTML={{ __html: `(() => {
           try {
             var theme = null;
@@ -67,15 +40,21 @@ export default function RootLayout({
             }
             if (theme === 'dark') {
               document.documentElement.classList.add('dark-mode');
-              document.body.classList.add('dark-mode');
             } else {
               document.documentElement.classList.remove('dark-mode');
-              document.body.classList.remove('dark-mode');
             }
           } catch (err) {
             // noop
           }
         })();` }} />
+        {/* PWA Configuration */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+      </head>
+      <body className={`${sora.variable} antialiased`}>
+        {/* Theme provider handles subsequent theme changes */}
 
         <ThemeProvider>
           <NotificationProvider>
