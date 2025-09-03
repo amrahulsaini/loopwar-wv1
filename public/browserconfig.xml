@@ -2,8 +2,8 @@
 <browserconfig>
     <msapplication>
         <tile>
-            <square150x150logo src="/loopwar-logo-icon.svg"/>
-            <TileColor>#6366f1</TileColor>
+            <square150x150logo src="/favicon-simple.svg"/>
+            <TileColor>#000000</TileColor>
         </tile>
     </msapplication>
 </browserconfig>

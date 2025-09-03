@@ -16,16 +16,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/loopwar-logo-icon.svg',
-        type: 'image/svg+xml',
-      },
-      {
-        url: '/logo.svg',
+        url: '/favicon-simple.svg',
         type: 'image/svg+xml',
       }
     ],
-    shortcut: '/loopwar-logo-icon.svg',
-    apple: '/loopwar-logo-icon.svg',
+    shortcut: '/favicon-simple.svg',
+    apple: '/favicon-simple.svg',
   },
 };
 
@@ -37,15 +33,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* LoopWar Favicon Configuration */}
-        <link rel="icon" type="image/svg+xml" href="/loopwar-logo-icon.svg" />
+        {/* LoopWar Simple L Favicon */}
+        <link rel="icon" type="image/svg+xml" href="/favicon-simple.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/loopwar-logo-icon.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/loopwar-logo-icon.svg" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/loopwar-logo-icon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon-simple.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-simple.svg" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-simple.svg" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#6366f1" />
-        <meta name="msapplication-TileColor" content="#6366f1" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className={`${sora.variable} antialiased`}>
