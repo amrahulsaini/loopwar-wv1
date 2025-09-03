@@ -214,38 +214,37 @@ export default function ZonePage() {
     }
   ];
 
-  // Check theme and get user info on mount
+  // Authentication check on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Check if user is authenticated
-      const sessionToken = getCookie('sessionToken');
-      const savedUsername = getCookie('username');
-      
-      if (!sessionToken || !savedUsername) {
-        // Redirect to join page if not authenticated
-        window.location.href = '/join';
-        return;
-      }
-      
-      setUsername(savedUsername);
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Initialize component
-  useEffect(() => {
-    // Check if user is logged in
-    const token = getCookie('sessionToken');
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
-
-    // Get username from cookie
-    const storedUsername = getCookie('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-      setIsLoading(false);
+      // Small delay to ensure cookies are set from login
+      setTimeout(() => {
+        const sessionToken = getCookie('sessionToken');
+        const savedUsername = getCookie('username');
+        const isVerified = getCookie('isVerified');
+        
+        console.log('🔍 Zone auth check:', { 
+          hasToken: !!sessionToken, 
+          hasUsername: !!savedUsername, 
+          isVerified 
+        });
+        
+        if (!sessionToken || !savedUsername) {
+          console.log('❌ Missing auth credentials, redirecting to login');
+          window.location.href = '/login';
+          return;
+        }
+        
+        if (isVerified === 'false') {
+          console.log('❌ User not verified, redirecting to verification');
+          window.location.href = '/verify';
+          return;
+        }
+        
+        console.log('✅ User authenticated:', savedUsername);
+        setUsername(savedUsername);
+        setIsLoading(false);
+      }, 100); // Small delay to ensure cookies are set
     }
   }, []);
 
