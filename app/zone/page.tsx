@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import NProgress from 'nprogress';
 import { 
   Workflow, 
   Database, 
@@ -32,12 +34,11 @@ interface CategoryData {
 }
 
 export default function ZonePage() {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('questions');
   const [selectedCategory, setSelectedCategory] = useState('Core DSA');
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Mock data for categories and topics
   const categories: CategoryData[] = [
@@ -234,23 +235,29 @@ export default function ZonePage() {
     }
   }, []);
 
-  // Handle header visibility on scroll
+  // Initialize component
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setHeaderVisible(false);
-      } else if (currentScrollY < lastScrollY || currentScrollY < 100) {
-        setHeaderVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
+    // Configure NProgress
+    NProgress.configure({ 
+      showSpinner: true,
+      speed: 500,
+      minimum: 0.3
+    });
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+    // Check if user is logged in
+    const token = getCookie('auth_token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    // Get username from cookie
+    const storedUsername = getCookie('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+      setIsLoading(false);
+    }
+  }, []);
 
   // Cookie utility functions
   const getCookie = (name: string): string | null => {
@@ -266,23 +273,29 @@ export default function ZonePage() {
 
   // Removed unused clearSession function
 
+  // Navigation with progress
+  const navigateWithProgress = (url: string) => {
+    NProgress.start();
+    router.push(url);
+  };
+
   const handleLogout = () => {
     // Clear cookies
     document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     
-    // Redirect to home
-    window.location.href = '/';
+    // Redirect to home with progress
+    navigateWithProgress('/');
   };
 
   const handleSettingsClick = () => {
     // Navigate to user settings page
-    window.location.href = `/${username}/settings`;
+    navigateWithProgress(`/${username}/settings`);
   };
 
   const handleProfileClick = () => {
     // Navigate to user profile page
-    window.location.href = `/${username}`;
+    navigateWithProgress(`/${username}`);
   };
 
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
@@ -306,7 +319,7 @@ export default function ZonePage() {
 
   return (
     <>
-      <header className={`zone-header ${headerVisible ? 'visible' : 'hidden'}`}>
+      <header className="zone-header">{` `}
         <div className="container">
           <Link href="/" className="logo-link" aria-label="LoopWar.dev Home">
             <Logo size={55} showText={false} />
