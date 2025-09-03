@@ -91,21 +91,21 @@ export default function Login() {
         setSuccess('Login successful! Redirecting...');
         
         // Set cookies for session management
-        document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=86400; secure; samesite=strict`;
-        document.cookie = `username=${data.username}; path=/; max-age=86400; secure; samesite=strict`;
-        document.cookie = `isVerified=${data.isVerified}; path=/; max-age=86400; secure; samesite=strict`;
+        const maxAge = data.rememberMe ? 2592000 : 604800; // 30 days if remember me, 7 days otherwise
+        document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=${maxAge}; secure; samesite=strict`;
+        document.cookie = `username=${data.user.username}; path=/; max-age=${maxAge}; secure; samesite=strict`;
+        document.cookie = `isVerified=${data.user.isVerified}; path=/; max-age=${maxAge}; secure; samesite=strict`;
         
-        // Redirect based on verification status
+        // For login, we should almost always redirect to zone
+        // Only redirect to verify if the account exists but is not verified (rare edge case)
         setTimeout(() => {
-          if (data.isVerified) {
+          if (data.user.isVerified) {
+            // Normal case: verified user logging in
             window.location.href = '/zone';
           } else {
-            // Include userId in verify redirect if available
-            if (data.user && data.user.id) {
-              window.location.href = `/verify?userId=${data.user.id}`;
-            } else {
-              window.location.href = '/verify';
-            }
+            // Edge case: user signed up but never verified their email
+            console.log('⚠️ User not verified, redirecting to verification');
+            window.location.href = `/verify?userId=${data.user.id}&email=${encodeURIComponent(data.user.email)}`;
           }
         }, 1500);
       } else {
