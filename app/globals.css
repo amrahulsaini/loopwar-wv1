@@ -2599,6 +2599,354 @@ body {
   }
 }
 
+/* =====================
+   VERIFY PAGE STYLES
+   ===================== */
+
+.verify-main {
+    min-height: 85vh;
+    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-card-bg) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.verify-card {
+    background-color: var(--color-card-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.verify-card .card-header {
+    margin-bottom: 30px;
+}
+
+.verify-card .card-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--color-primary);
+    line-height: 1.2;
+}
+
+.verify-card .card-header p {
+    font-size: 1.1rem;
+    color: var(--color-secondary);
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.verify-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.verify-form {
+    margin-bottom: 30px;
+}
+
+.verify-form .form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.verify-form .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+.verification-input {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 8px;
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: all var(--transition-speed);
+    font-family: monospace;
+}
+
+.verification-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.verification-input::placeholder {
+    color: var(--color-secondary);
+    opacity: 0.7;
+    letter-spacing: 4px;
+}
+
+.form-help {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--color-secondary);
+    text-align: center;
+}
+
+.verify-form .btn-primary {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    margin-top: 10px;
+}
+
+.verify-form .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.verify-form .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.button-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.verification-help {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 30px;
+    text-align: left;
+}
+
+.verification-help p {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+.verification-help ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.verification-help li {
+    padding: 8px 0;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+    position: relative;
+    padding-left: 20px;
+}
+
+.verification-help li:before {
+    content: "•";
+    color: var(--color-primary);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.verification-success {
+    text-align: center;
+}
+
+.verification-success .card-header {
+    margin-bottom: 30px;
+}
+
+.verification-success .success-message {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0 30px 0;
+}
+
+.verification-success .success-message p {
+    color: #0369a1;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.card-actions .btn-primary,
+.card-actions .btn-secondary {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    text-align: center;
+    transition: all var(--transition-speed);
+    display: inline-block;
+    border: 2px solid;
+}
+
+.card-actions .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+}
+
+.card-actions .btn-primary:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-actions .btn-secondary {
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.card-actions .btn-secondary:hover {
+    background: var(--color-card-bg);
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid;
+}
+
+.message.success {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #22c55e;
+    color: #15803d;
+}
+
+.message.error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+/* Verify Page Responsive Design */
+@media (max-width: 768px) {
+    .verify-main {
+        padding: 20px 0;
+        min-height: 80vh;
+    }
+
+    .verify-card {
+        padding: 30px 24px;
+        margin: 0 16px;
+    }
+
+    .verify-card .card-header h1 {
+        font-size: 1.9rem;
+    }
+
+    .verify-card .card-header p {
+        font-size: 1rem;
+    }
+
+    .verification-input {
+        font-size: 1.3rem;
+        letter-spacing: 6px;
+        padding: 14px 16px;
+    }
+
+    .verification-input::placeholder {
+        letter-spacing: 3px;
+    }
+
+    .verification-help {
+        padding: 20px;
+    }
+
+    .card-actions {
+        gap: 12px;
+    }
+
+    .card-actions .btn-primary,
+    .card-actions .btn-secondary {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .verify-card {
+        padding: 24px 20px;
+        margin: 0 12px;
+    }
+
+    .verify-card .card-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .verify-card .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+    }
+
+    .verification-input {
+        font-size: 1.2rem;
+        letter-spacing: 4px;
+        padding: 12px 14px;
+    }
+
+    .verification-help {
+        padding: 16px;
+    }
+
+    .verification-help li {
+        font-size: 0.9rem;
+    }
+
+    .card-actions .btn-primary,
+    .card-actions .btn-secondary {
+        padding: 11px 16px;
+        font-size: 0.9rem;
+    }
+}
+
 /* Responsive design for content pages */
 @media (max-width: 768px) {
   .page-title {
