@@ -189,6 +189,12 @@ body {
     align-items: center;
 }
 
+/* Add horizontal padding so header controls are not flush to viewport edge */
+.main-header .container {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 /* Updated layout for static pages with 3 sections */
 .main-header .container > .logo-link {
     flex-shrink: 0;
@@ -439,6 +445,27 @@ body.dark-mode .logo-wrapper:hover {
     z-index: 1001; /* Higher z-index than header */
 }
 
+/* Make the interactive area slightly larger so moving cursor from the button to dropdown
+   doesn't leave the hover area (prevents accidental closing). This is small and won't
+   affect layout but improves usability on touch/precision devices. */
+.plus-button-container {
+  display: inline-block; /* keep dropdown anchored to this container */
+  padding-right: 0; /* remove extra padding that can create a hover gap */
+  position: relative;
+}
+
+/* invisible buffer between the button and dropdown to preserve hover path */
+.plus-button-container::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px; /* extends below the button towards the dropdown */
+  height: 12px; /* small area that keeps hover active */
+  pointer-events: auto; /* allow this area to capture hover */
+  background: transparent;
+}
+
 .plus-button {
     background-color: var(--color-primary);
     color: var(--color-bg);
@@ -461,9 +488,9 @@ body.dark-mode .logo-wrapper:hover {
 }
 
 .dropdown-menu {
-    position: absolute;
-    top: 55px;
-    right: 0;
+  position: absolute;
+  top: 50px; /* slightly closer to button to avoid gap */
+  right: 0;
     background-color: var(--color-card-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
@@ -474,7 +501,7 @@ body.dark-mode .logo-wrapper:hover {
     width: 180px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(10px);
+  transform: translateY(6px);
     /* Add pointer-events: none when hidden to prevent interfering with elements below */
     pointer-events: none; 
     transition: opacity var(--transition-speed), transform var(--transition-speed), visibility var(--transition-speed);
@@ -886,6 +913,11 @@ body.dark-mode .plus-button-container.active .btn-join {
     .hamburger {
         margin-left: 0;
     }
+
+  /* Ensure dropdown aligns with padded header and stays reachable */
+  .plus-button-container .dropdown-menu {
+    right: 6px; /* move slightly left from the edge */
+  }
 }
 
 /* ===== JOIN PAGE STYLES ===== */
