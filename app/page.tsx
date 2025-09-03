@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CookieConsent from './components/CookieConsent';
-import ThemeSwitcher from './components/ThemeSwitcher';
 import Logo from './components/Logo';
 
 export default function Home() {
@@ -102,7 +101,6 @@ export default function Home() {
               <li><a href="#community" onClick={closeMobileMenu}>Community</a></li>
             </ul>
             <div className="nav-actions">
-              <ThemeSwitcher className="theme-toggle hover-lift icon" />
               <div 
                 className={`plus-button-container ${isPlusMenuActive ? 'active' : ''}`}
               >

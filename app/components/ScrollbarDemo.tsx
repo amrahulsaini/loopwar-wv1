@@ -1,19 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-
 export default function ScrollbarDemo() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  };
-
   const sampleContent = Array.from({ length: 50 }, (_, i) => 
     `This is line ${i + 1} - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`
   );
@@ -22,12 +9,6 @@ export default function ScrollbarDemo() {
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Custom Scrollbar Showcase</h1>
-        <button 
-          onClick={toggleTheme}
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          Toggle {isDarkMode ? 'Light' : 'Dark'} Mode
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

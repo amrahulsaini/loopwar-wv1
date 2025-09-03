@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Logo from '../components/Logo';
-import ThemeSwitcher from '../components/ThemeSwitcher';
 
 export default function AboutPage() {
   return (
@@ -20,7 +19,6 @@ export default function AboutPage() {
               <li><Link href="/#community">Community</Link></li>
             </ul>
             <div className="nav-actions">
-              <ThemeSwitcher className="theme-toggle hover-lift icon" />
               <div className="auth-buttons">
                 <Link href="/join" className="btn btn-join">Join the War</Link>
                 <Link href="/login" className="btn btn-login">Login</Link>
