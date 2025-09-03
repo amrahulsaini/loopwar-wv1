@@ -18,6 +18,11 @@ export const metadata: Metadata = {
       {
         url: '/favicon-simple.svg',
         type: 'image/svg+xml',
+      },
+      {
+        url: '/favicon.ico',
+        type: 'image/x-icon',
+        sizes: '16x16',
       }
     ],
     shortcut: '/favicon-simple.svg',
@@ -33,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* LoopWar Simple L Favicon */}
+        {/* LoopWar Simple L Favicon - Our Custom Logo */}
         <link rel="icon" type="image/svg+xml" href="/favicon-simple.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon-simple.svg" />
