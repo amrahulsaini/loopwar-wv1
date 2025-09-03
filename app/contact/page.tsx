@@ -1,22 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '../components/Logo';
 import ThemeSwitcher from '../components/ThemeSwitcher';
-import NProgress from 'nprogress';
 
 export default function ContactPage() {
-  // Configure NProgress
-  useEffect(() => {
-    NProgress.configure({ 
-      showSpinner: false,
-      minimum: 0.3,
-      easing: 'ease',
-      speed: 800
-    });
-  }, []);
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',

@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
-import NProgress from 'nprogress';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -17,16 +16,6 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const formRef = useRef<HTMLDivElement>(null);
 
-  // Configure NProgress
-  useEffect(() => {
-    NProgress.configure({ 
-      showSpinner: false,
-      minimum: 0.3,
-      easing: 'ease',
-      speed: 800
-    });
-  }, []);
-
   // Check existing session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,11 +26,9 @@ export default function LoginPage() {
       
       if (sessionToken && username && isVerified) {
         // Redirect to zone if fully authenticated and verified
-        NProgress.start();
         window.location.href = '/zone';
       } else if (sessionToken && username && !isVerified) {
         // Redirect to verify page if logged in but not verified
-        NProgress.start();
         window.location.href = '/verify';
       }
     }
@@ -90,7 +77,6 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setMessage({ type: '', text: '' });
-    NProgress.start();
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -125,7 +111,6 @@ export default function LoginPage() {
         
         // Redirect based on verification status
         setTimeout(() => {
-          NProgress.done();
           if (data.user.isVerified) {
             window.location.href = '/zone';
           } else {
@@ -134,7 +119,6 @@ export default function LoginPage() {
         }, 1500);
       } else {
         console.log('❌ Login failed:', data);
-        NProgress.done();
         setMessage({ 
           type: 'error', 
           text: data.error || data.message || 'Login failed. Please try again.' 
@@ -142,7 +126,6 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('❌ Login error:', error);
-      NProgress.done();
       setMessage({ 
         type: 'error', 
         text: 'Network error. Please check your connection and try again.' 

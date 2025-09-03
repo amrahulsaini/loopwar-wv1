@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
-import NProgress from 'nprogress';
 
 export default function JoinPage() {
   const [formData, setFormData] = useState({
@@ -18,16 +17,6 @@ export default function JoinPage() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const formRef = useRef<HTMLDivElement>(null);
 
-  // Configure NProgress
-  useEffect(() => {
-    NProgress.configure({ 
-      showSpinner: false,
-      minimum: 0.3,
-      easing: 'ease',
-      speed: 800
-    });
-  }, []);
-
   // Check existing session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -38,11 +27,9 @@ export default function JoinPage() {
       
       if (sessionToken && username && isVerified) {
         // Redirect to zone if fully authenticated and verified
-        NProgress.start();
         window.location.href = '/zone';
       } else if (sessionToken && username && !isVerified) {
         // Redirect to verify page if logged in but not verified
-        NProgress.start();
         window.location.href = '/verify';
       }
 
@@ -97,7 +84,6 @@ export default function JoinPage() {
     e.preventDefault();
     setIsLoading(true);
     setMessage({ type: '', text: '' });
-    NProgress.start();
 
     try {
       const response = await fetch('/api/auth/signup', {
@@ -130,12 +116,10 @@ export default function JoinPage() {
         
         // Redirect to verify page after successful registration
         setTimeout(() => {
-          NProgress.done();
           window.location.href = `/verify?userId=${data.userId}`;
         }, 2000);
       } else {
         console.log('❌ Signup failed:', data);
-        NProgress.done();
         // Show specific error message from server
         setMessage({ 
           type: 'error', 
@@ -143,7 +127,6 @@ export default function JoinPage() {
         });
       }
     } catch {
-      NProgress.done();
       setMessage({ 
         type: 'error', 
         text: 'Network error. Please check your connection and try again.' 

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { 
   Workflow, 
   Database, 
@@ -33,7 +32,6 @@ interface CategoryData {
 }
 
 export default function ZonePage() {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('questions');
@@ -237,7 +235,7 @@ export default function ZonePage() {
   // Initialize component
   useEffect(() => {
     // Check if user is logged in
-    const token = getCookie('auth_token');
+    const token = getCookie('sessionToken');
     if (!token) {
       window.location.href = '/login';
       return;
@@ -276,12 +274,12 @@ export default function ZonePage() {
 
   const handleSettingsClick = () => {
     // Navigate to user settings page
-    router.push(`/${username}/settings`);
+    window.location.href = `/${username}/settings`;
   };
 
   const handleProfileClick = () => {
     // Navigate to user profile page
-    router.push(`/${username}`);
+    window.location.href = `/${username}`;
   };
 
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);

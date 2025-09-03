@@ -1,22 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '../components/Logo';
 import ThemeSwitcher from '../components/ThemeSwitcher';
-import NProgress from 'nprogress';
 
 export default function AboutPage() {
-  // Configure NProgress
-  useEffect(() => {
-    NProgress.configure({ 
-      showSpinner: false,
-      minimum: 0.3,
-      easing: 'ease',
-      speed: 800
-    });
-  }, []);
-
   return (
     <>
       <header className="main-header">
