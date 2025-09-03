@@ -87,9 +87,13 @@ export default function Join() {
 
       if (response.ok) {
         setSuccess('Account created successfully! Please check your email for verification.');
-        // Redirect to verification page after 2 seconds
+        // Redirect to verification page after 2 seconds with userId parameter
         setTimeout(() => {
-          window.location.href = '/verify';
+          if (data.userId) {
+            window.location.href = `/verify?userId=${data.userId}`;
+          } else {
+            window.location.href = '/verify';
+          }
         }, 2000);
       } else {
         setError(data.error || 'Signup failed');

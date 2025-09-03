@@ -100,7 +100,12 @@ export default function Login() {
           if (data.isVerified) {
             window.location.href = '/zone';
           } else {
-            window.location.href = '/verify';
+            // Include userId in verify redirect if available
+            if (data.user && data.user.id) {
+              window.location.href = `/verify?userId=${data.user.id}`;
+            } else {
+              window.location.href = '/verify';
+            }
           }
         }, 1500);
       } else {
