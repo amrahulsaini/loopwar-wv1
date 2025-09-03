@@ -114,8 +114,8 @@ export default function Home() {
                   +
                 </button>
                 <div className="dropdown-menu scale-in">
-                  <a href="/join" className="dropdown-btn btn-join hover-lift-small gradient-animate">Join the War</a>
-                  <a href="/login" className="dropdown-btn btn-login hover-lift-small">Login</a>
+                  <Link href="/join" className="dropdown-btn btn-join hover-lift-small gradient-animate">Join the War</Link>
+                  <Link href="/login" className="dropdown-btn btn-login hover-lift-small">Login</Link>
                 </div>
               </div>
             </div>
@@ -209,10 +209,10 @@ export default function Home() {
           </div>
           <div className="footer-right">
             <ul className="footer-nav">
-              <li><a href="/about">About</a></li>
-              <li><a href="/privacy">Privacy</a></li>
-              <li><a href="/terms">Terms</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/privacy">Privacy</Link></li>
+              <li><Link href="/terms">Terms</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
             </ul>
           </div>
         </div>
