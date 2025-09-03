@@ -381,6 +381,7 @@ body.dark-mode .logo-wrapper:hover {
     align-items: center;
     gap: 15px;
     position: relative;
+    padding-right: 20px; /* Use padding instead of margin to keep hover area intact */
 }
 
 .auth-buttons {
@@ -845,6 +846,7 @@ body.dark-mode .plus-button-container.active .btn-join {
     
     .nav-actions {
         margin-left: auto;
+        padding-right: 20px; /* Use padding for mobile too */
     }
     
     .main-footer .container {
@@ -876,6 +878,7 @@ body.dark-mode .plus-button-container.active .btn-join {
     
     .nav-actions {
         margin-left: 0;
+        padding-right: 20px; /* Use padding for smallest screens too */
         width: 100%;
         justify-content: space-between;
     }
