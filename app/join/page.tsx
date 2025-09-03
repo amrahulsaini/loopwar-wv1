@@ -51,7 +51,7 @@ export default function Join() {
   };
 
   const handleOAuthSignup = (provider: string) => {
-    window.location.href = `/api/auth/oauth?provider=${provider}`;
+    window.location.href = `/api/auth/oauth?provider=${provider}&action=start`;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

@@ -53,7 +53,7 @@ export default function Login() {
       setLoading(true);
       setError('');
       
-      const redirectUrl = `${window.location.origin}/api/auth/oauth?provider=${provider}&action=login`;
+      const redirectUrl = `${window.location.origin}/api/auth/oauth?provider=${provider}&action=start`;
       window.location.href = redirectUrl;
     } catch (error) {
       console.error(`${provider} login error:`, error);
