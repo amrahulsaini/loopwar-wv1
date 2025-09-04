@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Type definitions
-interface UserRow {
-  username: string;
-}
-
 // Validate user session
 // Simple cookie-based validation (no database needed)
 async function validateUserSession(request: NextRequest): Promise<{ username: string } | null> {

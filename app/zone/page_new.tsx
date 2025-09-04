@@ -286,7 +286,7 @@ export default function ZonePage() {
 
     fetchUsername();
     loadTopics();
-  }, []);
+  }, [loadTopics]);
 
   const handleLogout = async () => {
     try {
@@ -305,7 +305,7 @@ export default function ZonePage() {
 
   // Get icon component by name
   const getIconComponent = (iconName: string) => {
-    const iconMap: { [key: string]: any } = {
+    const iconMap: { [key: string]: React.ComponentType<{ size?: number; className?: string }> } = {
       Workflow,
       Database,
       TerminalSquare,

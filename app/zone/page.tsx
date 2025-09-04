@@ -37,8 +37,6 @@ export default function ZonePage() {
   const [activeTab, setActiveTab] = useState('questions'); 
   const [selectedCategory, setSelectedCategory] = useState('DSA Core');
   const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [loadingTopics, setLoadingTopics] = useState(false);
-  const [topicsError, setTopicsError] = useState<string | null>(null);
 
   // Enhanced DSA Categories with your new structure
   const getFallbackCategories = (): CategoryData[] => [
@@ -220,9 +218,6 @@ export default function ZonePage() {
   // Load topics from API or use fallback
   const loadTopics = useCallback(async () => {
     try {
-      setLoadingTopics(true);
-      setTopicsError(null);
-      
       const response = await fetch('/api/topics', {
         method: 'GET',
         credentials: 'include',
@@ -254,9 +249,6 @@ export default function ZonePage() {
       console.error('❌ Error loading topics:', error);
       console.log('📝 Using fallback data due to error');
       setCategories(getFallbackCategories());
-      setTopicsError('Using offline data. Database connection failed.');
-    } finally {
-      setLoadingTopics(false);
     }
   }, []);
 
