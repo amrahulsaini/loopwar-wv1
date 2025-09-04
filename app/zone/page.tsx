@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { 
   Workflow, 
   Database, 
@@ -366,22 +365,8 @@ export default function ZonePage() {
               aria-label="View Profile"
               title={`Go to ${username}'s profile`}
             >
-              <div className="profile-avatar">
-                <Image 
-                  src="/default-pfp.svg" 
-                  alt={`${username}'s profile`}
-                  width={40}
-                  height={40}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = username.charAt(0).toUpperCase();
-                      parent.classList.add('default-avatar');
-                    }
-                  }}
-                />
+              <div className="profile-avatar default-avatar">
+                {username.charAt(0).toUpperCase()}
               </div>
             </button>
           </div>

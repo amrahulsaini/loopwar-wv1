@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import Logo from '../../components/Logo';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -145,22 +144,8 @@ export default function UserProfilePage() {
           {/* Profile Hero Section */}
           <section className="profile-hero">
             <div className="profile-hero-content">
-              <div className="profile-avatar-large">
-                <Image 
-                  src="/default-pfp.svg" 
-                  alt={`${username}'s profile`}
-                  width={120}
-                  height={120}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = username.charAt(0).toUpperCase();
-                      parent.classList.add('default-avatar-large');
-                    }
-                  }}
-                />
+              <div className="profile-avatar-large default-avatar-large">
+                {username.charAt(0).toUpperCase()}
               </div>
               <div className="profile-info">
                 <h1>{username}</h1>
