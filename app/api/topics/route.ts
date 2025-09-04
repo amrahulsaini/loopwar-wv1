@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
 
+// Type definitions
+interface DatabaseRow {
+  category_id: number;
+  category_name: string;
+  category_icon: string;
+  category_description: string;
+  topic_id: number;
+  topic_name: string;
+  topic_description: string;
+  total_problems: number;
+  difficulty_level: string;
+  subtopic_id: number;
+  subtopic_name: string;
+}
+
+interface UserRow {
+  username: string;
+}
+
 // Database connection
 const dbConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 };
 
 // Validate user session
-async function validateUserSession(request: NextRequest) {
+async function validateUserSession(request: NextRequest): Promise<UserRow | null> {
   const cookies = request.headers.get('cookie') || '';
   const sessionToken = cookies.split(';')
     .find(c => c.trim().startsWith('sessionToken='))
@@ -29,7 +48,8 @@ async function validateUserSession(request: NextRequest) {
     );
     await connection.end();
     
-    return (rows as any[]).length > 0 ? (rows as any[])[0] : null;
+    const userRows = rows as UserRow[];
+    return userRows.length > 0 ? userRows[0] : null;
   } catch (error) {
     console.error('Session validation error:', error);
     return null;
@@ -75,7 +95,8 @@ export async function GET(request: NextRequest) {
       // Transform database results into the expected format
       const categoriesMap = new Map();
       
-      (categoriesResult as any[]).forEach(row => {
+      const dbRows = categoriesResult as DatabaseRow[];
+      dbRows.forEach((row) => {
         const { 
           category_id, category_name, category_icon, category_description,
           topic_id, topic_name, topic_description, total_problems, difficulty_level,

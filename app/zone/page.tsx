@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Workflow, 
@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings
 } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
 
@@ -219,7 +220,7 @@ export default function ZonePage() {
   ];
 
   // Load topics from secure API
-  const loadTopics = async () => {
+  const loadTopics = useCallback(async () => {
     try {
       setLoadingTopics(true);
       setTopicsError(null);
@@ -259,7 +260,7 @@ export default function ZonePage() {
     } finally {
       setLoadingTopics(false);
     }
-  };
+  }, []); // Empty dependency array for useCallback
 
   // Load user session
   useEffect(() => {
@@ -286,7 +287,7 @@ export default function ZonePage() {
 
     fetchUsername();
     loadTopics();
-  }, []);
+  }, [loadTopics]); // Add loadTopics as dependency
 
   const handleLogout = async () => {
     try {
@@ -304,8 +305,8 @@ export default function ZonePage() {
   };
 
   // Get icon component by name
-  const getIconComponent = (iconName: string) => {
-    const iconMap: { [key: string]: any } = {
+  const getIconComponent = (iconName: string): LucideIcon => {
+    const iconMap: { [key: string]: LucideIcon } = {
       Workflow,
       Database,
       TerminalSquare,

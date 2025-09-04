@@ -7,9 +7,6 @@ const protectedRoutes = ['/zone'];
 // Routes that should redirect authenticated users
 const authRoutes = ['/join', '/verify'];
 
-// Public routes that don't require authentication
-const publicRoutes = ['/', '/api'];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
@@ -39,7 +36,6 @@ export function middleware(request: NextRequest) {
   // Check if the route is protected
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // If trying to access protected route without authentication
   if (isProtectedRoute && !isAuthenticated) {
