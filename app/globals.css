@@ -11,8 +11,10 @@
     
     /* Black & White Theme */
     --color-bg: #ffffff;
+    --color-bg-rgb: 255, 255, 255;
     --color-text: #1a1a1a;
     --color-primary: #000000;
+    --color-primary-rgb: 0, 0, 0;
     --color-secondary: #4d4d4d;
     --color-accent: #333333;
     --color-border: #e0e0e0;
@@ -43,6 +45,75 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* DEFAULT AVATAR STYLES */
+.default-avatar,
+.default-avatar-large,
+.avatar-placeholder {
+    background: var(--color-primary) !important;
+    color: var(--color-bg) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: var(--font-primary);
+    border-radius: 50%;
+}
+
+.default-avatar {
+    font-size: 0.9rem;
+}
+
+.default-avatar-large {
+    font-size: 3rem;
+}
+
+.avatar-placeholder {
+    font-size: 2rem;
+}
+
+/* Profile Avatar Styles */
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: var(--font-primary);
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* User Avatar in Headers */
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .container {
@@ -2004,6 +2075,7 @@ body {
     font-family: var(--font-primary);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    background: rgba(var(--color-bg-rgb), 0.95);
 }
 
 .zone-header .container {
@@ -3325,14 +3397,14 @@ body {
     
     .categories-sidebar {
         position: static;
-        order: 2;
+        order: 1;
         max-height: none;
         overflow: visible;
-        margin-top: 20px;
+        margin-bottom: 20px;
     }
     
     .topics-content {
-        order: 1;
+        order: 2;
         padding: 20px;
     }
     
@@ -3793,14 +3865,18 @@ body {
 
 /* Profile Header */
 .profile-header {
-    background: var(--color-bg);
+    background: rgba(var(--color-bg-rgb), 0.95);
     border-bottom: 2px solid var(--color-border);
     padding: 1rem 0;
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     font-family: var(--font-primary);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .profile-header .container {
@@ -3837,7 +3913,7 @@ body {
 .profile-main {
     min-height: 100vh;
     background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-card-bg) 100%);
-    padding: 40px 0;
+    padding: 120px 0 40px 0;
     font-family: var(--font-primary);
 }
 
@@ -4172,13 +4248,15 @@ body {
 }
 
 .settings-header {
-    background: var(--color-bg);
+    background: rgba(var(--color-bg-rgb), 0.95);
     border-bottom: 2px solid var(--color-border);
     padding: 1rem 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -4226,7 +4304,7 @@ body {
 }
 
 .settings-main {
-    padding: 40px 0;
+    padding: 120px 0 40px 0;
 }
 
 .settings-layout {
@@ -4543,7 +4621,7 @@ body {
     }
     
     .settings-main {
-        padding: 20px 0;
+        padding: 140px 0 20px 0;
     }
     
     .settings-layout {
@@ -4553,12 +4631,12 @@ body {
     
     .settings-sidebar {
         position: static;
-        order: 2;
-        margin-top: 20px;
+        order: 1;
+        top: auto;
     }
     
     .settings-content {
-        order: 1;
+        order: 2;
         padding: 24px;
     }
     
@@ -4608,6 +4686,10 @@ body {
     
     .back-btn span {
         display: none;
+    }
+    
+    .settings-main {
+        padding: 160px 0 20px 0;
     }
     
     .settings-sidebar {
@@ -4693,6 +4775,10 @@ body {
         padding: 5px 8px;
     }
     
+    .settings-main {
+        padding: 180px 0 20px 0;
+    }
+    
     .settings-nav-btn {
         padding: 8px 4px;
         font-size: 0.8rem;
@@ -4757,6 +4843,10 @@ body {
 
 /* Responsive Design for Profile Pages */
 @media (max-width: 768px) {
+    .profile-main {
+        padding: 140px 0 40px 0;
+    }
+    
     .profile-content-grid {
         grid-template-columns: 1fr;
         gap: 30px;
@@ -4786,7 +4876,7 @@ body {
 
 @media (max-width: 480px) {
     .profile-main {
-        padding: 20px 0;
+        padding: 160px 0 20px 0;
     }
 
     .stats-grid {
