@@ -26,7 +26,7 @@ const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+  ...(process.env.NODE_ENV === 'production' && { ssl: { rejectUnauthorized: false } })
 };
 
 // Validate user session
