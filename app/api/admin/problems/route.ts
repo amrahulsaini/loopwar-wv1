@@ -63,21 +63,41 @@ export async function GET(request: NextRequest) {
 
     // Handle name-based queries (for frontend subtopic pages)
     if (subtopicParam && topicParam && categoryParam) {
-      // Format names back from URL format
-      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-      const topicName = topicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-      const subtopicName = subtopicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      // Format names back from URL format - more accurate conversion
+      const categoryName = categoryParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase to spaces
+        .replace(/and/g, '&'); // replace 'and' back to '&'
+      
+      const topicName = topicParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/and/g, '&');
+      
+      const subtopicName = subtopicParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/and/g, '&');
+
+      console.log('Name-based query:', {
+        originalParams: { categoryParam, topicParam, subtopicParam },
+        convertedNames: { categoryName, topicName, subtopicName }
+      });
       
       query += ' AND c.name = ? AND t.name = ? AND s.name = ?';
       queryParams.push(categoryName, topicName, subtopicName);
     } else if (topicParam && categoryParam) {
-      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-      const topicName = topicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      const categoryName = categoryParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/and/g, '&');
+      
+      const topicName = topicParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/and/g, '&');
       
       query += ' AND c.name = ? AND t.name = ?';
       queryParams.push(categoryName, topicName);
     } else if (categoryParam) {
-      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      const categoryName = categoryParam
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/and/g, '&');
       
       query += ' AND c.name = ?';
       queryParams.push(categoryName);
@@ -85,7 +105,15 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY p.created_at DESC';
 
+    console.log('Final query:', query);
+    console.log('Query params:', queryParams);
+
     const rows = await Database.query(query, queryParams) as RowDataPacket[];
+
+    console.log('Query result count:', rows.length);
+    if (rows.length > 0) {
+      console.log('Sample result:', rows[0]);
+    }
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Clock,
   Target,
-  TrendingUp,
   ChevronDown,
   Database
 } from 'lucide-react';
@@ -76,15 +75,78 @@ export default function SubtopicPracticePage() {
           return;
         }
 
-        // Fetch actual problems from database based on subtopic
+        // First validate if this category/topic/subtopic exists in database
         try {
+          const categoriesResponse = await fetch('/api/admin/categories', {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          let isValidPath = false;
+
+          if (categoriesResponse.ok) {
+            const categoriesData = await categoriesResponse.json();
+            
+            if (categoriesData.success) {
+              // Format names back from URL format for comparison
+              const categoryName = category.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+              const topicName = topic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+              const subtopicName = subtopic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+
+              console.log('URL params:', { category, topic, subtopic });
+              console.log('Formatted names:', { categoryName, topicName, subtopicName });
+
+              // Check if category exists
+              const categoryObj = categoriesData.categories.find((cat: {name: string, id: number}) => 
+                cat.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === category.toLowerCase()
+              );
+
+              if (categoryObj) {
+                console.log('Category found:', categoryObj);
+                
+                // Check if topic exists in this category
+                const topicObj = categoriesData.topics.find((top: {name: string, category_id: number, id: number}) => 
+                  top.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === topic.toLowerCase() && 
+                  top.category_id === categoryObj.id
+                );
+
+                if (topicObj) {
+                  console.log('Topic found:', topicObj);
+                  
+                  // Check if subtopic exists in this topic
+                  const subtopicObj = categoriesData.subtopics.find((sub: {name: string, topic_id: number, id: number}) => 
+                    sub.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === subtopic.toLowerCase() && 
+                    sub.topic_id === topicObj.id
+                  );
+
+                  if (subtopicObj) {
+                    console.log('Subtopic found:', subtopicObj);
+                    isValidPath = true;
+                  }
+                }
+              }
+
+              // If path is not valid, redirect to 404
+              if (!isValidPath) {
+                console.log('Invalid path, redirecting to 404');
+                router.push('/404');
+                return;
+              }
+            }
+          }
+
+          // Now fetch actual problems from database
           const problemsResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
             method: 'GET',
             credentials: 'include',
           });
 
+          console.log('Fetching problems for:', { category, topic, subtopic });
+
           if (problemsResponse.ok) {
             const problemsData = await problemsResponse.json();
+            console.log('Problems response:', problemsData);
+            
             if (problemsData.success) {
               if (problemsData.problems.length > 0) {
                 // Convert database problems to frontend format
@@ -101,17 +163,21 @@ export default function SubtopicPracticePage() {
                   solved: false // TODO: Get actual user progress
                 }));
                 setProblems(formattedProblems);
+                console.log('Set problems:', formattedProblems);
               } else {
                 // No problems found - set empty array (will show "No problems" message)
                 setProblems([]);
+                console.log('No problems found');
               }
             } else {
               // API error - set empty array
               setProblems([]);
+              console.log('API error:', problemsData.message);
             }
           } else {
             // API request failed - set empty array
             setProblems([]);
+            console.log('Problems API request failed');
           }
         } catch (error) {
           console.error('Error fetching problems:', error);
