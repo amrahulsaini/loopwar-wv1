@@ -272,7 +272,11 @@ export default function SubtopicPracticePage() {
               </div>
             </div>
 
-            <div className="header-user">
+            <div className="header-right">
+              <Link href="/zone" className="header-back-btn">
+                <ArrowLeft size={16} />
+                <span>Back to Zone</span>
+              </Link>
               <span className="username">@{username}</span>
             </div>
           </div>
@@ -280,16 +284,6 @@ export default function SubtopicPracticePage() {
       </header>
 
       <main className="practice-main">
-        {/* Back Button - positioned at top */}
-        <div className="container">
-          <div className="practice-header">
-            <Link href="/zone" className="back-btn">
-              <ArrowLeft size={20} />
-              <span>Back to Zone</span>
-            </Link>
-          </div>
-        </div>
-
         <div className="container">
           {/* Practice Title */}
           <div className="practice-title-section">
