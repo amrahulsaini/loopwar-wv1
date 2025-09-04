@@ -22,12 +22,46 @@ export const SECURITY_HEADERS = {
 };
 
 export class SecurityService {
+  // Authenticate user from cookies
+  static authenticateUser(request: NextRequest): { isAuthenticated: boolean; username?: string; error?: string } {
+    try {
+      // Get cookies from request
+      const cookies = request.headers.get('cookie') || '';
+      const sessionToken = cookies.split(';')
+        .find(c => c.trim().startsWith('sessionToken='))
+        ?.split('=')[1];
+
+      const username = cookies.split(';')
+        .find(c => c.trim().startsWith('username='))
+        ?.split('=')[1];
+
+      const isVerifiedCookie = cookies.split(';')
+        .find(c => c.trim().startsWith('isVerified='))
+        ?.split('=')[1];
+
+      // Handle both 'true' and '1' as verified
+      const isVerified = isVerifiedCookie === 'true' || isVerifiedCookie === '1';
+
+      if (!sessionToken || !username || !isVerified) {
+        return { isAuthenticated: false, error: 'Missing authentication credentials' };
+      }
+
+      return {
+        isAuthenticated: true,
+        username: decodeURIComponent(username)
+      };
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return { isAuthenticated: false, error: 'Authentication failed' };
+    }
+  }
+
   // Get client IP address
   static getClientIP(request: NextRequest): string {
     const xForwardedFor = request.headers.get('x-forwarded-for');
     const xRealIP = request.headers.get('x-real-ip');
     const remoteAddr = request.headers.get('remote-addr');
-    
+
     if (xForwardedFor) {
       return xForwardedFor.split(',')[0].trim();
     }
@@ -45,7 +79,7 @@ export class SecurityService {
     const ip = this.getClientIP(request);
     const endpoint = request.nextUrl.pathname;
     const limit = RATE_LIMITS[endpoint as keyof typeof RATE_LIMITS] || RATE_LIMITS.default;
-    
+
     try {
       // Get current rate limit data
       const rateLimitData = await Database.queryOne(

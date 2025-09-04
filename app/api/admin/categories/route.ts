@@ -1,10 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Database } from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
 import { RowDataPacket } from 'mysql2';
 
 // GET - Fetch all categories, topics, and subtopics for admin
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Authenticate user
+    const auth = SecurityService.authenticateUser(request);
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     // Fetch all categories
     const categories = await Database.query(
       'SELECT id, name FROM categories ORDER BY name'
@@ -30,8 +40,8 @@ export async function GET() {
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         message: 'Failed to fetch categories data',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
       },

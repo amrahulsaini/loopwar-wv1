@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Database } from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const auth = SecurityService.authenticateUser(request);
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { username } = await request.json();
     
     if (!username) {

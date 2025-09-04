@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Database } from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
 import { RowDataPacket } from 'mysql2';
 
 interface ProblemRequest {
@@ -15,6 +16,15 @@ interface ProblemRequest {
 // GET - Fetch problems for admin
 export async function GET(request: NextRequest) {
   try {
+    // Authenticate user
+    const auth = SecurityService.authenticateUser(request);
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const subtopicId = searchParams.get('subtopic_id');
     const categoryId = searchParams.get('category_id');
@@ -240,6 +250,15 @@ export async function GET(request: NextRequest) {
 // POST - Add new problem
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const auth = SecurityService.authenticateUser(request);
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body: ProblemRequest = await request.json();
     
     const {
