@@ -71,28 +71,38 @@ export async function GET(request: NextRequest) {
       const topicsQuery = await Database.query('SELECT id, name, category_id FROM topics') as RowDataPacket[];
       const subtopicsQuery = await Database.query('SELECT id, name, topic_id FROM subtopics') as RowDataPacket[];
       
+      console.log('Database categories:', categoriesQuery);
+      console.log('Database topics:', topicsQuery);
+      console.log('Database subtopics:', subtopicsQuery);
+      
       // Find category by URL format
-      const categoryObj = categoriesQuery.find((cat) => 
-        (cat as {name: string, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === categoryParam.toLowerCase()
-      ) as {name: string, id: number} | undefined;
+      const categoryObj = categoriesQuery.find((cat) => {
+        const dbNameFormatted = (cat as {name: string, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and');
+        console.log(`Comparing "${dbNameFormatted}" with "${categoryParam.toLowerCase()}"`);
+        return dbNameFormatted === categoryParam.toLowerCase();
+      }) as {name: string, id: number} | undefined;
       
       if (categoryObj) {
         console.log('Found category:', categoryObj);
         
         // Find topic in this category
-        const topicObj = topicsQuery.find((top) => 
-          (top as {name: string, category_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === topicParam.toLowerCase() && 
-          (top as {name: string, category_id: number, id: number}).category_id === categoryObj.id
-        ) as {name: string, category_id: number, id: number} | undefined;
+        const topicObj = topicsQuery.find((top) => {
+          const dbNameFormatted = (top as {name: string, category_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and');
+          const categoryId = (top as {name: string, category_id: number, id: number}).category_id;
+          console.log(`Comparing topic "${dbNameFormatted}" with "${topicParam.toLowerCase()}" for category ${categoryId}`);
+          return dbNameFormatted === topicParam.toLowerCase() && categoryId === categoryObj.id;
+        }) as {name: string, category_id: number, id: number} | undefined;
         
         if (topicObj) {
           console.log('Found topic:', topicObj);
           
           // Find subtopic in this topic
-          const subtopicObj = subtopicsQuery.find((sub) => 
-            (sub as {name: string, topic_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === subtopicParam.toLowerCase() && 
-            (sub as {name: string, topic_id: number, id: number}).topic_id === topicObj.id
-          ) as {name: string, topic_id: number, id: number} | undefined;
+          const subtopicObj = subtopicsQuery.find((sub) => {
+            const dbNameFormatted = (sub as {name: string, topic_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and');
+            const topicId = (sub as {name: string, topic_id: number, id: number}).topic_id;
+            console.log(`Comparing subtopic "${dbNameFormatted}" with "${subtopicParam.toLowerCase()}" for topic ${topicId}`);
+            return dbNameFormatted === subtopicParam.toLowerCase() && topicId === topicObj.id;
+          }) as {name: string, topic_id: number, id: number} | undefined;
           
           if (subtopicObj) {
             console.log('Found subtopic:', subtopicObj);
