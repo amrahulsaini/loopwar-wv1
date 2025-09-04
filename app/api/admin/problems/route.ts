@@ -3,6 +3,17 @@ import { Database } from '../../../../lib/database';
 import { SecurityService } from '../../../../lib/security';
 import { RowDataPacket } from 'mysql2';
 
+interface ProblemRow {
+  id: number;
+  problem_name: string;
+  problem_description: string;
+  difficulty: string;
+  sort_order: number;
+  category_name: string;
+  topic_name: string;
+  subtopic_name: string;
+}
+
 interface ProblemRequest {
   category_id: number;
   topic_id: number;
@@ -42,9 +53,6 @@ export async function GET(request: NextRequest) {
         p.problem_description,
         p.difficulty,
         p.sort_order,
-        p.created_at,
-        p.created_by,
-        p.status,
         c.name as category_name,
         t.name as topic_name,
         s.name as subtopic_name
@@ -228,9 +236,21 @@ export async function GET(request: NextRequest) {
       console.log('Sample result:', rows[0]);
     }
 
+    // Clean response data - only return what's needed for frontend
+    const cleanProblems = (rows as ProblemRow[]).map((problem) => ({
+      id: problem.id,
+      title: problem.problem_name,
+      description: problem.problem_description,
+      difficulty: problem.difficulty,
+      sortOrder: problem.sort_order,
+      category: problem.category_name,
+      topic: problem.topic_name,
+      subtopic: problem.subtopic_name
+    }));
+
     return NextResponse.json({
       success: true,
-      problems: rows,
+      problems: cleanProblems,
       total: rows.length
     });
 

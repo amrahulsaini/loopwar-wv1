@@ -173,14 +173,18 @@ export default function SubtopicPracticePage() {
                 // Convert database problems to frontend format
                 const formattedProblems = problemsData.problems.map((p: {
                   id: number;
-                  problem_name: string;
+                  title: string;
                   difficulty: string;
-                  problem_description: string;
+                  description: string;
+                  sortOrder: number;
+                  category: string;
+                  topic: string;
+                  subtopic: string;
                 }) => ({
                   id: p.id,
-                  title: p.problem_name,
+                  title: p.title,
                   difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
-                  description: p.problem_description,
+                  description: p.description,
                   solved: false // TODO: Get actual user progress
                 }));
                 setProblems(formattedProblems);
