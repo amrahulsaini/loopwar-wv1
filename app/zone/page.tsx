@@ -12,7 +12,8 @@ import {
   Server,
   Bot,
   LogOut,
-  Settings
+  Settings,
+  TreePine
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner'; 
@@ -47,7 +48,7 @@ export default function ZonePage() {
   const getFallbackCategories = (): CategoryData[] => [
     {
       name: 'Core DSA',
-      icon: 'Workflow',
+      icon: 'TreePine',
       description: 'Fundamental Data Structures and Algorithms',
       topics: [
         {
@@ -205,7 +206,7 @@ export default function ZonePage() {
     },
     {
       name: 'OS & Shell',
-      icon: 'Terminal',
+      icon: 'TerminalSquare',
       description: 'Operating systems, shell scripting, command line tools, and system administration',
       topics: [
         { 
@@ -528,8 +529,9 @@ export default function ZonePage() {
       Bug,
       Server,
       Bot,
+      TreePine,
     };
-    return iconMap[iconName] || Workflow;
+    return iconMap[iconName] || TreePine;
   };
 
   // Function to render Lucide icons based on icon name
@@ -689,7 +691,7 @@ export default function ZonePage() {
                                         onClick={() => handleSubtopicClick(topic.name, subtopic)}
                                         title={`Click to practice: ${subtopic}`}
                                       >
-                                        <span className="subtopic-icon">📚</span>
+                                        <span className="subtopic-icon">{index + 1}</span>
                                         <span className="subtopic-name">{subtopic}</span>
                                         <span className="subtopic-arrow">→</span>
                                       </button>

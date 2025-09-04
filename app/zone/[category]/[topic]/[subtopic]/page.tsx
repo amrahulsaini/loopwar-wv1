@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   Clock,
   Target,
-  TrendingUp
+  TrendingUp,
+  ChevronDown
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
@@ -36,6 +37,7 @@ export default function SubtopicPracticePage() {
   const [username, setUsername] = useState('');
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [showNavigationDropdown, setShowNavigationDropdown] = useState(false);
   
   // URL parameters
   const category = params.category as string;
@@ -158,9 +160,23 @@ export default function SubtopicPracticePage() {
               <div className="breadcrumb">
                 <Link href="/zone" className="breadcrumb-link">Zone</Link>
                 <span className="breadcrumb-separator">→</span>
-                <span className="breadcrumb-item">{categoryDisplay}</span>
+                <div className="breadcrumb-dropdown">
+                  <button 
+                    className="breadcrumb-dropdown-btn"
+                    onClick={() => setShowNavigationDropdown(!showNavigationDropdown)}
+                  >
+                    {categoryDisplay}
+                    <ChevronDown size={14} />
+                  </button>
+                  {showNavigationDropdown && (
+                    <div className="breadcrumb-dropdown-menu">
+                      <Link href="/zone" className="dropdown-item">← Back to all categories</Link>
+                      <div className="dropdown-current">{categoryDisplay} → {topicDisplay}</div>
+                    </div>
+                  )}
+                </div>
                 <span className="breadcrumb-separator">→</span>
-                <span className="breadcrumb-item">{topicDisplay}</span>
+                <Link href="/zone" className="breadcrumb-link">{topicDisplay}</Link>
                 <span className="breadcrumb-separator">→</span>
                 <span className="breadcrumb-current">{subtopicDisplay}</span>
               </div>
