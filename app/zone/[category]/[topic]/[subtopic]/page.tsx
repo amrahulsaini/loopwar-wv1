@@ -13,7 +13,8 @@ import {
   Clock,
   Target,
   TrendingUp,
-  ChevronDown
+  ChevronDown,
+  Database
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
@@ -58,31 +59,6 @@ export default function SubtopicPracticePage() {
   const topicDisplay = formatDisplayName(topic);
   const subtopicDisplay = formatDisplayName(subtopic);
 
-  // Mock problems data (will be fetched from API later)
-  const getMockProblems = useCallback((): Problem[] => [
-    {
-      id: 1,
-      title: `${subtopicDisplay} - Basic Implementation`,
-      difficulty: 'Easy',
-      description: `Learn the fundamentals of ${subtopicDisplay} with step-by-step guidance.`,
-      solved: false
-    },
-    {
-      id: 2,
-      title: `${subtopicDisplay} - Intermediate Challenge`,
-      difficulty: 'Medium', 
-      description: `Apply ${subtopicDisplay} concepts to solve real-world problems.`,
-      solved: false
-    },
-    {
-      id: 3,
-      title: `${subtopicDisplay} - Advanced Optimization`,
-      difficulty: 'Hard',
-      description: `Master advanced ${subtopicDisplay} techniques and optimizations.`,
-      solved: false
-    }
-  ], [subtopicDisplay]);
-
   useEffect(() => {
     const fetchUserAndProblems = async () => {
       try {
@@ -100,8 +76,63 @@ export default function SubtopicPracticePage() {
           return;
         }
 
-        // Fetch actual problems from database based on subtopic
+        // First validate if this category/topic/subtopic exists in database
         try {
+          const categoriesResponse = await fetch('/api/admin/categories', {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (categoriesResponse.ok) {
+            const categoriesData = await categoriesResponse.json();
+            
+            if (categoriesData.success) {
+              // Format names back from URL format for comparison
+              const categoryName = category.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+              const topicName = topic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+              const subtopicName = subtopic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+
+              // Check if category exists
+              const categoryExists = categoriesData.categories.some((cat: {name: string}) => 
+                cat.name.toLowerCase() === categoryName.toLowerCase()
+              );
+
+              if (!categoryExists) {
+                router.push('/404');
+                return;
+              }
+
+              // Check if topic exists in this category
+              const categoryId = categoriesData.categories.find((cat: {name: string}) => 
+                cat.name.toLowerCase() === categoryName.toLowerCase()
+              )?.id;
+
+              const topicExists = categoriesData.topics.some((top: {name: string, category_id: number}) => 
+                top.name.toLowerCase() === topicName.toLowerCase() && top.category_id === categoryId
+              );
+
+              if (!topicExists) {
+                router.push('/404');
+                return;
+              }
+
+              // Check if subtopic exists in this topic
+              const topicId = categoriesData.topics.find((top: {name: string, category_id: number}) => 
+                top.name.toLowerCase() === topicName.toLowerCase() && top.category_id === categoryId
+              )?.id;
+
+              const subtopicExists = categoriesData.subtopics.some((sub: {name: string, topic_id: number}) => 
+                sub.name.toLowerCase() === subtopicName.toLowerCase() && sub.topic_id === topicId
+              );
+
+              if (!subtopicExists) {
+                router.push('/404');
+                return;
+              }
+            }
+          }
+
+          // Now fetch actual problems from database
           const problemsResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
             method: 'GET',
             credentials: 'include',
@@ -109,32 +140,38 @@ export default function SubtopicPracticePage() {
 
           if (problemsResponse.ok) {
             const problemsData = await problemsResponse.json();
-            if (problemsData.success && problemsData.problems.length > 0) {
-              // Convert database problems to frontend format
-              const formattedProblems = problemsData.problems.map((p: {
-                id: number;
-                problem_name: string;
-                difficulty: string;
-                problem_description: string;
-              }) => ({
-                id: p.id,
-                title: p.problem_name,
-                difficulty: p.difficulty,
-                description: p.problem_description,
-                solved: false // TODO: Get actual user progress
-              }));
-              setProblems(formattedProblems);
+            if (problemsData.success) {
+              if (problemsData.problems.length > 0) {
+                // Convert database problems to frontend format
+                const formattedProblems = problemsData.problems.map((p: {
+                  id: number;
+                  problem_name: string;
+                  difficulty: string;
+                  problem_description: string;
+                }) => ({
+                  id: p.id,
+                  title: p.problem_name,
+                  difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
+                  description: p.problem_description,
+                  solved: false // TODO: Get actual user progress
+                }));
+                setProblems(formattedProblems);
+              } else {
+                // No problems found - set empty array instead of mock data
+                setProblems([]);
+              }
             } else {
-              // Use mock data if no problems found
-              setProblems(getMockProblems());
+              // API error - set empty array
+              setProblems([]);
             }
           } else {
-            // Use mock data if API fails
-            setProblems(getMockProblems());
+            // API request failed - set empty array
+            setProblems([]);
           }
         } catch (error) {
           console.error('Error fetching problems:', error);
-          setProblems(getMockProblems());
+          // On error, set empty array instead of mock data
+          setProblems([]);
         }
         
       } catch (error) {
@@ -146,7 +183,7 @@ export default function SubtopicPracticePage() {
     };
 
     fetchUserAndProblems();
-  }, [category, topic, subtopic, router, getMockProblems]);
+  }, [category, topic, subtopic, router]);
 
   const handleModeChange = (mode: PracticeMode) => {
     setActiveMode(mode);
@@ -347,15 +384,15 @@ export default function SubtopicPracticePage() {
               ))}
             </div>
 
-            {/* Coming Soon Message for empty state */}
+            {/* No Problems Found Message */}
             {problems.length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">
-                  <TrendingUp size={48} />
+                  <Database size={48} />
                 </div>
-                <h3>Problems Coming Soon!</h3>
-                <p>We&apos;re working hard to add {activeMode} problems for {subtopicDisplay}.</p>
-                <p>Check back soon for exciting challenges!</p>
+                <h3>No Problems Available</h3>
+                <p>No {activeMode} problems have been added for <strong>{subtopicDisplay}</strong> yet.</p>
+                <p>Our team is working to add more problems. Check back soon!</p>
               </div>
             )}
           </div>
