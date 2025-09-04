@@ -13,8 +13,11 @@
     --color-bg: #ffffff;
     --color-bg-rgb: 255, 255, 255;
     --color-text: #1a1a1a;
+    --color-text-secondary: #666666;
     --color-primary: #000000;
     --color-primary-rgb: 0, 0, 0;
+    --color-primary-light: #f0f0f0;
+    --color-primary-dark: #333333;
     --color-secondary: #4d4d4d;
     --color-accent: #333333;
     --color-border: #e0e0e0;
@@ -2594,17 +2597,40 @@ body {
     margin-top: 16px;
 }
 
+.subtopics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
 .subtopics-label {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text);
-    margin: 0 0 8px 0;
+    margin: 0;
+}
+
+.expand-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.expand-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-bg);
 }
 
 .subtopics-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .subtopic-tag {
@@ -2615,6 +2641,141 @@ body {
     font-size: 0.75rem;
     color: var(--color-text);
     font-weight: 500;
+}
+
+/* Enhanced clickable subtopic styles */
+.subtopic-tag.clickable {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+}
+
+.subtopic-tag.clickable:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.subtopic-tag.clickable.selected {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.subtopic-icon {
+    font-size: 1rem;
+    margin-right: 8px;
+}
+
+.subtopic-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.subtopic-arrow {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.subtopic-tag.clickable:hover .subtopic-arrow {
+    opacity: 1;
+}
+
+.subtopic-tag.clickable.selected .subtopic-arrow {
+    opacity: 1;
+    color: var(--color-bg);
+}
+
+.subtopic-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--color-card-bg);
+    border: 2px dashed var(--color-border);
+    color: var(--color-text);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.subtopic-more-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.more-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.expand-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-left: auto;
+}
+
+.topic-actions {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.start-topic-btn.primary {
+    width: 100%;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.start-topic-btn.primary:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.start-subtopic-btn.secondary {
+    width: 100%;
+    background: var(--color-bg);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.start-subtopic-btn.secondary:hover {
+    background: var(--color-primary);
+    color: var(--color-bg);
 }
 
 .subtopic-more {

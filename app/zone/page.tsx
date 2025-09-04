@@ -40,6 +40,8 @@ export default function ZonePage() {
   const [activeTab, setActiveTab] = useState('questions'); 
   const [selectedCategory, setSelectedCategory] = useState('Core DSA');
   const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  const [selectedSubtopic, setSelectedSubtopic] = useState<{topic: string, subtopic: string} | null>(null);
 
   // Enhanced DSA Categories with your new structure
   const getFallbackCategories = (): CategoryData[] => [
@@ -173,78 +175,218 @@ export default function ZonePage() {
     {
       name: 'Databases',
       icon: 'Database',
+      description: 'SQL, NoSQL, database design, optimization, and data management',
       topics: [
-        { name: 'SQL Basics', problems: 20, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Joins & Subqueries', problems: 25, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Indexing & Optimization', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'NoSQL Databases', problems: 18, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Database Design', problems: 12, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'SQL Basics', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Beginner',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Database Design', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'NoSQL Databases', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
       name: 'OS & Shell',
-      icon: 'TerminalSquare',
+      icon: 'Terminal',
+      description: 'Operating systems, shell scripting, command line tools, and system administration',
       topics: [
-        { name: 'Process Management', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Memory Management', problems: 12, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'File Systems', problems: 10, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Shell Scripting', problems: 18, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'System Calls', problems: 14, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'Operating System Basics', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Shell Scripting', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Beginner',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'System Administration', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
       name: 'Networking & Concurrency',
       icon: 'Network',
+      description: 'Network protocols, distributed systems, multithreading, and concurrent programming',
       topics: [
-        { name: 'TCP/IP Protocol', problems: 12, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'HTTP/HTTPS', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Multithreading', problems: 20, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Synchronization', problems: 18, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Socket Programming', problems: 10, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'Network Protocols', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Multithreading', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Distributed Systems', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
       name: 'Programming Languages',
       icon: 'Code2',
+      description: 'Language-specific concepts, paradigms, and advanced programming techniques',
       topics: [
-        { name: 'Python Advanced', problems: 25, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'JavaScript/TypeScript', problems: 30, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Java Core', problems: 28, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'C++ STL', problems: 22, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Go Fundamentals', problems: 15, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'JavaScript Advanced', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Python Advanced', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Java Advanced', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
       name: 'Debugging & Optimization',
       icon: 'Bug',
+      description: 'Performance tuning, profiling, debugging techniques, and optimization strategies',
       topics: [
-        { name: 'Code Profiling', problems: 8, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Memory Debugging', problems: 10, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Performance Optimization', problems: 12, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Testing Strategies', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Static Analysis', problems: 6, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'Code Profiling', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Memory Debugging', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Performance Optimization', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
       name: 'System Design',
       icon: 'Server',
+      description: 'Scalable system architecture, design patterns, and distributed systems',
       topics: [
-        { name: 'RESTful APIs', problems: 20, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Authentication & Authorization', problems: 18, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Microservices', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Caching Strategies', problems: 12, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Message Queues', problems: 14, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'RESTful APIs', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Authentication & Authorization', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Microservices', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     },
     {
-      name: 'Machine Learning',
+      name: 'AI & ML',
       icon: 'Bot',
+      description: 'Machine learning algorithms, AI concepts, and deep learning fundamentals',
       topics: [
-        { name: 'Supervised Learning', problems: 25, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Unsupervised Learning', problems: 20, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Neural Networks', problems: 18, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Feature Engineering', problems: 15, completed: 0, subtopics: ['Data to be added soon'] },
-        { name: 'Model Evaluation', problems: 12, completed: 0, subtopics: ['Data to be added soon'] }
+        { 
+          name: 'Supervised Learning', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Intermediate',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Unsupervised Learning', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        },
+        { 
+          name: 'Neural Networks', 
+          problems: 0, 
+          completed: 0, 
+          difficulty: 'Advanced',
+          description: 'Data to be added yet',
+          subtopics: ['Data to be added yet']
+        }
       ]
     }
   ];
@@ -285,6 +427,32 @@ export default function ZonePage() {
       setCategories(getFallbackCategories());
     }
   }, []);
+
+  // Handler functions for subtopic interactions
+  const toggleTopicExpansion = (topicName: string) => {
+    setExpandedTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSubtopicClick = (topicName: string, subtopicName: string) => {
+    setSelectedSubtopic({ topic: topicName, subtopic: subtopicName });
+    console.log(`🎯 Selected subtopic: ${subtopicName} from ${topicName}`);
+    // TODO: Navigate to subtopic practice page
+    // This is where you can add navigation to specific subtopic content
+  };
+
+  const handleTopicStart = (topicName: string) => {
+    console.log(`🚀 Starting practice for topic: ${topicName}`);
+    // TODO: Navigate to topic overview page
+    // This is where you can add navigation to topic content
+  };
 
   // Authentication check on mount
   useEffect(() => {
@@ -484,25 +652,62 @@ export default function ZonePage() {
 
                               {topic.subtopics && (
                                 <div className="subtopics">
-                                  <p className="subtopics-label">Key areas:</p>
+                                  <div className="subtopics-header">
+                                    <p className="subtopics-label">Subtopics ({topic.subtopics.length}):</p>
+                                    <button 
+                                      className="expand-btn"
+                                      onClick={() => toggleTopicExpansion(topic.name)}
+                                    >
+                                      {expandedTopics.has(topic.name) ? '▼ Collapse' : '▶ View All'}
+                                    </button>
+                                  </div>
+                                  
                                   <div className="subtopics-list">
-                                    {topic.subtopics.slice(0, 3).map((subtopic, index) => (
-                                      <span key={index} className="subtopic-tag">
-                                        {subtopic}
-                                      </span>
+                                    {/* Always show first 3 subtopics */}
+                                    {topic.subtopics.slice(0, expandedTopics.has(topic.name) ? topic.subtopics.length : 3).map((subtopic, index) => (
+                                      <button 
+                                        key={index} 
+                                        className={`subtopic-tag clickable ${
+                                          selectedSubtopic?.topic === topic.name && selectedSubtopic?.subtopic === subtopic 
+                                            ? 'selected' : ''
+                                        }`}
+                                        onClick={() => handleSubtopicClick(topic.name, subtopic)}
+                                        title={`Click to practice: ${subtopic}`}
+                                      >
+                                        <span className="subtopic-icon">📚</span>
+                                        <span className="subtopic-name">{subtopic}</span>
+                                        <span className="subtopic-arrow">→</span>
+                                      </button>
                                     ))}
-                                    {topic.subtopics.length > 3 && (
-                                      <span className="subtopic-more">
-                                        +{topic.subtopics.length - 3} more
-                                      </span>
+                                    
+                                    {/* Show count if collapsed and there are more */}
+                                    {!expandedTopics.has(topic.name) && topic.subtopics.length > 3 && (
+                                      <button 
+                                        className="subtopic-more-btn"
+                                        onClick={() => toggleTopicExpansion(topic.name)}
+                                      >
+                                        <span className="more-icon">+</span>
+                                        <span>{topic.subtopics.length - 3} more subtopics</span>
+                                        <span className="expand-hint">Click to expand</span>
+                                      </button>
                                     )}
                                   </div>
                                 </div>
                               )}
 
-                              <button className="start-topic-btn">
-                                Start Practice
-                              </button>
+                              <div className="topic-actions">
+                                <button 
+                                  className="start-topic-btn primary"
+                                  onClick={() => handleTopicStart(topic.name)}
+                                >
+                                  🚀 Start Topic Practice
+                                </button>
+                                {selectedSubtopic?.topic === topic.name && (
+                                  <button className="start-subtopic-btn secondary">
+                                    📚 Practice: {selectedSubtopic.subtopic}
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
