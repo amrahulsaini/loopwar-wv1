@@ -100,9 +100,42 @@ export default function SubtopicPracticePage() {
           return;
         }
 
-        // TODO: Fetch problems from API based on category/topic/subtopic
-        // For now, use mock data
-        setProblems(getMockProblems());
+        // Fetch actual problems from database based on subtopic
+        try {
+          const problemsResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (problemsResponse.ok) {
+            const problemsData = await problemsResponse.json();
+            if (problemsData.success && problemsData.problems.length > 0) {
+              // Convert database problems to frontend format
+              const formattedProblems = problemsData.problems.map((p: {
+                id: number;
+                problem_name: string;
+                difficulty: string;
+                problem_description: string;
+              }) => ({
+                id: p.id,
+                title: p.problem_name,
+                difficulty: p.difficulty,
+                description: p.problem_description,
+                solved: false // TODO: Get actual user progress
+              }));
+              setProblems(formattedProblems);
+            } else {
+              // Use mock data if no problems found
+              setProblems(getMockProblems());
+            }
+          } else {
+            // Use mock data if API fails
+            setProblems(getMockProblems());
+          }
+        } catch (error) {
+          console.error('Error fetching problems:', error);
+          setProblems(getMockProblems());
+        }
         
       } catch (error) {
         console.error('Error fetching data:', error);
