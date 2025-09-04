@@ -174,15 +174,17 @@ export default function SubtopicPracticePage() {
       </header>
 
       <main className="practice-main">
+        {/* Back Button - positioned at top */}
         <div className="container">
-          {/* Back Button */}
           <div className="practice-header">
             <Link href="/zone" className="back-btn">
               <ArrowLeft size={20} />
               <span>Back to Zone</span>
             </Link>
           </div>
+        </div>
 
+        <div className="container">
           {/* Practice Title */}
           <div className="practice-title-section">
             <h1 className="practice-title">{subtopicDisplay}</h1>
