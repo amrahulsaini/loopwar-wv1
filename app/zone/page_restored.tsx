@@ -23,150 +23,116 @@ interface TopicData {
   problems: number;
   completed: number;
   subtopics?: string[];
-  difficulty?: string;
-  description?: string;
 }
 
 interface CategoryData {
   name: string;
   icon: string; // This will be the Lucide icon name       
   topics: TopicData[];
-  description?: string;
 }
 
 export default function ZonePage() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(true);        
   const [activeTab, setActiveTab] = useState('questions'); 
-  const [selectedCategory, setSelectedCategory] = useState('Core DSA');
+  const [selectedCategory, setSelectedCategory] = useState('DSA Core');
   const [categories, setCategories] = useState<CategoryData[]>([]);
 
   // Enhanced DSA Categories with your new structure
   const getFallbackCategories = (): CategoryData[] => [
     {
-      name: 'Core DSA',
+      name: 'DSA Core',
       icon: 'Workflow',
-      description: 'Fundamental Data Structures and Algorithms',
       topics: [
         {
-          name: 'Arrays and Matrices',
-          problems: 65,
-          completed: 0,
-          difficulty: 'Beginner',
-          description: 'Array operations, matrix problems, and 2D array techniques',
-          subtopics: ['Array Fundamentals', 'Subarray Problems', 'Matrix Operations', 'Array Rotations', 'Prefix and Suffix Arrays']
-        },
-        {
-          name: 'Strings and Pattern Matching',
+          name: 'Arrays & Strings',
           problems: 45,
           completed: 0,
-          difficulty: 'Beginner',
-          description: 'String manipulation, pattern matching algorithms, and text processing',
-          subtopics: ['String Basics', 'Palindromes', 'KMP Algorithm', 'String Hashing', 'Anagrams and Permutations']
-        },
-        {
-          name: 'Hash Tables and Maps',
-          problems: 40,
-          completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Hash-based data structures, frequency counting, and fast lookups',
-          subtopics: ['Hash Map Basics', 'Frequency Counting', 'Hash Set Operations', 'Two Sum Variants', 'Custom Hash Functions']
-        },
-        {
-          name: 'Sorting and Searching',
-          problems: 50,
-          completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Sorting algorithms, binary search, and search optimizations',
-          subtopics: ['Basic Sorting Algorithms', 'Binary Search Fundamentals', 'Binary Search Variants', 'Custom Comparators', 'Search in Rotated Arrays']
-        },
-        {
-          name: 'Two Pointers and Sliding Window',
-          problems: 35,
-          completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Efficient array traversal techniques and window-based algorithms',
-          subtopics: ['Two Pointers Technique', 'Fast and Slow Pointers', 'Fixed Window Size', 'Variable Window Size', 'Multiple Pointers']
-        },
-        {
-          name: 'Stacks and Queues',
-          problems: 45,
-          completed: 0,
-          difficulty: 'Beginner',
-          description: 'Linear data structures and their advanced applications',
-          subtopics: ['Stack Fundamentals', 'Monotonic Stack', 'Queue Operations', 'Priority Queues', 'Expression Evaluation']
+          subtopics: ['Array Basics', 'Two Pointers', 'Sliding Window', 'String Manipulation', 'Prefix Sum']
         },
         {
           name: 'Linked Lists',
-          problems: 38,
+          problems: 30,
           completed: 0,
-          difficulty: 'Beginner',
-          description: 'Dynamic linear data structures and pointer manipulation',
-          subtopics: ['Singly Linked Lists', 'Doubly Linked Lists', 'Cycle Detection', 'List Reversal', 'Merge Operations']
+          subtopics: ['Singly Linked Lists', 'Doubly Linked Lists', 'Circular Linked Lists', 'Fast & Slow Pointers', 'Reversal Techniques']
         },
         {
-          name: 'Trees and Binary Trees',
-          problems: 70,
+          name: 'Stacks & Queues',
+          problems: 25,
           completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Tree structures, traversals, and tree-based algorithms',
-          subtopics: ['Tree Traversals', 'Tree Construction', 'Tree Properties', 'Lowest Common Ancestor', 'Tree Views and Paths']
+          subtopics: ['Stack Operations', 'Queue Operations', 'Monotonic Stack', 'Priority Queue', 'Deque']
         },
         {
-          name: 'Binary Search Trees and Heaps',
-          problems: 42,
+          name: 'Hash Tables',
+          problems: 35,
           completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Self-balancing trees and priority queue implementations',
-          subtopics: ['BST Operations', 'BST Validation', 'Heap Implementation', 'Heap Sort', 'Balanced Trees']
+          subtopics: ['Hash Map Basics', 'Hash Set Operations', 'Collision Handling', 'Design Problems', 'Frequency Counting']
         },
         {
-          name: 'Graphs and Graph Algorithms',
-          problems: 85,
+          name: 'Trees',
+          problems: 50,
           completed: 0,
-          difficulty: 'Advanced',
-          description: 'Graph representations, traversals, and advanced graph algorithms',
-          subtopics: ['Graph Representation', 'DFS and BFS', 'Shortest Path Algorithms', 'Minimum Spanning Tree', 'Topological Sorting']
+          subtopics: ['Binary Trees', 'Binary Search Trees', 'Tree Traversals', 'Tree Construction', 'Path Problems']
+        },
+        {
+          name: 'Heaps',
+          problems: 20,
+          completed: 0,
+          subtopics: ['Min Heap', 'Max Heap', 'Heap Sort', 'Top K Problems', 'Merge K Sorted']
+        },
+        {
+          name: 'Graphs',
+          problems: 40,
+          completed: 0,
+          subtopics: ['Graph Representation', 'DFS & BFS', 'Shortest Path', 'Minimum Spanning Tree', 'Topological Sort']
         },
         {
           name: 'Dynamic Programming',
-          problems: 90,
+          problems: 55,
           completed: 0,
-          difficulty: 'Advanced',
-          description: 'Optimization problems, memoization, and DP patterns',
-          subtopics: ['1D Dynamic Programming', '2D Dynamic Programming', 'Knapsack Problems', 'LCS and LIS', 'Tree DP']
+          subtopics: ['1D DP', '2D DP', 'Knapsack Problems', 'LCS & LIS', 'Tree DP']
+        },
+        {
+          name: 'Searching & Sorting',
+          problems: 30,
+          completed: 0,
+          subtopics: ['Binary Search', 'Linear Search', 'Quick Sort', 'Merge Sort', 'Custom Sorting']
+        },
+        {
+          name: 'Recursion & Backtracking',
+          problems: 35,
+          completed: 0,
+          subtopics: ['Basic Recursion', 'Backtracking', 'Permutations', 'Combinations', 'N-Queens']
         },
         {
           name: 'Greedy Algorithms',
-          problems: 35,
+          problems: 25,
           completed: 0,
-          difficulty: 'Advanced',
-          description: 'Greedy choice strategies and optimization problems',
-          subtopics: ['Greedy Choice Strategy', 'Activity Selection', 'Interval Problems', 'Huffman Coding', 'Fractional Knapsack']
-        },
-        {
-          name: 'Backtracking and Recursion',
-          problems: 48,
-          completed: 0,
-          difficulty: 'Advanced',
-          description: 'Recursive problem solving and exhaustive search techniques',
-          subtopics: ['Recursion Fundamentals', 'Permutations and Combinations', 'N-Queens Problem', 'Sudoku Solver', 'Subset Generation']
+          subtopics: ['Activity Selection', 'Huffman Coding', 'Fractional Knapsack', 'Job Scheduling', 'Minimum Coins']
         },
         {
           name: 'Bit Manipulation',
+          problems: 20,
+          completed: 0,
+          subtopics: ['Bitwise Operations', 'Bit Masking', 'Power of Two', 'Single Number', 'Subset Generation']
+        },
+        {
+          name: 'Mathematical Algorithms',
           problems: 25,
           completed: 0,
-          difficulty: 'Intermediate',
-          description: 'Bitwise operations and bit-level problem solving',
-          subtopics: ['Bitwise Operations', 'Bit Masking', 'XOR Properties', 'Single Number Problems', 'Bit Counting']
+          subtopics: ['Number Theory', 'Modular Arithmetic', 'Prime Numbers', 'GCD & LCM', 'Fast Exponentiation']
         },
         {
           name: 'Advanced Data Structures',
           problems: 30,
           completed: 0,
-          difficulty: 'Advanced',
-          description: 'Specialized data structures for complex problems',
-          subtopics: ['Trie (Prefix Tree)', 'Segment Tree', 'Binary Indexed Tree', 'Disjoint Set Union', 'Sparse Table']
+          subtopics: ['Trie', 'Segment Tree', 'Fenwick Tree', 'Disjoint Set Union', 'LRU Cache']
+        },
+        {
+          name: 'String Algorithms',
+          problems: 25,
+          completed: 0,
+          subtopics: ['Pattern Matching', 'KMP Algorithm', 'Rabin-Karp', 'Z Algorithm', 'Suffix Array']
         }
       ]
     },

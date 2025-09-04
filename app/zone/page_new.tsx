@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Workflow, 
@@ -219,7 +219,7 @@ export default function ZonePage() {
   ];
 
   // Load topics from secure API
-  const loadTopics = async () => {
+  const loadTopics = useCallback(async () => {
     try {
       setLoadingTopics(true);
       setTopicsError(null);
@@ -259,7 +259,7 @@ export default function ZonePage() {
     } finally {
       setLoadingTopics(false);
     }
-  };
+  }, []);
 
   // Load user session
   useEffect(() => {
