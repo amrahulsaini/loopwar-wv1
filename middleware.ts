@@ -21,7 +21,8 @@ export function middleware(request: NextRequest) {
   // Get session token from cookies
   const sessionToken = request.cookies.get('sessionToken')?.value;
   const username = request.cookies.get('username')?.value;
-  const isVerified = request.cookies.get('isVerified')?.value === 'true';
+  const isVerifiedCookie = request.cookies.get('isVerified')?.value;
+  const isVerified = isVerifiedCookie === 'true';
   
   const isAuthenticated = sessionToken && username && isVerified;
   
@@ -29,6 +30,7 @@ export function middleware(request: NextRequest) {
     pathname,
     hasSessionToken: !!sessionToken,
     hasUsername: !!username,
+    isVerifiedCookie, // Show the actual cookie value
     isVerified,
     isAuthenticated
   });

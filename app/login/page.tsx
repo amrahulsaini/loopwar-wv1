@@ -90,8 +90,25 @@ export default function Login() {
       if (response.ok) {
         setSuccess('Login successful! Redirecting...');
         
-        // Cookies are now set by the server in response headers
-        // No need to set them manually with document.cookie
+        // Set cookies on client-side for immediate availability
+        const maxAge = data.rememberMe ? 2592000 : 604800; // 30 days if remember me, 7 days otherwise
+        const cookieOptions = `path=/; max-age=${maxAge}; secure; samesite=strict`;
+        
+        // Clear any existing cookies first
+        document.cookie = `sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `isVerified=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        
+        // Set new cookies
+        document.cookie = `sessionToken=${data.sessionToken}; ${cookieOptions}`;
+        document.cookie = `username=${data.user.username}; ${cookieOptions}`;
+        document.cookie = `isVerified=${data.user.isVerified}; ${cookieOptions}`;
+        
+        console.log('🍪 Cookies set:', {
+          sessionToken: !!data.sessionToken,
+          username: data.user.username,
+          isVerified: data.user.isVerified
+        });
         
         // Small delay to ensure cookies are processed by browser
         setTimeout(() => {
@@ -104,7 +121,7 @@ export default function Login() {
             console.log('⚠️ User not verified, redirecting to verification');
             window.location.href = `/verify?userId=${data.user.id}&email=${encodeURIComponent(data.user.email)}`;
           }
-        }, 1000); // Reduced delay since cookies are set server-side
+        }, 500); // Longer delay to ensure cookies are fully processed
       } else {
         setError(data.error || 'Login failed');
       }
