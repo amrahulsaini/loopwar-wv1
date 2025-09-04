@@ -47,11 +47,11 @@ export default function SubtopicPracticePage() {
   // Format display names (reverse the URL formatting)
   const formatDisplayName = (urlName: string) => {
     return urlName
-      .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters
+      .replace(/-/g, ' ') // Replace hyphens with spaces
       .replace(/and/g, '&') // Replace 'and' back to '&'
-      .split('')
-      .map((char, index) => index === 0 ? char.toUpperCase() : char)
-      .join('');
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   const categoryDisplay = formatDisplayName(category);
@@ -96,9 +96,12 @@ export default function SubtopicPracticePage() {
               console.log('URL params:', { category, topic, subtopic });
               console.log('Formatted names:', { categoryName, topicName, subtopicName });
 
-              // Check if category exists
+              // Check if category exists (using new hyphen format)
               const categoryObj = categoriesData.categories.find((cat: {name: string, id: number}) => 
-                cat.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === category.toLowerCase()
+                cat.name.toLowerCase()
+                  .replace(/\s+/g, '-')
+                  .replace(/&/g, 'and')
+                  .replace(/[^a-z0-9-]/g, '') === category.toLowerCase()
               );
 
               if (categoryObj) {
@@ -106,7 +109,10 @@ export default function SubtopicPracticePage() {
                 
                 // Check if topic exists in this category
                 const topicObj = categoriesData.topics.find((top: {name: string, category_id: number, id: number}) => 
-                  top.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === topic.toLowerCase() && 
+                  top.name.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/&/g, 'and')
+                    .replace(/[^a-z0-9-]/g, '') === topic.toLowerCase() && 
                   top.category_id === categoryObj.id
                 );
 
@@ -115,7 +121,10 @@ export default function SubtopicPracticePage() {
                   
                   // Check if subtopic exists in this topic
                   const subtopicObj = categoriesData.subtopics.find((sub: {name: string, topic_id: number, id: number}) => 
-                    sub.name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === subtopic.toLowerCase() && 
+                    sub.name.toLowerCase()
+                      .replace(/\s+/g, '-')
+                      .replace(/&/g, 'and')
+                      .replace(/[^a-z0-9-]/g, '') === subtopic.toLowerCase() && 
                     sub.topic_id === topicObj.id
                   );
 

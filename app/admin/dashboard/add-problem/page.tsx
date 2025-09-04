@@ -40,6 +40,7 @@ interface ProblemForm {
   problemName: string;
   problemDescription: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
+  sortOrder: string;
 }
 
 export default function AddProblemPage() {
@@ -56,7 +57,8 @@ export default function AddProblemPage() {
     subtopicId: '',
     problemName: '',
     problemDescription: '',
-    difficulty: 'Easy'
+    difficulty: 'Easy',
+    sortOrder: ''
   });
 
   // Dropdown data
@@ -166,7 +168,8 @@ export default function AddProblemPage() {
           subtopic_id: parseInt(formData.subtopicId),
           problem_name: formData.problemName,
           problem_description: formData.problemDescription,
-          difficulty: formData.difficulty
+          difficulty: formData.difficulty,
+          sort_order: formData.sortOrder ? parseInt(formData.sortOrder) : undefined
         })
       });
 
@@ -179,7 +182,8 @@ export default function AddProblemPage() {
           subtopicId: '',
           problemName: '',
           problemDescription: '',
-          difficulty: 'Easy'
+          difficulty: 'Easy',
+          sortOrder: ''
         });
         setFilteredTopics([]);
         setFilteredSubtopics([]);
@@ -383,6 +387,24 @@ export default function AddProblemPage() {
                       <option value="Medium">Medium</option>
                       <option value="Hard">Hard</option>
                     </select>
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="form-group">
+                    <label htmlFor="sortOrder" className="form-label">
+                      <span>Problem Order (Optional)</span>
+                      <small className="form-hint">Leave empty to add at the end</small>
+                    </label>
+                    <input
+                      type="number"
+                      id="sortOrder"
+                      name="sortOrder"
+                      value={formData.sortOrder}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="e.g., 1, 2, 3..."
+                      min="1"
+                    />
                   </div>
                 </div>
 

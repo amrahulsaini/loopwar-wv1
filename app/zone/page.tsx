@@ -446,12 +446,12 @@ export default function ZonePage() {
     setSelectedSubtopic({ topic: topicName, subtopic: subtopicName });
     console.log(`🎯 Selected subtopic: ${subtopicName} from ${topicName}`);
     
-    // Format names for URL (lowercase, no spaces, replace special characters)
+    // Format names for URL (lowercase, with hyphens instead of spaces)
     const formatForUrl = (name: string) => {
       return name.toLowerCase()
-        .replace(/\s+/g, '')  // Remove all spaces
-        .replace(/[^a-z0-9]/g, '')  // Remove special characters
-        .replace(/&/g, 'and');  // Replace & with 'and'
+        .replace(/\s+/g, '-')  // Replace spaces with hyphens
+        .replace(/&/g, 'and')  // Replace & with 'and'
+        .replace(/[^a-z0-9-]/g, '');  // Remove special characters except hyphens
     };
     
     const categoryFormatted = formatForUrl(selectedCategory);
