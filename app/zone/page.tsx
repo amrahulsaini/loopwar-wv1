@@ -444,8 +444,23 @@ export default function ZonePage() {
   const handleSubtopicClick = (topicName: string, subtopicName: string) => {
     setSelectedSubtopic({ topic: topicName, subtopic: subtopicName });
     console.log(`🎯 Selected subtopic: ${subtopicName} from ${topicName}`);
-    // TODO: Navigate to subtopic practice page
-    // This is where you can add navigation to specific subtopic content
+    
+    // Format names for URL (lowercase, no spaces, replace special characters)
+    const formatForUrl = (name: string) => {
+      return name.toLowerCase()
+        .replace(/\s+/g, '')  // Remove all spaces
+        .replace(/[^a-z0-9]/g, '')  // Remove special characters
+        .replace(/&/g, 'and');  // Replace & with 'and'
+    };
+    
+    const categoryFormatted = formatForUrl(selectedCategory);
+    const topicFormatted = formatForUrl(topicName);
+    const subtopicFormatted = formatForUrl(subtopicName);
+    
+    // Navigate to subtopic practice page
+    const practiceUrl = `/zone/${categoryFormatted}/${topicFormatted}/${subtopicFormatted}`;
+    console.log(`🚀 Navigating to: ${practiceUrl}`);
+    window.location.href = practiceUrl;
   };
 
   const handleTopicStart = (topicName: string) => {
