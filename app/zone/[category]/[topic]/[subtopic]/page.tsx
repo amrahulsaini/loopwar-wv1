@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Clock,
   Target,
-  ChevronDown,
   Database
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
@@ -28,6 +27,12 @@ interface Problem {
   lastAttempt?: string;
 }
 
+interface Subtopic {
+  id: number;
+  name: string;
+  topic_id: number;
+}
+
 type PracticeMode = 'learn' | 'mcq' | 'code';
 
 export default function SubtopicPracticePage() {
@@ -37,7 +42,7 @@ export default function SubtopicPracticePage() {
   const [username, setUsername] = useState('');
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [showNavigationDropdown, setShowNavigationDropdown] = useState(false);
+  const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
   
   // URL parameters
   const category = params.category as string;
@@ -120,7 +125,7 @@ export default function SubtopicPracticePage() {
                   console.log('Topic found:', topicObj);
                   
                   // Check if subtopic exists in this topic
-                  const subtopicObj = categoriesData.subtopics.find((sub: {name: string, topic_id: number, id: number}) => 
+                  const subtopicObj = categoriesData.subtopics.find((sub: Subtopic) => 
                     sub.name.toLowerCase()
                       .replace(/\s+/g, '-')
                       .replace(/&/g, 'and')
@@ -131,6 +136,13 @@ export default function SubtopicPracticePage() {
                   if (subtopicObj) {
                     console.log('Subtopic found:', subtopicObj);
                     isValidPath = true;
+
+                    // Get all subtopics for this topic
+                    const topicSubtopics = categoriesData.subtopics.filter((sub: Subtopic) => 
+                      sub.topic_id === topicObj.id
+                    );
+                    setAllSubtopics(topicSubtopics);
+                    console.log('All subtopics for this topic:', topicSubtopics);
                   }
                 }
               }
@@ -250,23 +262,19 @@ export default function SubtopicPracticePage() {
               <div className="breadcrumb">
                 <Link href="/zone" className="breadcrumb-link">Zone</Link>
                 <span className="breadcrumb-separator">→</span>
-                <div className="breadcrumb-dropdown">
-                  <button 
-                    className="breadcrumb-dropdown-btn"
-                    onClick={() => setShowNavigationDropdown(!showNavigationDropdown)}
-                  >
-                    {categoryDisplay}
-                    <ChevronDown size={14} />
-                  </button>
-                  {showNavigationDropdown && (
-                    <div className="breadcrumb-dropdown-menu">
-                      <Link href="/zone" className="dropdown-item">← Back to all categories</Link>
-                      <div className="dropdown-current">{categoryDisplay} → {topicDisplay}</div>
-                    </div>
-                  )}
-                </div>
+                <Link 
+                  href={`/zone?category=${encodeURIComponent(category)}`} 
+                  className="breadcrumb-link"
+                >
+                  {categoryDisplay}
+                </Link>
                 <span className="breadcrumb-separator">→</span>
-                <Link href="/zone" className="breadcrumb-link">{topicDisplay}</Link>
+                <Link 
+                  href={`/zone?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}`} 
+                  className="breadcrumb-link"
+                >
+                  {topicDisplay}
+                </Link>
                 <span className="breadcrumb-separator">→</span>
                 <span className="breadcrumb-current">{subtopicDisplay}</span>
               </div>
@@ -337,6 +345,37 @@ export default function SubtopicPracticePage() {
             </div>
           </div>
 
+          {/* Subtopics Navigation */}
+          {allSubtopics.length > 1 && (
+            <div className="subtopics-section">
+              <h2 className="subtopics-title">Subtopics in {topicDisplay}</h2>
+              <div className="subtopics-grid">
+                {allSubtopics.map((subtopicItem) => {
+                  const subtopicUrlName = subtopicItem.name
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/&/g, 'and')
+                    .replace(/[^a-z0-9-]/g, '');
+                  
+                  const isActive = subtopicUrlName === subtopic;
+                  
+                  return (
+                    <Link
+                      key={subtopicItem.id}
+                      href={`/zone/${category}/${topic}/${subtopicUrlName}`}
+                      className={`subtopic-card ${isActive ? 'active' : ''}`}
+                    >
+                      <h3 className="subtopic-name">{subtopicItem.name}</h3>
+                      <div className="subtopic-indicator">
+                        {isActive ? 'Current' : 'View'}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Problems List */}
           <div className="problems-section">
             <div className="problems-header">
@@ -356,13 +395,14 @@ export default function SubtopicPracticePage() {
             </div>
 
             <div className="problems-grid">
-              {problems.map((problem) => (
+              {problems.map((problem, index) => (
                 <div 
                   key={problem.id} 
                   className="problem-card"
                   onClick={() => handleProblemClick(problem.id)}
                 >
                   <div className="problem-header">
+                    <div className="problem-number">#{index + 1}</div>
                     <h3 className="problem-title">{problem.title}</h3>
                     <div 
                       className="problem-difficulty"
