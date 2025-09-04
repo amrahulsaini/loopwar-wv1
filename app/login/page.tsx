@@ -102,12 +102,12 @@ export default function Login() {
         // Set new cookies
         document.cookie = `sessionToken=${data.sessionToken}; ${cookieOptions}`;
         document.cookie = `username=${data.user.username}; ${cookieOptions}`;
-        document.cookie = `isVerified=${data.user.isVerified}; ${cookieOptions}`;
+        document.cookie = `isVerified=${data.user.isVerified ? 'true' : 'false'}; ${cookieOptions}`;
         
         console.log('🍪 Cookies set:', {
           sessionToken: !!data.sessionToken,
           username: data.user.username,
-          isVerified: data.user.isVerified
+          isVerified: data.user.isVerified ? 'true' : 'false'
         });
         
         // Small delay to ensure cookies are processed by browser

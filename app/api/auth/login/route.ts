@@ -183,10 +183,11 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set('sessionToken', sessionToken, cookieOptions);
     response.cookies.set('username', user.username, cookieOptions);
-    response.cookies.set('isVerified', user.is_verified.toString(), cookieOptions);
+    response.cookies.set('isVerified', user.is_verified ? 'true' : 'false', cookieOptions);
 
     console.log('🍪 Cookies set in response headers');
     console.log('✅ User verification status:', user.is_verified);
+    console.log('🍪 isVerified cookie value:', user.is_verified ? 'true' : 'false');
 
     return response;
 

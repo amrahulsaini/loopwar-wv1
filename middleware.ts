@@ -22,7 +22,8 @@ export function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get('sessionToken')?.value;
   const username = request.cookies.get('username')?.value;
   const isVerifiedCookie = request.cookies.get('isVerified')?.value;
-  const isVerified = isVerifiedCookie === 'true';
+  // Handle both 'true' and '1' as verified (database can store as boolean or int)
+  const isVerified = isVerifiedCookie === 'true' || isVerifiedCookie === '1';
   
   const isAuthenticated = sessionToken && username && isVerified;
   
