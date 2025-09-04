@@ -63,44 +63,116 @@ export async function GET(request: NextRequest) {
 
     // Handle name-based queries (for frontend subtopic pages)
     if (subtopicParam && topicParam && categoryParam) {
-      // Format names back from URL format - more accurate conversion
-      const categoryName = categoryParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase to spaces
-        .replace(/and/g, '&'); // replace 'and' back to '&'
+      // Instead of converting names, let's find the IDs first
+      console.log('URL params received:', { categoryParam, topicParam, subtopicParam });
       
-      const topicName = topicParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/and/g, '&');
+      // First get all categories/topics/subtopics to find matching IDs
+      const categoriesQuery = await Database.query('SELECT id, name FROM categories') as RowDataPacket[];
+      const topicsQuery = await Database.query('SELECT id, name, category_id FROM topics') as RowDataPacket[];
+      const subtopicsQuery = await Database.query('SELECT id, name, topic_id FROM subtopics') as RowDataPacket[];
       
-      const subtopicName = subtopicParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/and/g, '&');
-
-      console.log('Name-based query:', {
-        originalParams: { categoryParam, topicParam, subtopicParam },
-        convertedNames: { categoryName, topicName, subtopicName }
-      });
+      // Find category by URL format
+      const categoryObj = categoriesQuery.find((cat) => 
+        (cat as {name: string, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === categoryParam.toLowerCase()
+      ) as {name: string, id: number} | undefined;
       
-      query += ' AND c.name = ? AND t.name = ? AND s.name = ?';
-      queryParams.push(categoryName, topicName, subtopicName);
+      if (categoryObj) {
+        console.log('Found category:', categoryObj);
+        
+        // Find topic in this category
+        const topicObj = topicsQuery.find((top) => 
+          (top as {name: string, category_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === topicParam.toLowerCase() && 
+          (top as {name: string, category_id: number, id: number}).category_id === categoryObj.id
+        ) as {name: string, category_id: number, id: number} | undefined;
+        
+        if (topicObj) {
+          console.log('Found topic:', topicObj);
+          
+          // Find subtopic in this topic
+          const subtopicObj = subtopicsQuery.find((sub) => 
+            (sub as {name: string, topic_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === subtopicParam.toLowerCase() && 
+            (sub as {name: string, topic_id: number, id: number}).topic_id === topicObj.id
+          ) as {name: string, topic_id: number, id: number} | undefined;
+          
+          if (subtopicObj) {
+            console.log('Found subtopic:', subtopicObj);
+            // Use IDs for the query
+            query += ' AND p.category_id = ? AND p.topic_id = ? AND p.subtopic_id = ?';
+            queryParams.push(categoryObj.id, topicObj.id, subtopicObj.id);
+          } else {
+            console.log('Subtopic not found');
+            // Return empty result if subtopic doesn't exist
+            return NextResponse.json({
+              success: true,
+              problems: [],
+              total: 0
+            });
+          }
+        } else {
+          console.log('Topic not found');
+          return NextResponse.json({
+            success: true,
+            problems: [],
+            total: 0
+          });
+        }
+      } else {
+        console.log('Category not found');
+        return NextResponse.json({
+          success: true,
+          problems: [],
+          total: 0
+        });
+      }
     } else if (topicParam && categoryParam) {
-      const categoryName = categoryParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/and/g, '&');
+      // Similar logic for topic-only queries
+      const categoriesQuery = await Database.query('SELECT id, name FROM categories') as RowDataPacket[];
+      const topicsQuery = await Database.query('SELECT id, name, category_id FROM topics') as RowDataPacket[];
       
-      const topicName = topicParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/and/g, '&');
+      const categoryObj = categoriesQuery.find((cat) => 
+        (cat as {name: string, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === categoryParam.toLowerCase()
+      ) as {name: string, id: number} | undefined;
       
-      query += ' AND c.name = ? AND t.name = ?';
-      queryParams.push(categoryName, topicName);
+      if (categoryObj) {
+        const topicObj = topicsQuery.find((top) => 
+          (top as {name: string, category_id: number, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === topicParam.toLowerCase() && 
+          (top as {name: string, category_id: number, id: number}).category_id === categoryObj.id
+        ) as {name: string, category_id: number, id: number} | undefined;
+        
+        if (topicObj) {
+          query += ' AND p.category_id = ? AND p.topic_id = ?';
+          queryParams.push(categoryObj.id, topicObj.id);
+        } else {
+          return NextResponse.json({
+            success: true,
+            problems: [],
+            total: 0
+          });
+        }
+      } else {
+        return NextResponse.json({
+          success: true,
+          problems: [],
+          total: 0
+        });
+      }
     } else if (categoryParam) {
-      const categoryName = categoryParam
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/and/g, '&');
+      const categoriesQuery = await Database.query('SELECT id, name FROM categories') as RowDataPacket[];
       
-      query += ' AND c.name = ?';
-      queryParams.push(categoryName);
+      const categoryObj = categoriesQuery.find((cat) => 
+        (cat as {name: string, id: number}).name.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and') === categoryParam.toLowerCase()
+      ) as {name: string, id: number} | undefined;
+      
+      if (categoryObj) {
+        query += ' AND p.category_id = ?';
+        queryParams.push(categoryObj.id);
+      } else {
+        return NextResponse.json({
+          success: true,
+          problems: [],
+          total: 0
+        });
+      }
     }
 
     query += ' ORDER BY p.created_at DESC';
