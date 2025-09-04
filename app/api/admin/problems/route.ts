@@ -18,6 +18,11 @@ export async function GET(request: NextRequest) {
     const subtopicId = searchParams.get('subtopic_id');
     const categoryId = searchParams.get('category_id');
     const topicId = searchParams.get('topic_id');
+    
+    // Handle name-based queries (for frontend subtopic pages)
+    const categoryParam = searchParams.get('category');
+    const topicParam = searchParams.get('topic');
+    const subtopicParam = searchParams.get('subtopic');
 
     let query = `
       SELECT 
@@ -40,6 +45,7 @@ export async function GET(request: NextRequest) {
 
     const queryParams: (string | number)[] = [];
 
+    // Handle ID-based queries (for admin panel)
     if (subtopicId) {
       query += ' AND p.subtopic_id = ?';
       queryParams.push(subtopicId);
@@ -53,6 +59,28 @@ export async function GET(request: NextRequest) {
     if (topicId) {
       query += ' AND p.topic_id = ?';
       queryParams.push(topicId);
+    }
+
+    // Handle name-based queries (for frontend subtopic pages)
+    if (subtopicParam && topicParam && categoryParam) {
+      // Format names back from URL format
+      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      const topicName = topicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      const subtopicName = subtopicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      
+      query += ' AND c.name = ? AND t.name = ? AND s.name = ?';
+      queryParams.push(categoryName, topicName, subtopicName);
+    } else if (topicParam && categoryParam) {
+      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      const topicName = topicParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      
+      query += ' AND c.name = ? AND t.name = ?';
+      queryParams.push(categoryName, topicName);
+    } else if (categoryParam) {
+      const categoryName = categoryParam.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
+      
+      query += ' AND c.name = ?';
+      queryParams.push(categoryName);
     }
 
     query += ' ORDER BY p.created_at DESC';

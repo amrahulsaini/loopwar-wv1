@@ -82,36 +82,22 @@ export default function AddProblemPage() {
   const loadFormData = async () => {
     setIsLoading(true);
     try {
-      // Fetch categories, topics, and subtopics
-      const categoriesRes = await fetch('/api/topics');
+      // Fetch categories, topics, and subtopics from admin API
+      const categoriesRes = await fetch('/api/admin/categories');
 
       if (categoriesRes.ok) {
         const data = await categoriesRes.json();
-        setCategories(data.categories || []);
-        setTopics(data.topics || []);
-        setSubtopics(data.subtopics || []);
+        if (data.success) {
+          setCategories(data.categories || []);
+          setTopics(data.topics || []);
+          setSubtopics(data.subtopics || []);
+        } else {
+          console.error('Failed to fetch categories:', data.message);
+          setMessage({ type: 'error', text: 'Failed to load categories data.' });
+        }
       } else {
-        // Use fallback data if API fails
-        setCategories([
-          { id: 1, name: 'Core DSA' },
-          { id: 2, name: 'Databases' },
-          { id: 3, name: 'OS & Shell' },
-          { id: 4, name: 'Networking & Concurrency' },
-          { id: 5, name: 'Programming Languages' },
-          { id: 6, name: 'Debugging & Optimization' },
-          { id: 7, name: 'System Design' },
-          { id: 8, name: 'AI & ML' }
-        ]);
-        setTopics([
-          { id: 1, name: 'Arrays and Matrices', category_id: 1 },
-          { id: 2, name: 'Strings and Pattern Matching', category_id: 1 },
-          { id: 3, name: 'Hash Tables and Maps', category_id: 1 }
-        ]);
-        setSubtopics([
-          { id: 1, name: 'Array Fundamentals', topic_id: 1 },
-          { id: 2, name: 'Subarray Problems', topic_id: 1 },
-          { id: 3, name: 'String Basics', topic_id: 2 }
-        ]);
+        console.error('API request failed');
+        setMessage({ type: 'error', text: 'Failed to connect to database.' });
       }
     } catch (error) {
       console.error('Error loading form data:', error);
