@@ -263,9 +263,12 @@ export default function ZonePage() {
   // Removed unused clearSession function
 
   const handleLogout = () => {
-    // Clear cookies
+    // Clear ALL authentication cookies
     document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'isVerified=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    console.log('🚪 Logged out - all cookies cleared');
     
     // Redirect to home
     window.location.href = '/';
