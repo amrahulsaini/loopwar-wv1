@@ -285,11 +285,20 @@ export default function SubtopicPracticePage() {
             </div>
 
             <div className="header-right">
-              <Link href="/zone" className="header-back-btn">
-                <ArrowLeft size={16} />
-                <span>Back to Zone</span>
+              <Link href="/zone" className="header-back-btn" title="Back to Zone">
+                <ArrowLeft size={20} />
               </Link>
               <span className="username">@{username}</span>
+              <button
+                className="profile-btn"
+                onClick={() => router.push(`/${username}`)}
+                aria-label="View Profile"
+                title={`Go to ${username}'s profile`}
+              >
+                <div className="profile-avatar default-avatar">
+                  {username.charAt(0).toUpperCase()}
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -352,7 +361,7 @@ export default function SubtopicPracticePage() {
           {/* Subtopics Navigation */}
           {allSubtopics.length > 1 && (
             <div className="subtopics-section">
-              <h2 className="subtopics-title">Subtopics in {topicDisplay}</h2>
+              <h2 className="subtopics-title">Subtopics ({allSubtopics.length}):</h2>
               <div className="subtopics-grid">
                 {allSubtopics.map((subtopicItem) => {
                   const subtopicUrlName = subtopicItem.name

@@ -6467,21 +6467,20 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin-left: auto;
 }
 
 .header-back-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background: var(--color-primary);
   color: white;
   text-decoration: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
@@ -6494,6 +6493,38 @@ body {
   color: var(--color-text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.profile-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+}
+
+.default-avatar {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Subtopics Section */
