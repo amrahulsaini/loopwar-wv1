@@ -68,6 +68,14 @@ export default function Join() {
     setError('');
     setSuccess('');
 
+    // Check if user has declined cookies
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    if (cookieConsent === 'declined') {
+      setError('⚠️ Cookies are required to create an account. Please accept cookies to continue.');
+      setLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);

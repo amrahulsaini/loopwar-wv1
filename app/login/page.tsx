@@ -76,6 +76,14 @@ export default function Login() {
     setError('');
     setSuccess('');
 
+    // Check if user has declined cookies
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    if (cookieConsent === 'declined') {
+      setError('⚠️ Cookies are required for login. Please accept cookies to continue.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
