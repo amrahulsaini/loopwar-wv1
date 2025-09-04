@@ -291,7 +291,7 @@ export default function SubtopicPracticePage() {
               <span className="username">@{username}</span>
               <button
                 className="profile-btn"
-                onClick={() => router.push(`/${username}`)}
+                onClick={() => router.push(`/profiles/${username}`)}
                 aria-label="View Profile"
                 title={`Go to ${username}'s profile`}
               >
