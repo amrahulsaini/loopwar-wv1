@@ -2002,6 +2002,8 @@ body {
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     font-family: var(--font-primary);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .zone-header .container {
@@ -2009,6 +2011,8 @@ body {
     align-items: center;
     justify-content: space-between;
     color: var(--color-text);
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 /* Zone Navigation */
@@ -2017,6 +2021,7 @@ body {
     align-items: center;
     gap: 8px;
     margin-left: 40px;
+    flex-wrap: wrap;
 }
 
 .nav-btn {
@@ -2032,6 +2037,7 @@ body {
     transition: all var(--transition-speed);
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .nav-btn:hover {
@@ -2241,7 +2247,7 @@ body {
 
 /* Zone Main */
 .zone-main {
-    padding-top: 100px;
+    padding-top: 120px;
     min-height: 100vh;
     background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-card-bg) 100%);
     color: var(--color-text);
@@ -2251,9 +2257,10 @@ body {
 /* Questions Layout */
 .questions-layout {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 300px 1fr;
     gap: 30px;
     padding: 20px 0;
+    min-height: calc(100vh - 140px);
 }
 
 /* Categories Sidebar */
@@ -2264,7 +2271,9 @@ body {
     padding: 24px;
     height: fit-content;
     position: sticky;
-    top: 120px;
+    top: 140px;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
 }
 
 .categories-sidebar h3 {
@@ -3212,10 +3221,10 @@ body {
 }
 
 /* Responsive Design for Zone Page */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     .questions-layout {
-        grid-template-columns: 250px 1fr;
-        gap: 20px;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
     }
     
     .categories-sidebar {
@@ -3225,19 +3234,21 @@ body {
     .topics-content {
         padding: 24px;
     }
+    
+    .topics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .zone-header .container {
-        flex-direction: column;
-        gap: 16px;
-        padding: 0 16px;
+        padding: 0 20px;
     }
     
     .zone-nav {
-        margin-left: 0;
-        flex-wrap: wrap;
-        justify-content: center;
+        margin-left: 20px;
+        gap: 6px;
     }
     
     .nav-btn {
@@ -3245,40 +3256,118 @@ body {
         font-size: 0.9rem;
     }
     
+    .questions-layout {
+        grid-template-columns: 260px 1fr;
+        gap: 20px;
+    }
+    
+    .categories-sidebar {
+        padding: 20px;
+        top: 130px;
+    }
+    
+    .topics-content {
+        padding: 24px;
+    }
+    
+    .topics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 18px;
+    }
+    
+    .topic-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .zone-header {
+        padding: 0.75rem 0;
+    }
+    
+    .zone-header .container {
+        flex-direction: column;
+        gap: 12px;
+        padding: 0 16px;
+        align-items: stretch;
+    }
+    
+    .zone-nav {
+        margin-left: 0;
+        justify-content: center;
+        gap: 8px;
+        order: 2;
+    }
+    
+    .nav-btn {
+        flex: 1;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        text-align: center;
+        min-width: 0;
+    }
+    
     .header-actions {
-        order: -1;
+        order: 1;
         align-self: flex-end;
+        margin-bottom: 8px;
+    }
+    
+    .zone-main {
+        padding-top: 160px;
     }
     
     .questions-layout {
         grid-template-columns: 1fr;
         gap: 20px;
+        padding: 16px 0;
     }
     
     .categories-sidebar {
         position: static;
         order: 2;
+        max-height: none;
+        overflow: visible;
+        margin-top: 20px;
     }
     
     .topics-content {
         order: 1;
+        padding: 20px;
     }
     
     .categories-list {
-        flex-direction: row;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 8px;
     }
     
     .category-btn {
-        flex: 1;
-        min-width: 120px;
+        padding: 12px;
         justify-content: center;
+        text-align: center;
+    }
+    
+    .category-name {
+        font-size: 0.9rem;
+    }
+    
+    .topics-header h2 {
+        font-size: 1.8rem;
     }
     
     .topics-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+    
+    .topic-card {
+        padding: 20px;
+    }
+    
+    .tab-content {
+        padding: 20px 16px;
+        margin-top: 16px;
     }
     
     .loopai-features {
@@ -3296,27 +3385,23 @@ body {
         gap: 16px;
     }
     
-    .tab-content {
-        padding: 20px 16px;
+    .leaderboard-list {
+        padding: 12px 0;
+    }
+    
+    .rank-item {
+        padding: 12px 16px;
     }
 }
 
-@media (max-width: 480px) {
-    .zone-main {
-        padding-top: 140px;
-    }
-    
-    .zone-header {
-        padding: 0.75rem 0;
-    }
-    
-    .zone-nav {
-        gap: 4px;
+@media (max-width: 640px) {
+    .zone-header .container {
+        padding: 0 12px;
     }
     
     .nav-btn {
-        padding: 8px 12px;
-        font-size: 0.85rem;
+        padding: 8px 10px;
+        font-size: 0.8rem;
     }
     
     .action-btn {
@@ -3329,34 +3414,64 @@ body {
         font-size: 0.8rem;
     }
     
+    .zone-main {
+        padding-top: 170px;
+    }
+    
     .categories-sidebar {
         padding: 16px;
     }
     
-    .topics-content {
-        padding: 20px 16px;
-    }
-    
-    .topics-header h2 {
-        font-size: 1.8rem;
-    }
-    
-    .topic-card {
-        padding: 20px;
-    }
-    
-    .category-btn {
-        padding: 12px;
-        min-width: 100px;
-        font-size: 0.85rem;
-    }
-    
     .categories-list {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 6px;
     }
     
+    .category-btn {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+    
+    .topics-content {
+        padding: 16px;
+    }
+    
+    .topics-header h2 {
+        font-size: 1.6rem;
+    }
+    
+    .topics-header p {
+        font-size: 1rem;
+    }
+    
+    .topic-card {
+        padding: 16px;
+    }
+    
+    .topic-header h4 {
+        font-size: 1.2rem;
+    }
+    
+    .subtopics-list {
+        gap: 4px;
+    }
+    
+    .subtopic-tag {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    
+    .start-topic-btn {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .tab-content {
+        padding: 16px 12px;
+    }
+    
     .feature-card {
-        padding: 24px 20px;
+        padding: 20px 16px;
     }
     
     .loopai-header h2 {
@@ -3366,7 +3481,309 @@ body {
     .contest-container h2,
     .ranks-container h2,
     .report-container h2 {
+        font-size: 1.6rem;
+    }
+    
+    .contest-card,
+    .report-card {
+        padding: 16px;
+    }
+    
+    .leaderboard-header {
+        padding: 16px;
+    }
+    
+    .rank-item {
+        padding: 10px 12px;
+    }
+    
+    .rank-position {
+        width: 32px;
+        font-size: 1rem;
+    }
+    
+    .rank-info {
+        margin-left: 12px;
+    }
+    
+    .rank-name {
+        font-size: 0.9rem;
+    }
+    
+    .rank-points {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .zone-header {
+        padding: 0.5rem 0;
+    }
+    
+    .zone-header .container {
+        padding: 0 8px;
+        gap: 8px;
+    }
+    
+    .zone-nav {
+        gap: 4px;
+    }
+    
+    .nav-btn {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+    
+    .header-actions {
+        gap: 8px;
+    }
+    
+    .action-btn {
+        padding: 6px;
+        border-radius: 8px;
+    }
+    
+    .profile-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+    
+    .zone-main {
+        padding-top: 180px;
+    }
+    
+    .questions-layout {
+        padding: 12px 0;
+        gap: 16px;
+    }
+    
+    .categories-sidebar {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .categories-sidebar h3 {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+    
+    .categories-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+    
+    .category-btn {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+    
+    .category-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .topics-content {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .topics-header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+    
+    .topics-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .topics-header p {
+        font-size: 0.9rem;
+    }
+    
+    .topic-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .topic-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .topic-stats {
+        gap: 2px;
+    }
+    
+    .topic-stats .completed,
+    .topic-stats .total {
+        font-size: 1rem;
+    }
+    
+    .progress-bar {
+        height: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .subtopics {
+        margin-top: 12px;
+    }
+    
+    .subtopics-label {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+    
+    .subtopic-tag {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+    }
+    
+    .subtopic-more {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+    }
+    
+    .start-topic-btn {
+        padding: 8px;
+        margin-top: 16px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+    
+    .tab-content {
+        padding: 12px 8px;
+        border-radius: 12px;
+    }
+    
+    .loopai-header h2 {
         font-size: 1.8rem;
+    }
+    
+    .loopai-header p {
+        font-size: 1rem;
+    }
+    
+    .feature-card {
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+    
+    .contest-container h2,
+    .ranks-container h2,
+    .report-container h2 {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    
+    .contest-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .contest-status {
+        top: 12px;
+        right: 12px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .contest-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .contest-card p {
+        font-size: 0.9rem;
+    }
+    
+    .leaderboard {
+        border-radius: 12px;
+    }
+    
+    .leaderboard-header {
+        padding: 12px;
+    }
+    
+    .leaderboard-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .leaderboard-header p {
+        font-size: 0.9rem;
+    }
+    
+    .rank-item {
+        padding: 8px 12px;
+    }
+    
+    .rank-position {
+        width: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .rank-info {
+        margin-left: 8px;
+    }
+    
+    .rank-name {
+        font-size: 0.85rem;
+    }
+    
+    .rank-points {
+        font-size: 0.75rem;
+    }
+    
+    .rank-badge {
+        font-size: 1.2rem;
+    }
+    
+    .report-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .report-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+    
+    .stat-item {
+        padding: 8px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
+    }
+    
+    .chart-placeholder,
+    .activity-placeholder {
+        padding: 20px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        padding: 8px 16px;
+        font-size: 0.85rem;
     }
 }
 
@@ -3759,6 +4176,17 @@ body {
     border-bottom: 2px solid var(--color-border);
     padding: 1rem 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.settings-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .header-left {
@@ -3767,11 +4195,19 @@ body {
     gap: 20px;
 }
 
+.header-left h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+    font-family: var(--font-primary);
+}
+
 .back-btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 10px 16px;
     background: var(--color-card-bg);
     border: 2px solid var(--color-border);
     border-radius: 12px;
@@ -3779,12 +4215,14 @@ body {
     text-decoration: none;
     font-weight: 500;
     transition: all var(--transition-speed);
+    font-family: var(--font-primary);
 }
 
 .back-btn:hover {
     background: var(--color-primary);
     color: var(--color-bg);
     border-color: var(--color-primary);
+    transform: translateY(-2px);
 }
 
 .settings-main {
@@ -3793,10 +4231,11 @@ body {
 
 .settings-layout {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 300px 1fr;
     gap: 40px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    min-height: calc(100vh - 140px);
 }
 
 .settings-sidebar {
@@ -3805,13 +4244,15 @@ body {
     border-radius: 16px;
     padding: 24px;
     height: fit-content;
+    position: sticky;
+    top: 120px;
 }
 
 .settings-sidebar h2 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-primary);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     font-family: var(--font-primary);
 }
 
@@ -3825,7 +4266,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 14px 16px;
     background: transparent;
     border: 2px solid transparent;
     border-radius: 12px;
@@ -3835,11 +4276,14 @@ body {
     transition: all var(--transition-speed);
     font-family: var(--font-primary);
     font-weight: 500;
+    font-size: 0.95rem;
+    width: 100%;
 }
 
 .settings-nav-btn:hover {
     background: var(--color-bg);
     border-color: var(--color-border);
+    transform: translateX(4px);
 }
 
 .settings-nav-btn.active {
@@ -3853,19 +4297,207 @@ body {
     border: 2px solid var(--color-border);
     border-radius: 16px;
     padding: 32px;
+    min-height: 500px;
 }
 
 .settings-section h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--color-primary);
     margin-bottom: 32px;
     font-family: var(--font-primary);
 }
 
+/* Form Styles */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 8px;
+    font-family: var(--font-primary);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-speed);
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.form-group input:disabled {
+    background: var(--color-border);
+    color: var(--color-secondary);
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+.profile-picture-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.current-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--color-border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-primary);
+}
+
+.upload-btn {
+    padding: 10px 20px;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.upload-btn:hover {
+    background: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.switch-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 4px 0;
+    font-family: var(--font-primary);
+}
+
+.switch-info p {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+    margin: 0;
+}
+
+.switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: var(--color-border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background var(--transition-speed);
+}
+
+.switch.active {
+    background: var(--color-primary);
+}
+
+.switch-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--transition-speed);
+}
+
+.switch.active .switch-thumb {
+    transform: translateX(24px);
+}
+
+.danger-zone {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 2px solid var(--color-border);
+}
+
+.danger-zone h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 16px;
+    font-family: var(--font-primary);
+}
+
+.danger-btn {
+    padding: 10px 20px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.danger-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+}
+
 /* Settings Loading */
 .settings-loading {
-    min-height: 80vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3878,6 +4510,249 @@ body {
     margin-top: 20px;
     color: var(--color-secondary);
     font-size: 1.1rem;
+}
+
+/* Responsive Design for Settings */
+@media (max-width: 1024px) {
+    .settings-layout {
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+    }
+    
+    .settings-sidebar {
+        padding: 20px;
+    }
+    
+    .settings-content {
+        padding: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-left {
+        gap: 12px;
+    }
+    
+    .header-left h1 {
+        font-size: 1.5rem;
+    }
+    
+    .back-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .settings-main {
+        padding: 20px 0;
+    }
+    
+    .settings-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .settings-sidebar {
+        position: static;
+        order: 2;
+        margin-top: 20px;
+    }
+    
+    .settings-content {
+        order: 1;
+        padding: 24px;
+    }
+    
+    .settings-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .settings-nav-btn {
+        flex: 1;
+        min-width: 140px;
+        justify-content: center;
+        text-align: center;
+        padding: 12px 8px;
+    }
+    
+    .settings-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 24px;
+    }
+    
+    .profile-picture-upload {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 640px) {
+    .settings-header {
+        padding: 0.75rem 0;
+    }
+    
+    .header-left {
+        gap: 8px;
+    }
+    
+    .header-left h1 {
+        font-size: 1.3rem;
+    }
+    
+    .back-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .back-btn span {
+        display: none;
+    }
+    
+    .settings-sidebar {
+        padding: 16px;
+    }
+    
+    .settings-sidebar h2 {
+        font-size: 1.3rem;
+        margin-bottom: 16px;
+    }
+    
+    .settings-nav {
+        gap: 6px;
+    }
+    
+    .settings-nav-btn {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+    
+    .settings-content {
+        padding: 20px 16px;
+    }
+    
+    .settings-section h2 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .current-avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .avatar-placeholder {
+        font-size: 1.5rem;
+    }
+    
+    .switch-container {
+        padding: 12px;
+    }
+    
+    .switch-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    .switch-info p {
+        font-size: 0.8rem;
+    }
+    
+    .danger-zone {
+        margin-top: 30px;
+        padding-top: 20px;
+    }
+    
+    .danger-zone h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-header .container {
+        padding: 0 12px;
+    }
+    
+    .header-left h1 {
+        font-size: 1.2rem;
+    }
+    
+    .back-btn {
+        padding: 5px 8px;
+    }
+    
+    .settings-nav-btn {
+        padding: 8px 4px;
+        font-size: 0.8rem;
+        min-width: 80px;
+    }
+    
+    .settings-content {
+        padding: 16px 12px;
+    }
+    
+    .settings-section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .current-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .avatar-placeholder {
+        font-size: 1.2rem;
+    }
+    
+    .upload-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .switch {
+        width: 44px;
+        height: 24px;
+    }
+    
+    .switch-thumb {
+        width: 18px;
+        height: 18px;
+        top: 3px;
+        left: 3px;
+    }
+    
+    .switch.active .switch-thumb {
+        transform: translateX(20px);
+    }
+    
+    .danger-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
 }
 
 /* Responsive Design for Profile Pages */

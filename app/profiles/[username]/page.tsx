@@ -65,12 +65,32 @@ export default function UserProfilePage() {
       setCurrentUser(savedUsername);
       setIsOwnProfile(savedUsername === username);
       
-      // Simulate API call to check if user exists
-      setTimeout(() => {
-        // For now, we'll assume any username exists (in real app, check with backend)
-        setUserExists(true);
-        setIsLoading(false);
-      }, 1000);
+      // Check if user exists by making API call
+      const checkUserExists = async () => {
+        try {
+          const response = await fetch('/api/user/check', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setUserExists(data.exists);
+          } else {
+            setUserExists(false);
+          }
+        } catch (error) {
+          console.error('Error checking user existence:', error);
+          setUserExists(false);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      checkUserExists();
     }
   }, [username]);
 
