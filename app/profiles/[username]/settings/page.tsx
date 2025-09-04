@@ -16,7 +16,7 @@ export default function SettingsPage({ params }: { params: { username: string } 
       const savedUsername = getCookie('username');
       
       if (!sessionToken || !savedUsername) {
-        window.location.href = '/join';
+        window.location.href = '/login';
         return;
       }
       

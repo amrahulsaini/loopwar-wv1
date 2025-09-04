@@ -90,24 +90,21 @@ export default function Login() {
       if (response.ok) {
         setSuccess('Login successful! Redirecting...');
         
-        // Set cookies for session management
-        const maxAge = data.rememberMe ? 2592000 : 604800; // 30 days if remember me, 7 days otherwise
-        document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=${maxAge}; secure; samesite=strict`;
-        document.cookie = `username=${data.user.username}; path=/; max-age=${maxAge}; secure; samesite=strict`;
-        document.cookie = `isVerified=${data.user.isVerified}; path=/; max-age=${maxAge}; secure; samesite=strict`;
+        // Cookies are now set by the server in response headers
+        // No need to set them manually with document.cookie
         
-        // For login, we should almost always redirect to zone
-        // Only redirect to verify if the account exists but is not verified (rare edge case)
+        // Small delay to ensure cookies are processed by browser
         setTimeout(() => {
           if (data.user.isVerified) {
             // Normal case: verified user logging in
+            console.log('✅ Redirecting verified user to zone');
             window.location.href = '/zone';
           } else {
             // Edge case: user signed up but never verified their email
             console.log('⚠️ User not verified, redirecting to verification');
             window.location.href = `/verify?userId=${data.user.id}&email=${encodeURIComponent(data.user.email)}`;
           }
-        }, 1500);
+        }, 1000); // Reduced delay since cookies are set server-side
       } else {
         setError(data.error || 'Login failed');
       }

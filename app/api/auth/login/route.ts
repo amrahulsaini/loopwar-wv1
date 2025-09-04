@@ -150,8 +150,8 @@ export async function POST(request: NextRequest) {
     console.log('⏱️ Request processed in:', endTime - startTime, 'ms');
     console.log('🎉 Login completed successfully for user:', sanitizedUsername);
 
-    // Return success with user data (excluding sensitive information)
-    return NextResponse.json({
+    // Create response with user data
+    const response = NextResponse.json({
       success: true,
       message: 'Login successful!',
       user: {
@@ -170,6 +170,24 @@ export async function POST(request: NextRequest) {
         processingTime: endTime - startTime
       }
     }, { status: 200 });
+
+    // Set cookies in response headers (server-side)
+    const cookieMaxAge = rememberMe ? 2592000 : 604800; // 30 days or 7 days
+    const cookieOptions = {
+      maxAge: cookieMaxAge,
+      httpOnly: false, // Allow JavaScript access for client-side checks
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+      path: '/'
+    };
+
+    response.cookies.set('sessionToken', sessionToken, cookieOptions);
+    response.cookies.set('username', user.username, cookieOptions);
+    response.cookies.set('isVerified', user.is_verified.toString(), cookieOptions);
+
+    console.log('🍪 Cookies set in response headers');
+
+    return response;
 
   } catch (error) {
     const endTime = Date.now();
