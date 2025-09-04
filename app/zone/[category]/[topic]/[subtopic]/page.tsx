@@ -76,63 +76,8 @@ export default function SubtopicPracticePage() {
           return;
         }
 
-        // First validate if this category/topic/subtopic exists in database
+        // Fetch actual problems from database based on subtopic
         try {
-          const categoriesResponse = await fetch('/api/admin/categories', {
-            method: 'GET',
-            credentials: 'include',
-          });
-
-          if (categoriesResponse.ok) {
-            const categoriesData = await categoriesResponse.json();
-            
-            if (categoriesData.success) {
-              // Format names back from URL format for comparison
-              const categoryName = category.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-              const topicName = topic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-              const subtopicName = subtopic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/and/g, '&');
-
-              // Check if category exists
-              const categoryExists = categoriesData.categories.some((cat: {name: string}) => 
-                cat.name.toLowerCase() === categoryName.toLowerCase()
-              );
-
-              if (!categoryExists) {
-                router.push('/404');
-                return;
-              }
-
-              // Check if topic exists in this category
-              const categoryId = categoriesData.categories.find((cat: {name: string}) => 
-                cat.name.toLowerCase() === categoryName.toLowerCase()
-              )?.id;
-
-              const topicExists = categoriesData.topics.some((top: {name: string, category_id: number}) => 
-                top.name.toLowerCase() === topicName.toLowerCase() && top.category_id === categoryId
-              );
-
-              if (!topicExists) {
-                router.push('/404');
-                return;
-              }
-
-              // Check if subtopic exists in this topic
-              const topicId = categoriesData.topics.find((top: {name: string, category_id: number}) => 
-                top.name.toLowerCase() === topicName.toLowerCase() && top.category_id === categoryId
-              )?.id;
-
-              const subtopicExists = categoriesData.subtopics.some((sub: {name: string, topic_id: number}) => 
-                sub.name.toLowerCase() === subtopicName.toLowerCase() && sub.topic_id === topicId
-              );
-
-              if (!subtopicExists) {
-                router.push('/404');
-                return;
-              }
-            }
-          }
-
-          // Now fetch actual problems from database
           const problemsResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
             method: 'GET',
             credentials: 'include',
@@ -157,7 +102,7 @@ export default function SubtopicPracticePage() {
                 }));
                 setProblems(formattedProblems);
               } else {
-                // No problems found - set empty array instead of mock data
+                // No problems found - set empty array (will show "No problems" message)
                 setProblems([]);
               }
             } else {
@@ -170,7 +115,7 @@ export default function SubtopicPracticePage() {
           }
         } catch (error) {
           console.error('Error fetching problems:', error);
-          // On error, set empty array instead of mock data
+          // On error, set empty array (will show "No problems" message)
           setProblems([]);
         }
         
@@ -384,15 +329,15 @@ export default function SubtopicPracticePage() {
               ))}
             </div>
 
-            {/* No Problems Found Message */}
+            {/* No Problems Added Message */}
             {problems.length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">
                   <Database size={48} />
                 </div>
-                <h3>No Problems Available</h3>
+                <h3>No Problems Added Yet</h3>
                 <p>No {activeMode} problems have been added for <strong>{subtopicDisplay}</strong> yet.</p>
-                <p>Our team is working to add more problems. Check back soon!</p>
+                <p>Add problems via the admin dashboard to see them here!</p>
               </div>
             )}
           </div>
