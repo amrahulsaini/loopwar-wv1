@@ -81,8 +81,8 @@ export default function LearnProblemPage() {
 
         if (problemResponse.ok) {
           const problemData = await problemResponse.json();
-          if (problemData.success) {
-            setProblem(problemData.problem);
+          if (problemData.success && problemData.problems && problemData.problems.length > 0) {
+            setProblem(problemData.problems[0]);
             // Generate learning steps based on the problem
             generateLearningSteps(problemData.problem);
           }

@@ -82,10 +82,10 @@ export default function MCQProblemPage() {
 
         if (problemResponse.ok) {
           const problemData = await problemResponse.json();
-          if (problemData.success) {
-            setProblem(problemData.problem);
+          if (problemData.success && problemData.problems && problemData.problems.length > 0) {
+            setProblem(problemData.problems[0]);
             // Generate sample MCQ questions based on the problem
-            generateMCQQuestions(problemData.problem);
+            generateMCQQuestions(problemData.problems[0]);
           }
         }
 

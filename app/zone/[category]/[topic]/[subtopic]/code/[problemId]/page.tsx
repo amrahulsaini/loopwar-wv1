@@ -82,12 +82,12 @@ export default function CodeProblemPage() {
 
         if (problemResponse.ok) {
           const problemData = await problemResponse.json();
-          if (problemData.success) {
-            setProblem(problemData.problem);
+          if (problemData.success && problemData.problems && problemData.problems.length > 0) {
+            setProblem(problemData.problems[0]);
             // Generate sample test cases
             generateTestCases();
             // Set initial code template
-            setCode(`// Write your solution for: ${problemData.problem.title}
+            setCode(`// Write your solution for: ${problemData.problems[0].title}
 // ${problemData.problem.description}
 
 function solution() {
