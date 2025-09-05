@@ -41,6 +41,8 @@ export async function POST(request: NextRequest) {
     const body: ChatRequest = await request.json();
     const { user_id, message, conversation_id, context } = body;
 
+    console.log('AI Chat API Request:', { user_id, message: message.substring(0, 100), conversation_id, context });
+
     if (!user_id || !message) {
       return NextResponse.json(
         { error: 'Missing required fields: user_id and message' },
@@ -95,17 +97,23 @@ export async function POST(request: NextRequest) {
       const result = await chat.sendMessage(message);
       const aiResponse = result.response.text();
 
+      console.log('AI Response generated:', aiResponse.substring(0, 100) + '...');
+
       // Save to database
       await connection.execute(
         'INSERT INTO ai_messages (conversation_id, user_id, user_message, ai_response, created_at) VALUES (?, ?, ?, ?, NOW())',
         [currentConversationId, user_id, message, aiResponse]
       );
 
+      console.log('Message saved to database');
+
       // Update conversation timestamp
       await connection.execute(
         'UPDATE ai_conversations SET updated_at = NOW() WHERE id = ?',
         [currentConversationId]
       );
+
+      console.log('Conversation updated');
 
       return NextResponse.json({
         conversation_id: currentConversationId,

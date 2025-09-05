@@ -66,6 +66,7 @@ export default function LearnProblemPage() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [userMessage, setUserMessage] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
 
   // URL parameters
@@ -100,6 +101,7 @@ export default function LearnProblemPage() {
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setUsername(userData.username);
+          setUserId(userData.id); // Store the actual user ID
         } else {
           router.push('/login');
           return;
@@ -130,7 +132,7 @@ export default function LearnProblemPage() {
   }, [problemId, router]);
 
   const sendMessageToAI = async () => {
-    if (!userMessage.trim() || !problem) return;
+    if (!userMessage.trim() || !problem || !userId) return;
 
     setIsAiLoading(true);
     const newMessage: AIMessage = {
@@ -151,7 +153,7 @@ export default function LearnProblemPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: 1, // TODO: Get actual user ID from session
+          user_id: userId, // Use actual user ID from session
           message: messageToSend,
           conversation_id: conversationId,
           context: `${problem.title} - ${subtopicDisplay}`
