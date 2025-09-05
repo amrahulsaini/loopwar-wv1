@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -36,6 +36,8 @@ interface Subtopic {
 type PracticeMode = 'learn' | 'mcq' | 'code';
 
 export default function SubtopicPracticePage() {
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [lastProblemId, setLastProblemId] = useState<number | null>(null);
   const params = useParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -227,6 +229,10 @@ export default function SubtopicPracticePage() {
   };
 
   const handleProblemClick = (problemId: number) => {
+    setLastProblemId(problemId);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(`lastProblemId-${category}-${topic}-${subtopic}`, String(problemId));
+    }
     const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${activeMode}/${problemId}`;
     console.log(`🚀 Starting ${activeMode} practice for problem ${problemId}`);
     router.push(practiceUrl);
@@ -257,34 +263,59 @@ export default function SubtopicPracticePage() {
     <>
       <header className="main-header">
         <div className="container">
-          <div className="header-content">
+          <div className="header-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Link href="/zone" className="logo-link">
               <Logo />
             </Link>
-            
-            <div className="header-center">
-              <div className="breadcrumb">
+            <div className="header-center" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+              <div className="breadcrumb" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <Link href="/zone" className="breadcrumb-link">Zone</Link>
                 <span className="breadcrumb-separator">→</span>
-                <Link 
-                  href={`/zone?category=${encodeURIComponent(category)}`} 
-                  className="breadcrumb-link"
-                >
-                  {categoryDisplay}
-                </Link>
+                <span className="breadcrumb-link">{categoryDisplay}</span>
                 <span className="breadcrumb-separator">→</span>
-                <Link 
-                  href={`/zone?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}`} 
-                  className="breadcrumb-link"
-                >
-                  {topicDisplay}
-                </Link>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <span
+                    className="breadcrumb-link breadcrumb-dropdown-trigger"
+                    tabIndex={0}
+                    style={{ cursor: 'pointer', position: 'relative' }}
+                    onMouseEnter={() => setShowDropdown(true)}
+                    onMouseLeave={() => setShowDropdown(false)}
+                    onClick={() => setShowDropdown((v) => !v)}
+                  >
+                    {topicDisplay}
+                  </span>
+                  {showDropdown && (
+                    <div
+                      className="breadcrumb-dropdown"
+                      style={{ position: 'absolute', top: '100%', left: 0, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10, minWidth: '180px', borderRadius: '8px', padding: '8px 0' }}
+                      onMouseEnter={() => setShowDropdown(true)}
+                      onMouseLeave={() => setShowDropdown(false)}
+                    >
+                      {allSubtopics.map((subtopicItem) => {
+                        const subtopicUrlName = subtopicItem.name
+                          .toLowerCase()
+                          .replace(/\s+/g, '-')
+                          .replace(/&/g, 'and')
+                          .replace(/[^a-z0-9-]/g, '');
+                        return (
+                          <Link
+                            key={subtopicItem.id}
+                            href={`/zone/${category}/${topic}/${subtopicUrlName}`}
+                            className="breadcrumb-dropdown-item"
+                            style={{ display: 'block', padding: '8px 16px', color: subtopicUrlName === subtopic ? '#2563eb' : '#222', fontWeight: subtopicUrlName === subtopic ? 'bold' : 'normal', background: subtopicUrlName === subtopic ? '#f3f4f6' : 'transparent', borderRadius: '4px', textDecoration: 'none' }}
+                          >
+                            {subtopicItem.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
                 <span className="breadcrumb-separator">→</span>
                 <span className="breadcrumb-current">{subtopicDisplay}</span>
               </div>
             </div>
-
-            <div className="header-right">
+            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <Link href="/zone" className="header-back-btn" title="Back to Zone">
                 <ArrowLeft size={20} />
               </Link>
@@ -408,47 +439,48 @@ export default function SubtopicPracticePage() {
             </div>
 
             <div className="problems-grid">
-              {problems.map((problem, index) => (
-                <div 
-                  key={problem.id} 
-                  className="problem-card"
-                  onClick={() => handleProblemClick(problem.id)}
-                >
-                  <div className="problem-header">
-                    <div className="problem-number">#{index + 1}</div>
-                    <h3 className="problem-title">{problem.title}</h3>
-                    <div 
-                      className="problem-difficulty"
-                      style={{ color: getDifficultyColor(problem.difficulty) }}
-                    >
-                      {problem.difficulty}
+              {problems.map((problem, index) => {
+                const isLast = lastProblemId === problem.id;
+                return (
+                  <div
+                    key={problem.id}
+                    className={`problem-card${isLast ? ' last-active-problem' : ''}`}
+                    onClick={() => handleProblemClick(problem.id)}
+                    style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
+                  >
+                    <div className="problem-header">
+                      <div className="problem-number">#{index + 1}</div>
+                      <h3 className="problem-title">{problem.title}</h3>
+                      <div
+                        className="problem-difficulty"
+                        style={{ color: getDifficultyColor(problem.difficulty) }}
+                      >
+                        {problem.difficulty}
+                      </div>
+                    </div>
+                    <p className="problem-description">{problem.description}</p>
+                    <div className="problem-footer">
+                      <div className="problem-status">
+                        {problem.solved ? (
+                          <div className="status-solved">
+                            <CheckCircle2 size={16} />
+                            <span>Solved</span>
+                          </div>
+                        ) : (
+                          <div className="status-unsolved">
+                            <Clock size={16} />
+                            <span>Not Started</span>
+                          </div>
+                        )}
+                      </div>
+                      <button className="start-problem-btn">
+                        <Play size={16} />
+                        <span>Start {activeMode}</span>
+                      </button>
                     </div>
                   </div>
-
-                  <p className="problem-description">{problem.description}</p>
-
-                  <div className="problem-footer">
-                    <div className="problem-status">
-                      {problem.solved ? (
-                        <div className="status-solved">
-                          <CheckCircle2 size={16} />
-                          <span>Solved</span>
-                        </div>
-                      ) : (
-                        <div className="status-unsolved">
-                          <Clock size={16} />
-                          <span>Not Started</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <button className="start-problem-btn">
-                      <Play size={16} />
-                      <span>Start {activeMode}</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* No Problems Added Message */}
