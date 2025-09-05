@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   BookOpen,
+  Brain,
   CheckCircle2,
   Database,
   Lightbulb,
@@ -255,6 +256,17 @@ export default function LearnProblemPage() {
               </div>
               <h1 className="problem-title">{problem.title}</h1>
               <p className="problem-description">{problem.description}</p>
+              
+              <div className="problem-actions">
+                <Link 
+                  href={`/zone/${category}/${topic}/${subtopic}/workspace/${sortOrder}`} 
+                  className="workspace-action-btn"
+                  title="Open AI Learning Workspace"
+                >
+                  <Brain size={18} />
+                  AI Learning Workspace
+                </Link>
+              </div>
             </div>
 
             <div className="learning-section">
@@ -325,6 +337,9 @@ export default function LearnProblemPage() {
                   <div className="completion-actions">
                     <Link href={`/zone/${category}/${topic}/${subtopic}`} className="back-btn">
                       Back to Problems
+                    </Link>
+                    <Link href={`/zone/${category}/${topic}/${subtopic}/workspace/${sortOrder}`} className="workspace-btn">
+                      🤖 AI Learning Workspace
                     </Link>
                     <Link href={`/zone/${category}/${topic}/${subtopic}/mcq/${sortOrder}`} className="practice-btn">
                       Try MCQ Practice
