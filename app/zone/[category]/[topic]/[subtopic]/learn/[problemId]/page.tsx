@@ -69,6 +69,7 @@ export default function LearnProblemPage() {
   const [userId, setUserId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [isFullscreenChat, setIsFullscreenChat] = useState(false);
+  const [typingMessage, setTypingMessage] = useState<string>('');
 
   // URL parameters
   const category = params.category as string;
@@ -177,14 +178,9 @@ export default function LearnProblemPage() {
         const data = await response.json();
         setConversationId(data.conversation_id);
 
-        const aiResponse: AIMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date()
-        };
-
-        setAiMessages(prev => [...prev, aiResponse]);
+        // Start typing animation
+        const messageId = (Date.now() + 1).toString();
+        await typeMessage(data.response, messageId);
       } else {
         console.error('AI API error:', response.statusText);
       }
@@ -193,6 +189,35 @@ export default function LearnProblemPage() {
     } finally {
       setIsAiLoading(false);
     }
+  };
+
+  const typeMessage = async (fullMessage: string, messageId: string) => {
+    const words = fullMessage.split(' ');
+    let currentText = '';
+    let wordIndex = 0;
+
+    const typeNextWord = () => {
+      if (wordIndex < words.length) {
+        currentText += (wordIndex > 0 ? ' ' : '') + words[wordIndex];
+        setTypingMessage(currentText);
+        wordIndex++;
+        setTimeout(typeNextWord, 100); // 100ms delay between words
+      } else {
+        // Typing complete, add the final message
+        setTimeout(() => {
+          const aiResponse: AIMessage = {
+            id: messageId,
+            role: 'assistant',
+            content: fullMessage,
+            timestamp: new Date()
+          };
+          setAiMessages(prev => [...prev, aiResponse]);
+          setTypingMessage('');
+        }, 500);
+      }
+    };
+
+    typeNextWord();
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -398,6 +423,17 @@ export default function LearnProblemPage() {
                     </div>
                   </div>
                 )}
+
+                {typingMessage && (
+                  <div className="message assistant">
+                    <div className="message-avatar">
+                      <Bot size={16} />
+                    </div>
+                    <div className="message-content">
+                      <p>{typingMessage}<span className="cursor">|</span></p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="chat-input">
@@ -492,6 +528,17 @@ export default function LearnProblemPage() {
                       <span></span>
                       <span></span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {typingMessage && (
+                <div className="message assistant">
+                  <div className="message-avatar">
+                    <Bot size={20} />
+                  </div>
+                  <div className="message-content">
+                    <p>{typingMessage}<span className="cursor">|</span></p>
                   </div>
                 </div>
               )}
