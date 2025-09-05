@@ -263,48 +263,55 @@ export default function SubtopicPracticePage() {
     <>
       <header className="main-header">
         <div className="container">
-          <div className="header-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link href="/zone" className="logo-link">
-              <Logo />
-            </Link>
-            <div className="header-center" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <div className="breadcrumb" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div className="header-content">
+            {/* Left - Logo */}
+            <div className="header-left">
+              <Link href="/zone" className="logo-link">
+                <Logo />
+              </Link>
+            </div>
+
+            {/* Center - Breadcrumb */}
+            <div className="header-center">
+              <div className="breadcrumb">
                 <Link href="/zone" className="breadcrumb-link">Zone</Link>
                 <span className="breadcrumb-separator">→</span>
                 <span className="breadcrumb-link">{categoryDisplay}</span>
                 <span className="breadcrumb-separator">→</span>
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <span
-                    className="breadcrumb-link breadcrumb-dropdown-trigger"
-                    tabIndex={0}
-                    style={{ cursor: 'pointer', position: 'relative' }}
+                <div className="breadcrumb-dropdown-container">
+                  <button
+                    className="breadcrumb-dropdown-trigger"
                     onMouseEnter={() => setShowDropdown(true)}
                     onMouseLeave={() => setShowDropdown(false)}
                     onClick={() => setShowDropdown((v) => !v)}
                   >
                     {topicDisplay}
-                  </span>
+                    <span className="dropdown-arrow">▼</span>
+                  </button>
                   {showDropdown && (
                     <div
-                      className="breadcrumb-dropdown"
-                      style={{ position: 'absolute', top: '100%', left: 0, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', zIndex: 10, minWidth: '180px', borderRadius: '8px', padding: '8px 0' }}
+                      className="breadcrumb-dropdown-menu"
                       onMouseEnter={() => setShowDropdown(true)}
                       onMouseLeave={() => setShowDropdown(false)}
                     >
+                      <div className="dropdown-title">Subtopics:</div>
                       {allSubtopics.map((subtopicItem) => {
                         const subtopicUrlName = subtopicItem.name
                           .toLowerCase()
                           .replace(/\s+/g, '-')
                           .replace(/&/g, 'and')
                           .replace(/[^a-z0-9-]/g, '');
+                        const isActive = subtopicUrlName === subtopic;
+                        
                         return (
                           <Link
                             key={subtopicItem.id}
                             href={`/zone/${category}/${topic}/${subtopicUrlName}`}
-                            className="breadcrumb-dropdown-item"
-                            style={{ display: 'block', padding: '8px 16px', color: subtopicUrlName === subtopic ? '#2563eb' : '#222', fontWeight: subtopicUrlName === subtopic ? 'bold' : 'normal', background: subtopicUrlName === subtopic ? '#f3f4f6' : 'transparent', borderRadius: '4px', textDecoration: 'none' }}
+                            className={`dropdown-item ${isActive ? 'active' : ''}`}
+                            onClick={() => setShowDropdown(false)}
                           >
-                            {subtopicItem.name}
+                            <span className="item-name">{subtopicItem.name}</span>
+                            {isActive && <span className="current-indicator">✓</span>}
                           </Link>
                         );
                       })}
@@ -315,21 +322,25 @@ export default function SubtopicPracticePage() {
                 <span className="breadcrumb-current">{subtopicDisplay}</span>
               </div>
             </div>
-            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+
+            {/* Right - Back button and User info */}
+            <div className="header-right">
               <Link href="/zone" className="header-back-btn" title="Back to Zone">
                 <ArrowLeft size={20} />
               </Link>
-              <span className="username">@{username}</span>
-              <button
-                className="profile-btn"
-                onClick={() => router.push(`/profiles/${username}`)}
-                aria-label="View Profile"
-                title={`Go to ${username}'s profile`}
-              >
-                <div className="profile-avatar default-avatar">
-                  {username.charAt(0).toUpperCase()}
-                </div>
-              </button>
+              <div className="user-info">
+                <span className="username">@{username}</span>
+                <button
+                  className="profile-btn"
+                  onClick={() => router.push(`/profiles/${username}`)}
+                  aria-label="View Profile"
+                  title={`Go to ${username}'s profile`}
+                >
+                  <div className="profile-avatar">
+                    {username.charAt(0).toUpperCase()}
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
