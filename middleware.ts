@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Protected routes that require authentication
-const protectedRoutes = ['/zone'];
+// Note: We check these manually in the code below, not with startsWith
+const protectedRoutes = ['/zone', '/admin'];
 
 // Routes that should redirect authenticated users
 const authRoutes = ['/join', '/verify'];
@@ -34,7 +35,8 @@ export function middleware(request: NextRequest) {
   });
 
   // Check if the route is protected
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  // Only protect exact /zone path and admin routes, not zone subpaths like problem pages
+  const isProtectedRoute = pathname === '/zone' || pathname.startsWith('/admin');
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
   // If trying to access protected route without authentication

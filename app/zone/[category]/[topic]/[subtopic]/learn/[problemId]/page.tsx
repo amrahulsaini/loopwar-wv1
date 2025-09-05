@@ -69,8 +69,8 @@ export default function LearnProblemPage() {
           const userData = await userResponse.json();
           setUsername(userData.username);
         } else {
-          router.push('/login');
-          return;
+          // User is not authenticated, but allow them to view the problem anyway
+          console.log('User not authenticated, viewing problem as guest');
         }
 
         // Fetch problem by sortOrder within the subtopic
@@ -84,13 +84,13 @@ export default function LearnProblemPage() {
           if (problemData.success && problemData.problems && problemData.problems.length > 0) {
             setProblem(problemData.problems[0]);
             // Generate learning steps based on the problem
-            generateLearningSteps(problemData.problem);
+            generateLearningSteps(problemData.problems[0]);
           }
         }
 
       } catch (error) {
         console.error('Error fetching data:', error);
-        router.push('/login');
+        // Don't redirect on error, just show the error state
       } finally {
         setIsLoading(false);
       }

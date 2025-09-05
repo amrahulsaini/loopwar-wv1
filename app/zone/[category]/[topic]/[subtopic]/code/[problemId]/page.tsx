@@ -70,8 +70,8 @@ export default function CodeProblemPage() {
           const userData = await userResponse.json();
           setUsername(userData.username);
         } else {
-          router.push('/login');
-          return;
+          // User is not authenticated, but allow them to view the problem anyway
+          console.log('User not authenticated, viewing problem as guest');
         }
 
         // Fetch problem by sortOrder within the subtopic
@@ -99,7 +99,7 @@ function solution() {
 
       } catch (error) {
         console.error('Error fetching data:', error);
-        router.push('/login');
+        // Don't redirect on error, just show the error state
       } finally {
         setIsLoading(false);
       }
