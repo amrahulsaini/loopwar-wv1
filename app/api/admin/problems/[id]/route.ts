@@ -17,7 +17,7 @@ interface ProblemRow extends RowDataPacket {
 // GET - Fetch individual problem by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate user
@@ -29,7 +29,7 @@ export async function GET(
       );
     }
 
-    const problemId = params.id;
+    const { id: problemId } = await params;
 
     if (!problemId || isNaN(Number(problemId))) {
       return NextResponse.json(

@@ -17,30 +17,6 @@ import {
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
 
-// Category icon mapping utility
-const getCategoryIcon = (categoryName: string) => {
-  const iconMap: Record<string, string> = {
-    'core-dsa': 'Workflow',
-    'system-design': 'Server',
-    'web-development': 'Globe',
-    'mobile-development': 'Smartphone',
-    'data-science': 'BarChart3',
-    'machine-learning': 'Brain',
-    'devops': 'Settings',
-    'security': 'Shield',
-    'databases': 'Database',
-    'cloud-computing': 'Cloud',
-    'programming-languages': 'Code',
-    'algorithms': 'Zap',
-    'competitive-programming': 'Trophy',
-    'interview-preparation': 'Briefcase',
-    'default': 'BookOpen'
-  };
-
-  const lookupKey = categoryName.toLowerCase().replace(/-/g, '-');
-  return iconMap[lookupKey] || iconMap['default'];
-};
-
 const getCategoryColor = (categoryName: string) => {
   const colorMap: Record<string, string> = {
     'core-dsa': '#3b82f6',
