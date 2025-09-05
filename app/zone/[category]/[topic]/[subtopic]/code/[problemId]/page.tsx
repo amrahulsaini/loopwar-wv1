@@ -43,7 +43,7 @@ export default function CodeProblemPage() {
   const category = params.category as string;
   const topic = params.topic as string;
   const subtopic = params.subtopic as string;
-  const problemId = params.problemId as string;
+  const sortOrder = params.problemId as string;
 
   const formatDisplayName = (urlName: string) => {
     return urlName
@@ -74,7 +74,8 @@ export default function CodeProblemPage() {
           return;
         }
 
-        const problemResponse = await fetch(`/api/admin/problems/${problemId}`, {
+        // Fetch problem by sortOrder within the subtopic
+        const problemResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}&sortOrder=${encodeURIComponent(sortOrder)}`, {
           method: 'GET',
           credentials: 'include',
         });
@@ -105,7 +106,7 @@ function solution() {
     };
 
     fetchData();
-  }, [problemId, router]);
+  }, [category, topic, subtopic, sortOrder, router]);
 
   const generateTestCases = () => {
     // This is a placeholder - in real implementation, you'd fetch from database

@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const categoryParam = searchParams.get('category');
     const topicParam = searchParams.get('topic');
     const subtopicParam = searchParams.get('subtopic');
+    const sortOrderParam = searchParams.get('sortOrder');
 
     let query = `
       SELECT 
@@ -138,6 +139,12 @@ export async function GET(request: NextRequest) {
             // Use IDs for the query
             query += ' AND p.category_id = ? AND p.topic_id = ? AND p.subtopic_id = ?';
             queryParams.push(categoryObj.id, topicObj.id, subtopicObj.id);
+            
+            // Add sortOrder filter if provided
+            if (sortOrderParam) {
+              query += ' AND p.sort_order = ?';
+              queryParams.push(parseInt(sortOrderParam));
+            }
           } else {
             console.log('Subtopic not found');
             // Return empty result if subtopic doesn't exist

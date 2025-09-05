@@ -241,13 +241,13 @@ export default function SubtopicPracticePage() {
 
   const displayedProblems = showAllProblems ? problems : problems.slice(0, 9);
 
-  const handleProblemClick = (problemId: number) => {
-    setLastProblemId(problemId);
+  const handleProblemClick = (sortOrder: number) => {
+    setLastProblemId(sortOrder);
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(`lastProblemId-${category}-${topic}-${subtopic}`, String(problemId));
+      window.localStorage.setItem(`lastProblemId-${category}-${topic}-${subtopic}`, String(sortOrder));
     }
-    const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${activeMode}/${problemId}`;
-    console.log(`🚀 Starting ${activeMode} practice for problem ${problemId}`);
+    const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${activeMode}/${sortOrder}`;
+    console.log(`🚀 Starting ${activeMode} practice for problem with sort order ${sortOrder}`);
     router.push(practiceUrl);
   };
 
@@ -464,12 +464,12 @@ export default function SubtopicPracticePage() {
 
             <div className="problems-grid">
               {displayedProblems.map((problem, index) => {
-                const isLast = lastProblemId === problem.id;
+                const isLast = lastProblemId === (problem.sortOrder || problem.id);
                 return (
                   <div
                     key={problem.id}
                     className={`problem-card${isLast ? ' last-active-problem' : ''}`}
-                    onClick={() => handleProblemClick(problem.id)}
+                    onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
                     style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
                   >
                     <div className="problem-header">

@@ -42,7 +42,7 @@ export default function LearnProblemPage() {
   const category = params.category as string;
   const topic = params.topic as string;
   const subtopic = params.subtopic as string;
-  const problemId = params.problemId as string;
+  const sortOrder = params.problemId as string;
 
   const formatDisplayName = (urlName: string) => {
     return urlName
@@ -73,7 +73,8 @@ export default function LearnProblemPage() {
           return;
         }
 
-        const problemResponse = await fetch(`/api/admin/problems/${problemId}`, {
+        // Fetch problem by sortOrder within the subtopic
+        const problemResponse = await fetch(`/api/admin/problems?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}&sortOrder=${encodeURIComponent(sortOrder)}`, {
           method: 'GET',
           credentials: 'include',
         });
@@ -96,7 +97,7 @@ export default function LearnProblemPage() {
     };
 
     fetchData();
-  }, [problemId, router]);
+  }, [category, topic, subtopic, sortOrder, router]);
 
   const generateLearningSteps = (problem: Problem) => {
     // This is a placeholder - in real implementation, you'd fetch from database
@@ -325,10 +326,10 @@ export default function LearnProblemPage() {
                     <Link href={`/zone/${category}/${topic}/${subtopic}`} className="back-btn">
                       Back to Problems
                     </Link>
-                    <Link href={`/zone/${category}/${topic}/${subtopic}/mcq/${problemId}`} className="practice-btn">
+                    <Link href={`/zone/${category}/${topic}/${subtopic}/mcq/${sortOrder}`} className="practice-btn">
                       Try MCQ Practice
                     </Link>
-                    <Link href={`/zone/${category}/${topic}/${subtopic}/code/${problemId}`} className="practice-btn">
+                    <Link href={`/zone/${category}/${topic}/${subtopic}/code/${sortOrder}`} className="practice-btn">
                       Try Coding Challenge
                     </Link>
                   </div>
