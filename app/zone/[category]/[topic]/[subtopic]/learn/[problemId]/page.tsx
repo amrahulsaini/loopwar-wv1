@@ -55,6 +55,17 @@ interface AIMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  type?: 'text' | 'question' | 'response';
+  showButtons?: boolean;
+}
+
+interface Note {
+  id: number;
+  title: string;
+  content: string;
+  type: string;
+  created_at: string;
+  is_edited: boolean;
 }
 
 export default function LearnProblemPage() {
@@ -70,6 +81,10 @@ export default function LearnProblemPage() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [isFullscreenChat, setIsFullscreenChat] = useState(false);
   const [typingMessage, setTypingMessage] = useState<string>('');
+  const [showNotesPanel, setShowNotesPanel] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [showYesNoButtons, setShowYesNoButtons] = useState(false);
+  const [chatSessionId] = useState<number | null>(null);
 
   // URL parameters
   const category = params.category as string;
@@ -209,15 +224,82 @@ export default function LearnProblemPage() {
             id: messageId,
             role: 'assistant',
             content: fullMessage,
-            timestamp: new Date()
+            timestamp: new Date(),
+            type: fullMessage.includes('?') ? 'question' : 'response',
+            showButtons: fullMessage.includes('do you know') || fullMessage.includes('understand')
           };
           setAiMessages(prev => [...prev, aiResponse]);
           setTypingMessage('');
+          setShowYesNoButtons(aiResponse.showButtons || false);
+
+          // Auto-generate note from the conversation
+          if (fullMessage.length > 50) {
+            generateNoteFromMessage(fullMessage);
+          }
         }, 500);
       }
     };
 
     typeNextWord();
+  };
+
+  const generateNoteFromMessage = async (message: string) => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch('/api/ai/notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          session_id: chatSessionId,
+          note_title: `Concept: ${problem?.title || 'General'}`,
+          note_content: message,
+          note_type: 'concept_explanation',
+          problem_id: parseInt(problemId)
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Note generated:', data.note_id);
+        // Refresh notes
+        fetchNotes();
+      }
+    } catch (error) {
+      console.error('Error generating note:', error);
+    }
+  };
+
+  const fetchNotes = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`/api/ai/notes?user_id=${userId}&session_id=${chatSessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.notes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
+  };
+
+  const handleYesNoResponse = async (response: 'yes' | 'no') => {
+    setShowYesNoButtons(false);
+    const buttonMessage: AIMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: response,
+      timestamp: new Date(),
+      type: 'text'
+    };
+
+    setAiMessages(prev => [...prev, buttonMessage]);
+    setUserMessage(response);
+    await sendMessageToAI();
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -358,13 +440,22 @@ export default function LearnProblemPage() {
               <div className="chat-header">
                 <Bot size={20} />
                 <h3>LoopAI Assistant</h3>
-                <button
-                  onClick={() => setIsFullscreenChat(true)}
-                  className="fullscreen-btn"
-                  title="Open fullscreen chat"
-                >
-                  ⛶
-                </button>
+                <div className="chat-controls">
+                  <button
+                    onClick={() => setShowNotesPanel(!showNotesPanel)}
+                    className="notes-btn"
+                    title="Toggle notes panel"
+                  >
+                    📝
+                  </button>
+                  <button
+                    onClick={() => setIsFullscreenChat(true)}
+                    className="fullscreen-btn"
+                    title="Open fullscreen chat"
+                  >
+                    ⛶
+                  </button>
+                </div>
               </div>
 
               <div className="chat-messages">
@@ -405,6 +496,22 @@ export default function LearnProblemPage() {
                       <span className="message-time">
                         {message.timestamp.toLocaleTimeString()}
                       </span>
+                      {message.showButtons && showYesNoButtons && (
+                        <div className="yes-no-buttons">
+                          <button
+                            onClick={() => handleYesNoResponse('yes')}
+                            className="yes-btn"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={() => handleYesNoResponse('no')}
+                            className="no-btn"
+                          >
+                            No
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -454,6 +561,34 @@ export default function LearnProblemPage() {
                 </button>
               </div>
             </div>
+
+            {/* Notes Panel */}
+            {showNotesPanel && (
+              <div className="notes-panel">
+                <div className="notes-header">
+                  <h4>Study Notes</h4>
+                  <button
+                    onClick={() => setShowNotesPanel(false)}
+                    className="close-notes-btn"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="notes-content">
+                  {notes.length === 0 ? (
+                    <p className="no-notes">No notes yet. Start chatting to generate automatic notes!</p>
+                  ) : (
+                    notes.map((note) => (
+                      <div key={note.id} className="note-item">
+                        <h5>{note.title}</h5>
+                        <p>{note.content.substring(0, 100)}...</p>
+                        <small>{new Date(note.created_at).toLocaleDateString()}</small>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

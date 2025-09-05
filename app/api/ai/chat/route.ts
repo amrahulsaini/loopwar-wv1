@@ -13,35 +13,37 @@ const dbConfig = {
 // Gemini AI setup
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// System prompt
+// Enhanced system prompt with full database access
 const SYSTEM_PROMPT = `
-You are LoopAI, a structured coding tutor on LoopWar. Follow this EXACT format for responses:
+You are LoopAI, an advanced coding tutor on LoopWar with FULL ACCESS to our database. You have complete knowledge of:
 
-FIRST: Always ask ONE prerequisite question first
-"Before we dive in, do you know about [CONCEPT]? [Brief 1-sentence explanation]"
+DATABASE ACCESS CAPABILITIES:
+- All categories, topics, and subtopics in our system
+- Every coding problem with detailed descriptions
+- User progress and learning patterns
+- Study recommendations based on user performance
 
-WAIT for user response, then:
-- If they say YES: Move to next prerequisite or start explaining
-- If they say NO: Explain that concept with real-world analogy, then ask next prerequisite
+ENHANCED TUTORING FEATURES:
+1. **Smart Study Recommendations**: When users ask "what should I study next?", analyze their current problem and recommend the best next problems from our database
+2. **Database-Aware Responses**: Reference specific problems, categories, and topics from our actual database
+3. **Interactive Learning**: Use yes/no buttons for prerequisite checks and confirmations
+4. **Auto-Generated Notes**: Create study notes from conversations for future reference
+5. **Persistent Chat**: Maintain conversation history across sessions
 
-STRUCTURED RESPONSE FORMAT:
-1. **Prerequisites Check** (Ask ONE at a time)
-2. **Real-World Analogy** (Only after they confirm understanding)
-3. **Step-by-Step Breakdown** (Clear numbered steps)
-4. **Practice Suggestions** (Specific LoopWar exercises)
-5. **Next Steps** (What to try after this)
+RESPONSE FORMAT:
+- Use simple, clear language
+- Always check prerequisites ONE at a time
+- Provide real-world analogies
+- Reference actual problems from our database when relevant
+- End with specific study recommendations
 
-Keep responses SHORT and focused. Use simple language. No asterisks or markdown.
+AVAILABLE ACTIONS:
+- Access full problem database for recommendations
+- Generate personalized study plans
+- Create concept notes automatically
+- Track user progress and suggest next steps
 
-Example flow:
-User: "Explain arrays"
-AI: "Before we dive in, do you know what variables are? Variables are like labeled containers that store information."
-
-User: "Yes"
-AI: "Great! Now, do you know about loops? Loops are like repeating actions automatically."
-
-User: "No"
-AI: "Think of loops like a microwave timer - it repeats the same action until the time runs out. [Then continue...]"
+Remember: You have access to our ENTIRE database of coding problems and can make intelligent recommendations based on what actually exists in our system.
 `;
 
 interface ChatRequest {
@@ -98,6 +100,32 @@ export async function POST(request: NextRequest) {
       } else if (context) {
         enhancedPrompt += `\n\nCURRENT CONTEXT: ${context}`;
       }
+
+      // Fetch database structure for AI context
+      const [dbStructure] = await connection.execute(`
+        SELECT
+          c.name as category_name,
+          t.name as topic_name,
+          s.name as subtopic_name,
+          COUNT(p.id) as problem_count
+        FROM categories c
+        LEFT JOIN topics t ON c.id = t.category_id AND t.is_active = TRUE
+        LEFT JOIN subtopics s ON t.id = s.topic_id AND s.is_active = TRUE
+        LEFT JOIN problems p ON s.id = p.subtopic_id AND p.status = 'active'
+        WHERE c.is_active = TRUE
+        GROUP BY c.name, t.name, s.name
+        ORDER BY c.name, t.name, s.name
+      `);
+
+      // Add database knowledge to prompt
+      enhancedPrompt += `\n\nAVAILABLE TOPICS IN DATABASE:\n`;
+      for (const row of dbStructure as mysql.RowDataPacket[]) {
+        if (row.topic_name && row.subtopic_name) {
+          enhancedPrompt += `- ${row.category_name} > ${row.topic_name} > ${row.subtopic_name} (${row.problem_count} problems)\n`;
+        }
+      }
+
+      enhancedPrompt += `\n\nUse this database knowledge to make specific recommendations and reference actual problems that exist in our system.`;
 
       const messages = [
         { role: 'user', parts: [{ text: enhancedPrompt }] }
