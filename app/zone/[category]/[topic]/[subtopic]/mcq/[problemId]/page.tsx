@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  HelpCircle,
   CheckCircle2,
   XCircle,
   Database

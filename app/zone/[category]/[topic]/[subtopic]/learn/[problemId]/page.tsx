@@ -6,13 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   BookOpen,
-  MessageCircle,
-  HelpCircle,
   Code,
-  Play,
-  CheckCircle2,
-  Clock,
-  Target,
   Database,
   Send,
   Bot,
@@ -265,7 +259,7 @@ export default function LearnProblemPage() {
                     Understanding the Problem
                   </h3>
                   <div className="section-content">
-                    <p>Let's break down this problem step by step. Click the AI assistant below to get personalized help!</p>
+                    <p>Let&apos;s break down this problem step by step. Click the AI assistant below to get personalized help!</p>
                   </div>
                 </div>
 
@@ -302,7 +296,7 @@ export default function LearnProblemPage() {
                 {aiMessages.length === 0 && (
                   <div className="welcome-message">
                     <Bot size={24} />
-                    <p>Hi! I'm LoopAI, your coding tutor. Ask me anything about this problem!</p>
+                    <p>Hi! I&apos;m LoopAI, your coding tutor. Ask me anything about this problem!</p>
                     <div className="suggested-questions">
                       <button
                         className="suggested-btn"

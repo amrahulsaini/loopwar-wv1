@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Code,
   Play,
   CheckCircle2,
   XCircle,
@@ -38,7 +37,7 @@ export default function CodeProblemPage() {
   const [code, setCode] = useState('');
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<{testCase: number, input: string, expected: string, actual: string, passed: boolean, isHidden: boolean}[]>([]);
   const [allPassed, setAllPassed] = useState(false);
 
   const category = params.category as string;
@@ -85,7 +84,7 @@ export default function CodeProblemPage() {
           if (problemData.success) {
             setProblem(problemData.problem);
             // Generate sample test cases
-            generateTestCases(problemData.problem);
+            generateTestCases();
             // Set initial code template
             setCode(`// Write your solution for: ${problemData.problem.title}
 // ${problemData.problem.description}
@@ -108,7 +107,7 @@ function solution() {
     fetchData();
   }, [problemId, router]);
 
-  const generateTestCases = (problem: Problem) => {
+  const generateTestCases = () => {
     // This is a placeholder - in real implementation, you'd fetch from database
     const sampleTestCases: TestCase[] = [
       {

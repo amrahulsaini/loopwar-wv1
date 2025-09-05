@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           'INSERT INTO ai_conversations (user_id, context, created_at) VALUES (?, ?, NOW())',
           [user_id, context || null]
         );
-        currentConversationId = (result as any).insertId;
+        currentConversationId = (result as mysql.ResultSetHeader).insertId;
       }
 
       // Get conversation history
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       ];
 
       // Add conversation history
-      for (const row of historyRows as any[]) {
+      for (const row of historyRows as mysql.RowDataPacket[]) {
         messages.push({ role: 'user', parts: [{ text: row.user_message }] });
         messages.push({ role: 'model', parts: [{ text: row.ai_response }] });
       }
@@ -85,15 +85,14 @@ export async function POST(request: NextRequest) {
 
       // Generate AI response
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: message }] }],
-        systemInstruction: SYSTEM_PROMPT,
+      const chat = model.startChat({
         history: messages.slice(0, -1).map(msg => ({
           role: msg.role === 'model' ? 'model' : 'user',
           parts: msg.parts
         }))
       });
 
+      const result = await chat.sendMessage(message);
       const aiResponse = result.response.text();
 
       // Save to database
