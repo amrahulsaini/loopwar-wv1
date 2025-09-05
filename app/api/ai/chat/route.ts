@@ -13,37 +13,51 @@ const dbConfig = {
 // Gemini AI setup
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// Enhanced system prompt with full database access
+// Enhanced educational system prompt for learning workspace
 const SYSTEM_PROMPT = `
-You are LoopAI, an advanced coding tutor on LoopWar with FULL ACCESS to our database. You have complete knowledge of:
+You are LoopAI, an expert coding tutor and mentor on LoopWar. You are a concise, precise, and highly educational AI assistant designed specifically for helping students learn programming concepts step by step.
 
-DATABASE ACCESS CAPABILITIES:
-- All categories, topics, and subtopics in our system
-- Every coding problem with detailed descriptions
-- User progress and learning patterns
-- Study recommendations based on user performance
+CURRENT LEARNING CONTEXT:
+- Problem: {PROBLEM_TITLE}
+- Description: {PROBLEM_DESCRIPTION}
+- Category: {CATEGORY}
+- Topic: {TOPIC}
+- Subtopic: {SUBTOPIC}
 
-ENHANCED TUTORING FEATURES:
-1. **Smart Study Recommendations**: When users ask "what should I study next?", analyze their current problem and recommend the best next problems from our database
-2. **Database-Aware Responses**: Reference specific problems, categories, and topics from our actual database
-3. **Interactive Learning**: Use yes/no buttons for prerequisite checks and confirmations
-4. **Auto-Generated Notes**: Create study notes from conversations for future reference
-5. **Persistent Chat**: Maintain conversation history across sessions
+CORE TEACHING PRINCIPLES:
+1. **Short & Precise**: Keep responses under 150 words unless specifically asked for detailed explanations
+2. **Step-by-Step Learning**: Break complex concepts into digestible pieces
+3. **Prerequisites First**: Always check if students understand prerequisites before teaching new concepts
+4. **Interactive Learning**: Ask questions and use yes/no prompts to gauge understanding
+5. **Real-World Analogies**: Use simple analogies to explain complex programming concepts
+6. **Socratic Method**: Guide students to discover answers rather than just giving them
 
-RESPONSE FORMAT:
-- Use simple, clear language
-- Always check prerequisites ONE at a time
-- Provide real-world analogies
-- Reference actual problems from our database when relevant
-- End with specific study recommendations
+RESPONSE STYLE:
+- Use bullet points and numbered lists
+- Bold **key concepts** 
+- Include relevant emojis for engagement
+- End with a follow-up question or next step
+- Provide practical examples when needed
 
-AVAILABLE ACTIONS:
-- Access full problem database for recommendations
-- Generate personalized study plans
-- Create concept notes automatically
-- Track user progress and suggest next steps
+TEACHING ACTIONS YOU CAN TAKE:
+- explain_concept: Provide detailed explanation of the current topic
+- check_prerequisites: Ask about foundational knowledge needed
+- show_approach: Guide through solution methodology
+- teach_prerequisites: Explain missing foundational concepts
+- show_examples: Provide concrete code examples
+- practice_problems: Suggest related practice exercises
 
-Remember: You have access to our ENTIRE database of coding problems and can make intelligent recommendations based on what actually exists in our system.
+PREREQUISITE CHECKING:
+When checking prerequisites, ask about ONE concept at a time:
+"Before we dive into {CURRENT_CONCEPT}, do you understand {PREREQUISITE_CONCEPT}?"
+
+LEARNING WORKSPACE FEATURES:
+- Your responses automatically update the student's notes
+- Students can edit and save concepts in real-time
+- Focus on building a comprehensive understanding
+- Create a VS Code-like learning experience
+
+Remember: You're not just answering questions - you're building a complete learning experience. Guide students through concepts like a patient mentor would.
 `;
 
 interface ChatRequest {
@@ -53,15 +67,15 @@ interface ChatRequest {
   context?: string;
   problem_id?: number;
   problem_title?: string;
-  problem_description?: string;
+  action?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: ChatRequest = await request.json();
-    const { user_id, message, conversation_id, context, problem_id, problem_title, problem_description } = body;
+    const { user_id, message, conversation_id, context, problem_id, problem_title, action } = body;
 
-    console.log('AI Chat API Request:', { user_id, message: message.substring(0, 100), conversation_id, context, problem_id });
+    console.log('AI Chat API Request:', { user_id, message: message.substring(0, 100), conversation_id, context, problem_id, action });
 
     if (!user_id || !message) {
       return NextResponse.json(
@@ -74,31 +88,107 @@ export async function POST(request: NextRequest) {
     const connection = await mysql.createConnection(dbConfig);
 
     try {
-      let currentConversationId = conversation_id;
+    let currentSessionId = conversation_id;
 
-      // Create new conversation if none exists
-      if (!currentConversationId) {
-        const [result] = await connection.execute(
-          'INSERT INTO ai_conversations (user_id, context, created_at) VALUES (?, ?, NOW())',
-          [user_id, context || null]
-        );
-        currentConversationId = (result as mysql.ResultSetHeader).insertId;
-      }
-
-      // Get conversation history
-      const [historyRows] = await connection.execute(
-        'SELECT user_message, ai_response FROM ai_messages WHERE conversation_id = ? ORDER BY created_at ASC',
-        [currentConversationId]
+    // Create new chat session if none exists
+    if (!currentSessionId) {
+      const [result] = await connection.execute(
+        'INSERT INTO ai_chat_sessions (user_id, session_name, problem_id, category_id, topic_id, subtopic_id, created_at, last_message_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
+        [user_id, `Problem: ${problem_title || 'General Discussion'}`, problem_id || null, null, null, null]
       );
+      currentSessionId = (result as mysql.ResultSetHeader).insertId;
+    }
 
-      // Prepare messages for Gemini
+    // Get chat session history
+    const [historyRows] = await connection.execute(
+      'SELECT content, message_type FROM ai_chat_messages WHERE session_id = ? AND message_type IN ("user_text", "ai_response") ORDER BY created_at ASC',
+      [currentSessionId]
+    );      // Prepare messages for Gemini
       let enhancedPrompt = SYSTEM_PROMPT;
 
-      // Add problem context if available
-      if (problem_title && problem_description) {
-        enhancedPrompt += `\n\nCURRENT PROBLEM:\nTitle: ${problem_title}\nDescription: ${problem_description}\n\nThe user is asking about this specific problem. Provide targeted help based on this context.`;
-      } else if (context) {
-        enhancedPrompt += `\n\nCURRENT CONTEXT: ${context}`;
+      // Fetch problem-specific data to enhance AI responses
+      let problemContext = '';
+      if (problem_id) {
+        try {
+          const [problemDetails] = await connection.execute(`
+            SELECT 
+              p.title,
+              p.description,
+              p.difficulty,
+              p.solution_hints,
+              p.time_complexity,
+              p.space_complexity,
+              c.name as category_name,
+              t.name as topic_name,
+              s.name as subtopic_name,
+              GROUP_CONCAT(pp.prerequisite_concept) as prerequisites
+            FROM problems p
+            LEFT JOIN subtopics s ON p.subtopic_id = s.id
+            LEFT JOIN topics t ON s.topic_id = t.id
+            LEFT JOIN categories c ON t.category_id = c.id
+            LEFT JOIN problem_prerequisites pp ON p.id = pp.problem_id
+            WHERE p.id = ? AND p.is_active = TRUE
+            GROUP BY p.id
+          `, [problem_id]);
+
+          if ((problemDetails as mysql.RowDataPacket[]).length > 0) {
+            const details = (problemDetails as mysql.RowDataPacket[])[0];
+            problemContext = `
+**PROBLEM DETAILS:**
+- Title: ${details.title}
+- Description: ${details.description}
+- Difficulty: ${details.difficulty}
+- Time Complexity: ${details.time_complexity || 'Not specified'}
+- Space Complexity: ${details.space_complexity || 'Not specified'}
+- Prerequisites: ${details.prerequisites || 'None specified'}
+- Solution Hints: ${details.solution_hints || 'No hints available'}
+`;
+            
+            // Update placeholders with actual data
+            enhancedPrompt = enhancedPrompt
+              .replace('{PROBLEM_TITLE}', details.title)
+              .replace('{PROBLEM_DESCRIPTION}', details.description)
+              .replace('{CATEGORY}', details.category_name)
+              .replace('{TOPIC}', details.topic_name)
+              .replace('{SUBTOPIC}', details.subtopic_name);
+          }
+        } catch (error) {
+          console.error('Failed to fetch problem details:', error);
+        }
+      }
+
+      if (!problemContext) {
+        // Use generic context if no problem data
+        enhancedPrompt = enhancedPrompt
+          .replace('{PROBLEM_TITLE}', 'General Discussion')
+          .replace('{PROBLEM_DESCRIPTION}', 'General coding discussion')
+          .replace('{CATEGORY}', 'General')
+          .replace('{TOPIC}', 'General')
+          .replace('{SUBTOPIC}', 'General');
+      }
+
+      // Add problem context to prompt
+      enhancedPrompt += problemContext;
+
+      // Enhanced prompt based on action type
+      if (action === 'explain_concept') {
+        enhancedPrompt += `\n\n**USER ACTION: EXPLAIN CONCEPT**
+Please provide a clear, step-by-step explanation of the main concept in this problem. Keep it under 150 words and ask if they understand prerequisites first.`;
+      } else if (action === 'check_prerequisites') {
+        enhancedPrompt += `\n\n**USER ACTION: CHECK PREREQUISITES**
+Ask about ONE foundational concept at a time that's needed for this problem. Use yes/no buttons for easy interaction.`;
+      } else if (action === 'show_approach') {
+        enhancedPrompt += `\n\n**USER ACTION: SHOW APPROACH**
+Guide them through the solution methodology step by step. Focus on the thinking process, not just the code.`;
+      } else if (action === 'teach_prerequisites') {
+        enhancedPrompt += `\n\n**USER ACTION: TEACH PREREQUISITES**
+The student doesn't know the prerequisites. Teach them the foundational concept they need first, then connect it to the main problem.`;
+      } else if (action === 'knows_prerequisites') {
+        enhancedPrompt += `\n\n**USER ACTION: KNOWS PREREQUISITES**
+Great! The student knows the prerequisites. Now explain the main concept building upon their existing knowledge.`;
+      } else if (action === 'show_examples') {
+        enhancedPrompt += `\n\n**USER ACTION: SHOW EXAMPLES**
+Provide 1-2 concrete examples that illustrate the concept. Make them simple and relatable.`;
       }
 
       // Fetch database structure for AI context
@@ -137,8 +227,24 @@ export async function POST(request: NextRequest) {
         messages.push({ role: 'model', parts: [{ text: row.ai_response }] });
       }
 
-      // Add current message
-      messages.push({ role: 'user', parts: [{ text: message }] });
+      // Add current message with special handling for actions
+      let finalMessage = message;
+      
+      // Special handling for "explain_concept" action
+      if (action === 'explain_concept') {
+        finalMessage = `The user clicked "Explain me this concept" for the problem: ${problem_title}. 
+
+IMPORTANT: Before explaining this concept, you MUST:
+1. Ask about ONE prerequisite concept at a time using yes/no questions
+2. For example: "Before I explain ${problem_title || 'this concept'}, do you understand [PREREQUISITE]?"
+3. Wait for their response before proceeding
+4. Keep your response SHORT (2-3 sentences max)
+5. Focus on the fundamentals they need to know first
+
+Original user message: ${message}`;
+      }
+
+      messages.push({ role: 'user', parts: [{ text: finalMessage }] });
 
       // Generate AI response
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
@@ -149,29 +255,31 @@ export async function POST(request: NextRequest) {
         }))
       });
 
-      const result = await chat.sendMessage(message);
+      const result = await chat.sendMessage(finalMessage);
       const aiResponse = result.response.text();
 
       console.log('AI Response generated:', aiResponse.substring(0, 100) + '...');
 
-      // Save to database
+      // Save user message to new chat system
       await connection.execute(
-        'INSERT INTO ai_messages (conversation_id, user_id, user_message, ai_response, created_at) VALUES (?, ?, ?, ?, NOW())',
-        [currentConversationId, user_id, message, aiResponse]
+        'INSERT INTO ai_chat_messages (session_id, user_id, message_type, content, created_at) VALUES (?, ?, ?, ?, NOW())',
+        [currentSessionId, user_id, 'user_text', message]
       );
 
-      console.log('Message saved to database');
-
-      // Update conversation timestamp
+      // Save AI response to new chat system
       await connection.execute(
-        'UPDATE ai_conversations SET updated_at = NOW() WHERE id = ?',
-        [currentConversationId]
+        'INSERT INTO ai_chat_messages (session_id, user_id, message_type, content, created_at) VALUES (?, ?, ?, ?, NOW())',
+        [currentSessionId, user_id, 'ai_response', aiResponse]
       );
 
-      console.log('Conversation updated');
+      // Update session timestamp
+      await connection.execute(
+        'UPDATE ai_chat_sessions SET last_message_at = NOW(), updated_at = NOW() WHERE id = ?',
+        [currentSessionId]
+      );
 
       return NextResponse.json({
-        conversation_id: currentConversationId,
+        session_id: currentSessionId,
         response: aiResponse,
         timestamp: new Date().toISOString()
       });
