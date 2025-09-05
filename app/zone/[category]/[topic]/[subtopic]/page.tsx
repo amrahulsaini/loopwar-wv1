@@ -23,6 +23,7 @@ interface Problem {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   description: string;
   solved: boolean;
+  sortOrder?: number;
   timeSpent?: number;
   lastAttempt?: string;
 }
@@ -187,8 +188,13 @@ export default function SubtopicPracticePage() {
                   title: p.title,
                   difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
                   description: p.description,
+                  sortOrder: p.sortOrder,
                   solved: false // TODO: Get actual user progress
                 }));
+                
+                // Sort problems by sortOrder
+                formattedProblems.sort((a: Problem, b: Problem) => (a.sortOrder || 0) - (b.sortOrder || 0));
+                
                 setProblems(formattedProblems);
                 console.log('Set problems:', formattedProblems);
               } else {

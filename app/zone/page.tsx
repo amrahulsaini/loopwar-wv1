@@ -458,11 +458,10 @@ export default function ZonePage() {
     const topicFormatted = formatForUrl(topicName);
     const subtopicFormatted = formatForUrl(subtopicName);
     
-    // Navigate to learning workspace page with a sample problem
-    const sampleProblemId = 301; // In a real app, you'd fetch the first problem for this subtopic
-    const learningUrl = `/zone/${categoryFormatted}/${topicFormatted}/${subtopicFormatted}/learn/${sampleProblemId}`;
-    console.log(`� Navigating to learning workspace: ${learningUrl}`);
-    window.location.href = learningUrl;
+    // Navigate to subtopic page to show all problems and practice modes
+    const subtopicUrl = `/zone/${categoryFormatted}/${topicFormatted}/${subtopicFormatted}`;
+    console.log(`🚀 Navigating to subtopic page: ${subtopicUrl}`);
+    window.location.href = subtopicUrl;
   };
 
   const handleTopicStart = (topicName: string) => {
