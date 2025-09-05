@@ -68,6 +68,7 @@ export default function LearnProblemPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
+  const [isFullscreenChat, setIsFullscreenChat] = useState(false);
 
   // URL parameters
   const category = params.category as string;
@@ -165,7 +166,10 @@ export default function LearnProblemPage() {
           user_id: userId, // Use actual user ID from session
           message: messageToSend,
           conversation_id: conversationId,
-          context: `${problem.title} - ${subtopicDisplay}`
+          context: `${problem.title} - ${subtopicDisplay}`,
+          problem_id: parseInt(problemId),
+          problem_title: problem.title,
+          problem_description: problem.description
         })
       });
 
@@ -329,6 +333,13 @@ export default function LearnProblemPage() {
               <div className="chat-header">
                 <Bot size={20} />
                 <h3>LoopAI Assistant</h3>
+                <button
+                  onClick={() => setIsFullscreenChat(true)}
+                  className="fullscreen-btn"
+                  title="Open fullscreen chat"
+                >
+                  ⛶
+                </button>
               </div>
 
               <div className="chat-messages">
@@ -410,6 +421,102 @@ export default function LearnProblemPage() {
           </div>
         </div>
       </main>
+
+      {/* Fullscreen Chat Modal */}
+      {isFullscreenChat && (
+        <div className="fullscreen-chat-overlay">
+          <div className="fullscreen-chat-modal">
+            <div className="fullscreen-chat-header">
+              <div className="chat-header">
+                <Bot size={24} />
+                <h3>LoopAI Assistant</h3>
+              </div>
+              <button
+                onClick={() => setIsFullscreenChat(false)}
+                className="close-fullscreen-btn"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="fullscreen-chat-messages">
+              {aiMessages.length === 0 && (
+                <div className="welcome-message">
+                  <Bot size={32} />
+                  <p>Hi! I&apos;m LoopAI, your coding tutor. Ask me anything about this problem!</p>
+                  <div className="suggested-questions">
+                    <button
+                      className="suggested-btn"
+                      onClick={() => setUserMessage("Explain this problem step by step")}
+                    >
+                      Explain this problem
+                    </button>
+                    <button
+                      className="suggested-btn"
+                      onClick={() => setUserMessage("What concepts do I need to know?")}
+                    >
+                      Key concepts needed
+                    </button>
+                    <button
+                      className="suggested-btn"
+                      onClick={() => setUserMessage("Give me a hint")}
+                    >
+                      Give me a hint
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {aiMessages.map((message) => (
+                <div key={message.id} className={`message ${message.role}`}>
+                  <div className="message-avatar">
+                    {message.role === 'user' ? <User size={20} /> : <Bot size={20} />}
+                  </div>
+                  <div className="message-content">
+                    <p>{message.content}</p>
+                    <span className="message-time">
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {isAiLoading && (
+                <div className="message assistant">
+                  <div className="message-avatar">
+                    <Bot size={20} />
+                  </div>
+                  <div className="message-content">
+                    <div className="typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="fullscreen-chat-input">
+              <input
+                type="text"
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessageToAI()}
+                placeholder="Ask me anything about this problem..."
+                disabled={isAiLoading}
+              />
+              <button
+                onClick={sendMessageToAI}
+                disabled={isAiLoading || !userMessage.trim()}
+                className="send-btn"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -15,18 +15,26 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // System prompt
 const SYSTEM_PROMPT = `
-You are LoopAI, an advanced AI tutor for the LoopWar coding platform. Your role is to help users learn programming concepts through interactive, personalized tutoring.
+You are LoopAI, a direct and helpful coding tutor on LoopWar platform. Be concise, practical, and educational.
 
-Key guidelines:
-- Be friendly, patient, and encouraging
-- Explain concepts clearly with examples
-- Adapt your explanations based on user knowledge level
-- Use code examples when relevant
-- Guide users toward understanding rather than giving direct answers
-- Relate concepts to real-world applications
-- Encourage best practices and problem-solving skills
+KEY RULES:
+- Always know the current problem from context
+- Ask about prerequisites first (arrays, loops, etc.)
+- Use real-world analogies to explain concepts
+- Guide students through learning progression
+- Suggest MCQs and practice problems
+- Keep responses short and actionable
+- No asterisks or markdown formatting
+- Be conversational but focused on learning
 
-Remember: You're part of LoopWar, so reference the platform's features when appropriate.
+When explaining problems:
+1. Assess what user already knows
+2. Teach concepts with analogies
+3. Break down the problem step-by-step
+4. Suggest practice exercises
+5. Guide to related problems on the platform
+
+Remember: You're on LoopWar - reference the platform's features naturally.
 `;
 
 interface ChatRequest {
@@ -34,14 +42,17 @@ interface ChatRequest {
   message: string;
   conversation_id?: number;
   context?: string;
+  problem_id?: number;
+  problem_title?: string;
+  problem_description?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: ChatRequest = await request.json();
-    const { user_id, message, conversation_id, context } = body;
+    const { user_id, message, conversation_id, context, problem_id, problem_title, problem_description } = body;
 
-    console.log('AI Chat API Request:', { user_id, message: message.substring(0, 100), conversation_id, context });
+    console.log('AI Chat API Request:', { user_id, message: message.substring(0, 100), conversation_id, context, problem_id });
 
     if (!user_id || !message) {
       return NextResponse.json(
@@ -72,8 +83,17 @@ export async function POST(request: NextRequest) {
       );
 
       // Prepare messages for Gemini
+      let enhancedPrompt = SYSTEM_PROMPT;
+
+      // Add problem context if available
+      if (problem_title && problem_description) {
+        enhancedPrompt += `\n\nCURRENT PROBLEM:\nTitle: ${problem_title}\nDescription: ${problem_description}\n\nThe user is asking about this specific problem. Provide targeted help based on this context.`;
+      } else if (context) {
+        enhancedPrompt += `\n\nCURRENT CONTEXT: ${context}`;
+      }
+
       const messages = [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] }
+        { role: 'user', parts: [{ text: enhancedPrompt }] }
       ];
 
       // Add conversation history
