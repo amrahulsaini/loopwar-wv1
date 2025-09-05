@@ -16,15 +16,22 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Get 'next' param from URL
+  const getNextParam = () => {
+    if (typeof window === 'undefined') return null;
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('next');
+  };
+
   useEffect(() => {
     // Check if user is already logged in
     if (typeof window !== 'undefined') {
       const sessionToken = getCookie('sessionToken');
       const username = getCookie('username');
       const isUserVerified = getCookie('isVerified') === 'true';
-      
       if (sessionToken && username && isUserVerified) {
-        window.location.href = '/zone';
+        const next = getNextParam();
+        window.location.href = next || '/zone';
       }
     }
   }, []);
@@ -122,8 +129,9 @@ export default function Login() {
         setTimeout(() => {
           if (data.user.isVerified) {
             // Normal case: verified user logging in
-            console.log('✅ Redirecting verified user to zone');
-            window.location.href = '/zone';
+            const next = getNextParam();
+            console.log('✅ Redirecting verified user to', next || '/zone');
+            window.location.href = next || '/zone';
           } else {
             // Edge case: user signed up but never verified their email
             console.log('⚠️ User not verified, redirecting to verification');

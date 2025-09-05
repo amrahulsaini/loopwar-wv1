@@ -38,10 +38,13 @@ export function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
   // If trying to access protected route without authentication
-  if (isProtectedRoute && !isAuthenticated) {
-    console.log('Redirecting to /join - not authenticated');
-    return NextResponse.redirect(new URL('/join', request.url));
-  }
+    if (isProtectedRoute && !isAuthenticated) {
+      console.log('Redirecting to /join - not authenticated');
+      // Add ?next=originalPath to /join so login can redirect back
+      const nextUrl = new URL('/join', request.url);
+      nextUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(nextUrl);
+    }
 
   // If trying to access auth routes while authenticated
   if (isAuthRoute && isAuthenticated) {
