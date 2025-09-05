@@ -1,14 +1,14 @@
-# CyberPanel Deployment Guide for LoopAI Backend
+# LoopWar Deployment Guide (Next.js Only)
 
 ## Prerequisites
 - CyberPanel installed on your server
-- Domain/subdomain configured in CyberPanel
+- Domain configured in CyberPanel
 - SSH access to your server
 
 ## Step 1: Create a Website in CyberPanel
 1. Log into CyberPanel
 2. Go to "Websites" → "Create Website"
-3. Enter your domain (e.g., ai.loopwar.dev)
+3. Enter your domain (e.g., loopwar.dev)
 4. Select package and create
 
 ## Step 2: Upload Files via SFTP
@@ -18,52 +18,96 @@
    - Username: website-username (from CyberPanel)
    - Password: website-password
    - Port: 22
-3. Upload the ai-backend folder to `/home/website-domain/public_html/`
+3. Upload the entire project folder to `/home/loopwar.dev/public_html/`
 
-## Step 3: Install Python and Dependencies
+## Step 3: Install Dependencies
 Connect via SSH and run:
 
 ```bash
-# Navigate to your website directory
-cd /home/ai.loopwar.dev/public_html/ai-backend
+cd /home/loopwar.dev/public_html/loopwar-wv1
 
-# Install Python 3.9+ if not available
-# (CyberPanel usually has Python, but verify version)
-python3 --version
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install Node.js dependencies
+npm install
 ```
 
 ## Step 4: Configure Environment Variables
-Create `.env` file in the ai-backend directory:
+Create `.env.local` file in the project root:
 
 ```bash
-nano .env
+nano .env.local
 ```
 
-Add:
+Add your configuration:
 ```
+# SMTP Configuration
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USER=903fd4002@smtp-brevo.com
+SMTP_PASS=7rxfNbnRm1OCjUW2
+SMTP_FROM=verify@loopwar.dev
+
+# Next.js Environment
+NEXTAUTH_URL=https://loopwar.dev
+NEXTAUTH_SECRET=your-nextauth-secret-key
+
+# MySQL Database Configuration
 DB_HOST=localhost
 DB_USER=loop_wv1
 DB_PASSWORD=your_db_password
 DB_NAME=loop_wv1
+DB_PORT=3306
+
+# OAuth Configuration
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# Gemini AI Configuration
 GEMINI_API_KEY=AIzaSyDloh6LukhgTcIGITl58o3Plh2ZlqBPofQ
 ```
 
-## Step 5: Create WSGI Entry Point
-Create `wsgi.py` in ai-backend directory:
+## Step 5: Set Up Database
+1. In CyberPanel, go to "Databases" → "phpMyAdmin"
+2. Import the AI tables from `database/ai-tables.sql`
+3. Ensure your database user has proper permissions
 
-```python
-from main import app
+## Step 6: Build and Start Application
+```bash
+# Build the application
+npm run build
 
-if __name__ == "__main__":
-    app.run()
+# Start with PM2
+pm2 start npm --name "loopwar" -- start
+pm2 save
 ```
+
+## Step 7: Configure SSL
+Don't forget to:
+1. Go to "SSL" → "Manage SSL"
+2. Issue Let's Encrypt certificate for your domain
+
+## Features Included
+- ✅ AI-powered learning assistant (LoopAI)
+- ✅ Interactive MCQ quizzes
+- ✅ Code challenge editor
+- ✅ User authentication and sessions
+- ✅ Database integration
+- ✅ Responsive design
+
+## Testing
+1. Visit your domain
+2. Navigate to Zone → Select a problem
+3. Click "Learn" to test the AI assistant
+4. Try MCQ and Code modes
+
+## Troubleshooting
+- Check PM2 logs: `pm2 logs loopwar`
+- Verify environment variables are loaded
+- Ensure database connectivity
+- Check file permissions
+
+The AI functionality is now integrated directly into your Next.js application, making deployment much simpler!
 
 ## Step 6: Configure OpenLiteSpeed
 1. In CyberPanel, go to "Websites" → "Manage" → your domain

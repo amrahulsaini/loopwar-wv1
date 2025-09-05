@@ -127,13 +127,13 @@ export default function LearnProblemPage() {
     setUserMessage('');
 
     try {
-      const response = await fetch('https://ai.loopwar.dev/api/ai/chat', {
+      const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: 1, // TODO: Get actual user ID
+          user_id: 1, // TODO: Get actual user ID from session
           message: messageToSend,
           conversation_id: conversationId,
           context: `${problem.title} - ${subtopicDisplay}`
