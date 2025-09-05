@@ -8,10 +8,7 @@ import {
   BookOpen,
   HelpCircle,
   Code,
-  CheckCircle2,
   Database,
-  Lightbulb,
-  Target,
   Play
 } from 'lucide-react';
 import Logo from '../../../../../components/Logo';

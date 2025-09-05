@@ -14,7 +14,6 @@ import {
   Bot,
   Sparkles,
   FileText,
-  MessageSquare,
   ChevronRight
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
@@ -160,6 +159,7 @@ export default function AILearningWorkspace() {
     }
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, topic, subtopic, sortOrder]);
 
   const initializeSession = useCallback(async (problemData: Problem) => {
@@ -198,7 +198,8 @@ export default function AILearningWorkspace() {
     } catch (error) {
       console.error('Error initializing session:', error);
     }
-  }, [category, topic, subtopic, sortOrder, sendInitialGreeting]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, topic, subtopic, sortOrder]);
 
   const sendInitialGreeting = useCallback(async (problemData: Problem) => {
     const greeting = `👋 Hi! I'm LoopAI, your learning companion. I see you're working on "${problemData.title}" - a ${problemData.difficulty} level problem in ${formatDisplayName(problemData.topic_name)}.
@@ -220,6 +221,7 @@ What would you like to start with today?`;
     if (sessionId) {
       await saveMessage(aiMessage);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const handleSendMessage = async (messageText: string, promptType?: string) => {

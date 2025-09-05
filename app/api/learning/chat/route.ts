@@ -100,7 +100,7 @@ Respond as LoopAI - be helpful, structured, and conversational. If this is a spe
     const aiResponse = result.response.text();
 
     // Extract potential notes from AI response for structured learning
-    const notes = extractNotesFromResponse(aiResponse, sessionId);
+    const notes = extractNotesFromResponse(aiResponse);
 
     // Save notes to database if any were generated
     if (notes.length > 0) {
@@ -141,7 +141,7 @@ Respond as LoopAI - be helpful, structured, and conversational. If this is a spe
   }
 }
 
-function extractNotesFromResponse(response: string, _sessionId: string) {
+function extractNotesFromResponse(response: string) {
   const notes: Array<{
     type: string;
     title: string;

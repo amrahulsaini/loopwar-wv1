@@ -97,7 +97,7 @@ export async function GET(
       if (problem.tags) {
         try {
           parsedTags = JSON.parse(problem.tags);
-        } catch (e) {
+        } catch {
           parsedTags = [];
         }
       }
