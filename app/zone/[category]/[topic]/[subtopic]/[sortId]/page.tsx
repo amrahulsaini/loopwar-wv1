@@ -14,8 +14,8 @@ import {
   Target,
   Play
 } from 'lucide-react';
-import Logo from '../../../../components/Logo';
-import LoadingSpinner from '../../../../components/LoadingSpinner';
+import Logo from '../../../../../components/Logo';
+import LoadingSpinner from '../../../../../components/LoadingSpinner';
 
 interface Problem {
   id: number;
