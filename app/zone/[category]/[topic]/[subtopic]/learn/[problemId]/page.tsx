@@ -11,10 +11,58 @@ import {
   Send,
   Bot,
   User,
-  Lightbulb
+  Lightbulb,
+  Workflow
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
+
+// Category icon mapping utility
+const getCategoryIcon = (categoryName: string) => {
+  const iconMap: Record<string, string> = {
+    'core-dsa': 'Workflow',
+    'system-design': 'Server',
+    'web-development': 'Globe',
+    'mobile-development': 'Smartphone',
+    'data-science': 'BarChart3',
+    'machine-learning': 'Brain',
+    'devops': 'Settings',
+    'security': 'Shield',
+    'databases': 'Database',
+    'cloud-computing': 'Cloud',
+    'programming-languages': 'Code',
+    'algorithms': 'Zap',
+    'competitive-programming': 'Trophy',
+    'interview-preparation': 'Briefcase',
+    'default': 'BookOpen'
+  };
+
+  const lookupKey = categoryName.toLowerCase().replace(/-/g, '-');
+  return iconMap[lookupKey] || iconMap['default'];
+};
+
+const getCategoryColor = (categoryName: string) => {
+  const colorMap: Record<string, string> = {
+    'core-dsa': '#3b82f6',
+    'system-design': '#ef4444',
+    'web-development': '#10b981',
+    'mobile-development': '#f59e0b',
+    'data-science': '#8b5cf6',
+    'machine-learning': '#06b6d4',
+    'devops': '#f97316',
+    'security': '#84cc16',
+    'databases': '#6366f1',
+    'cloud-computing': '#ec4899',
+    'programming-languages': '#14b8a6',
+    'algorithms': '#f43f5e',
+    'competitive-programming': '#eab308',
+    'interview-preparation': '#64748b',
+    'default': '#6b7280'
+  };
+
+  const lookupKey = categoryName.toLowerCase().replace(/-/g, '-');
+  return colorMap[lookupKey] || colorMap['default'];
+};
 
 interface Problem {
   id: number;
@@ -240,6 +288,10 @@ export default function LearnProblemPage() {
             <div className="learn-content">
               <div className="problem-header-section">
                 <div className="problem-meta">
+                  <div className="category-icon" style={{ color: getCategoryColor(category) }}>
+                    <Workflow size={24} />
+                    <span>{categoryDisplay}</span>
+                  </div>
                   <div
                     className="problem-difficulty"
                     style={{ color: getDifficultyColor(problem.difficulty) }}
