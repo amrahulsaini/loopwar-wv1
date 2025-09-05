@@ -46,6 +46,7 @@ export default function SubtopicPracticePage() {
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
+  const [showAllProblems, setShowAllProblems] = useState<boolean>(false);
   
   // URL parameters
   const category = params.category as string;
@@ -234,13 +235,19 @@ export default function SubtopicPracticePage() {
     console.log(`🎯 Switched to ${mode} mode for ${subtopicDisplay}`);
   };
 
-  const handleProblemClick = (sortOrder: number) => {
-    setLastProblemId(sortOrder);
+  const handleShowMoreProblems = () => {
+    setShowAllProblems(true);
+  };
+
+  const displayedProblems = showAllProblems ? problems : problems.slice(0, 9);
+
+  const handleProblemClick = (problemId: number) => {
+    setLastProblemId(problemId);
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(`lastProblemId-${category}-${topic}-${subtopic}`, String(sortOrder));
+      window.localStorage.setItem(`lastProblemId-${category}-${topic}-${subtopic}`, String(problemId));
     }
-    const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${sortOrder}`;
-    console.log(`🚀 Starting practice for problem with sort order ${sortOrder}`);
+    const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${activeMode}/${problemId}`;
+    console.log(`🚀 Starting ${activeMode} practice for problem ${problemId}`);
     router.push(practiceUrl);
   };
 
@@ -441,7 +448,7 @@ export default function SubtopicPracticePage() {
           <div className="problems-section">
             <div className="problems-header">
               <h2 className="problems-title">
-                {activeMode.toUpperCase()} Problems ({problems.length})
+                {activeMode.toUpperCase()} Problems ({displayedProblems.length}{!showAllProblems && problems.length > 9 ? ` of ${problems.length}` : ''})
               </h2>
               <div className="problems-stats">
                 <div className="stat">
@@ -456,13 +463,13 @@ export default function SubtopicPracticePage() {
             </div>
 
             <div className="problems-grid">
-              {problems.map((problem, index) => {
-                const isLast = lastProblemId === problem.sortOrder;
+              {displayedProblems.map((problem, index) => {
+                const isLast = lastProblemId === problem.id;
                 return (
                   <div
                     key={problem.id}
                     className={`problem-card${isLast ? ' last-active-problem' : ''}`}
-                    onClick={() => handleProblemClick(problem.sortOrder || 0)}
+                    onClick={() => handleProblemClick(problem.id)}
                     style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
                   >
                     <div className="problem-header">
@@ -499,6 +506,15 @@ export default function SubtopicPracticePage() {
                 );
               })}
             </div>
+
+            {/* View More Button */}
+            {!showAllProblems && problems.length > 9 && (
+              <div className="view-more-section">
+                <button className="view-more-btn" onClick={handleShowMoreProblems}>
+                  View More Problems ({problems.length - 9} remaining)
+                </button>
+              </div>
+            )}
 
             {/* No Problems Added Message */}
             {problems.length === 0 && (
