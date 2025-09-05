@@ -1,4 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mysql from 'mysql2/promise';
+
+// Database configuration
+const dbConfig = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,11 +28,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Return user info from cookies (avoiding database SSL issues)
-    return NextResponse.json({ 
-      username: decodeURIComponent(username),
-      authenticated: true 
-    });
+    // Get user ID from database
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      const [rows] = await connection.execute(
+        'SELECT id FROM users WHERE username = ?',
+        [decodeURIComponent(username)]
+      );
+
+      const userRows = rows as mysql.RowDataPacket[];
+      if (userRows.length === 0) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
+      const userId = userRows[0].id;
+
+      // Return user info with ID
+      return NextResponse.json({ 
+        id: userId,
+        username: decodeURIComponent(username),
+        authenticated: true 
+      });
+    } finally {
+      await connection.end();
+    }
     
   } catch (error) {
     console.error('User API error:', error);

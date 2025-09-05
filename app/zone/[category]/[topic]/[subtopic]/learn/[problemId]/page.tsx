@@ -102,6 +102,7 @@ export default function LearnProblemPage() {
           const userData = await userResponse.json();
           setUsername(userData.username);
           setUserId(userData.id); // Store the actual user ID
+          console.log('User data:', userData); // Debug log
         } else {
           router.push('/login');
           return;
@@ -132,7 +133,15 @@ export default function LearnProblemPage() {
   }, [problemId, router]);
 
   const sendMessageToAI = async () => {
-    if (!userMessage.trim() || !problem || !userId) return;
+    console.log('Send button clicked:', { userMessage, problem, userId }); // Debug log
+    if (!userMessage.trim() || !problem || !userId) {
+      console.log('Send blocked by condition:', { 
+        hasMessage: !!userMessage.trim(), 
+        hasProblem: !!problem, 
+        hasUserId: !!userId 
+      });
+      return;
+    }
 
     setIsAiLoading(true);
     const newMessage: AIMessage = {
