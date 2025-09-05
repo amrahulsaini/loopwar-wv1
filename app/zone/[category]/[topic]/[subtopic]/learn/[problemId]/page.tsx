@@ -9,8 +9,7 @@ import {
   CheckCircle2,
   Database,
   Lightbulb,
-  Target,
-  Clock
+  Target
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -321,7 +320,7 @@ export default function LearnProblemPage() {
               {currentStep === learningSteps.length - 1 && (
                 <div className="learning-complete">
                   <h3>🎉 Learning Complete!</h3>
-                  <p>You've completed all the learning steps for this problem.</p>
+                  <p>You&apos;ve completed all the learning steps for this problem.</p>
                   <div className="completion-actions">
                     <Link href={`/zone/${category}/${topic}/${subtopic}`} className="back-btn">
                       Back to Problems
