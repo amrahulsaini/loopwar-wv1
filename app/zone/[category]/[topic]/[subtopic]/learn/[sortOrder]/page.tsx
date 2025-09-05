@@ -130,7 +130,7 @@ export default function LearnModePage() {
             </div>
 
             <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
-              We're building the most advanced AI learning platform for coding education.
+              We&apos;re building the most advanced AI learning platform for coding education.
               This feature will revolutionize how developers learn and practice algorithms.
             </p>
 
