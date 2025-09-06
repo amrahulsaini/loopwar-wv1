@@ -835,10 +835,9 @@
     border-radius: 50%;
     flex-shrink: 0;
     overflow: hidden;
-    /* Light background for dark LOOPAI logo visibility */
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    padding: 0.2rem;
+    /* No background - let SVG show its natural colors */
+    background: transparent;
+    border: 2px solid var(--color-border);
 }
 
 .aiAvatar {
@@ -852,10 +851,10 @@
 }
 
 .aiAvatarImage {
-    width: 80%;  /* Slightly smaller to show background */
-    height: 80%;
+    width: 100%;  /* Full size to show complete SVG */
+    height: 100%;
     border-radius: 50%;
-    object-fit: contain;  /* Use contain for SVG to prevent cropping */
+    object-fit: cover;  /* Use cover to fill the circle */
     object-position: center;
 }
 
