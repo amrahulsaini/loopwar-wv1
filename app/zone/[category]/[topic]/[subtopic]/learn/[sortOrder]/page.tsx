@@ -106,10 +106,12 @@ export default function LearnModePage() {
     
     return (
       <div className={containerClass}>
-        {/* Fallback approach - use text if SVG fails */}
-        <div className={styles.aiAvatarFallback}>
-          AI
-        </div>
+        {/* Use your custom LOOPAI SVG */}
+        <img 
+          src="/loopwarai.svg" 
+          alt="LOOPAI Assistant"
+          className={styles.aiAvatarImage}
+        />
       </div>
     );
   };
@@ -441,13 +443,8 @@ export default function LearnModePage() {
                 </div>
                 <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                   <div className={styles.messageText}>
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-500">LOOPAI is thinking...</span>
+                    <div className={styles.loadingContainer}>
+                      <div className={styles.spinner}></div>
                     </div>
                   </div>
                 </div>
@@ -490,18 +487,6 @@ export default function LearnModePage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerBadge}>
-            <span className={styles.footerText}>Powered by</span>
-            <span className={styles.footerBrand}>
-              LOOPAI
-            </span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
