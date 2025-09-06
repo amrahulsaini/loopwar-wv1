@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
@@ -20,6 +21,12 @@ interface ChatMessage {
   created_at: string;
 }
 
+interface UserData {
+  username: string;
+  profilePicture?: string;
+  authenticated: boolean;
+}
+
 export default function LearnModePage() {
   const params = useParams();
   const category = params.category as string;
@@ -32,7 +39,84 @@ export default function LearnModePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check user authentication and get user data
+  const checkUserSession = useCallback(async () => {
+    try {
+      const response = await fetch('/api/user');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser({
+          username: userData.username,
+          profilePicture: userData.profilePicture,
+          authenticated: userData.authenticated
+        });
+      } else {
+        // User not authenticated, but allow guest access
+        setUser({
+          username: 'Guest',
+          authenticated: false
+        });
+      }
+    } catch (error) {
+      console.error('Error checking user session:', error);
+      setUser({
+        username: 'Guest',
+        authenticated: false
+      });
+    }
+  }, []);
+
+  // Initialize user session on component mount
+  useEffect(() => {
+    checkUserSession();
+  }, [checkUserSession]);
+
+  // Render user avatar
+  const renderUserAvatar = (size: 'small' | 'medium' = 'small') => {
+    const sizeClass = size === 'medium' ? styles.userAvatar : styles.userAvatarSmall;
+    
+    if (user?.profilePicture) {
+      return (
+        <div className={sizeClass}>
+          <Image 
+            src={user.profilePicture} 
+            alt={`${user.username}'s avatar`}
+            className={styles.avatarImage}
+            width={size === 'medium' ? 40 : 28}
+            height={size === 'medium' ? 40 : 28}
+          />
+        </div>
+      );
+    }
+    
+    // Default avatar with user's first letter
+    return (
+      <div className={`${sizeClass} ${styles.defaultAvatar}`}>
+        {user?.username?.charAt(0).toUpperCase() || 'G'}
+      </div>
+    );
+  };
+
+  // Render AI avatar (using custom LOOPAI icon)
+  const renderAIAvatar = (size: 'small' | 'medium' = 'small') => {
+    const containerClass = size === 'medium' ? styles.botAvatar : styles.aiAvatar;
+    
+    return (
+      <div className={containerClass}>
+        {/* Use the custom LOOPAI icon from downloads */}
+        <Image 
+          src="/loopai-icon.ico" 
+          alt="LOOPAI Assistant"
+          className={styles.aiAvatarImage}
+          width={size === 'medium' ? 40 : 28}
+          height={size === 'medium' ? 40 : 28}
+        />
+      </div>
+    );
+  };
 
   // Format display names
   const formatDisplayName = (urlName: string) => {
@@ -211,6 +295,21 @@ export default function LearnModePage() {
                   AI Learning Session
                 </div>
               </div>
+              
+              {/* User Profile Section */}
+              {user && (
+                <div className={styles.userProfileSection}>
+                  <div className={styles.userInfo}>
+                    <span className={styles.userName}>{user.username}</span>
+                    {user.authenticated && (
+                      <Link href={`/profiles/${user.username}`} className={styles.profileLink}>
+                        View Profile
+                      </Link>
+                    )}
+                  </div>
+                  {renderUserAvatar('medium')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -246,9 +345,7 @@ export default function LearnModePage() {
           <div className={styles.chatHeader}>
             <div className={styles.chatHeaderContent}>
               <div className={styles.botAvatarContainer}>
-                <div className={styles.botAvatar}>
-                  <Bot className="w-7 h-7" />
-                </div>
+                {renderAIAvatar('medium')}
               </div>
               <div className={styles.chatInfo}>
                 <h2 className={styles.chatTitle}>
@@ -276,7 +373,7 @@ export default function LearnModePage() {
                     <Bot className="w-10 h-10 text-purple-400" />
                   </div>
                 </div>
-                <h3 className={styles.welcomeTitle}>Welcome to LOOPAI!</h3>
+                <h3 className={styles.welcomeTitle}>Welcome to LOOPAI{user ? `, ${user.username}` : ''}!</h3>
                 <p className={styles.welcomeText}>
                   I&apos;m your AI tutor for <span className={styles.welcomeHighlight}>{subtopicDisplay}</span>. 
                   I&apos;ll help you understand concepts, solve problems, and master algorithms step by step.
@@ -295,11 +392,13 @@ export default function LearnModePage() {
               <>
                 {messages.map((msg, index) => (
                   <div key={index} className={`${styles.messageContainer} ${msg.message_type === 'user' ? styles.messageContainerUser : styles.messageContainerAi}`}>
-                    {msg.message_type === 'ai' && (
+                    {msg.message_type === 'ai' ? (
                       <div className={styles.aiAvatarContainer}>
-                        <div className={styles.aiAvatar}>
-                          <Bot className="w-4 h-4" />
-                        </div>
+                        {renderAIAvatar('small')}
+                      </div>
+                    ) : (
+                      <div className={styles.userAvatarContainer}>
+                        {renderUserAvatar('small')}
                       </div>
                     )}
                     <div className={`${styles.messageBubble} ${msg.message_type === 'user' ? styles.messageBubbleUser : styles.messageBubbleAi}`}>
@@ -317,9 +416,7 @@ export default function LearnModePage() {
                 {isTyping && (
                   <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
                     <div className={styles.aiAvatarContainer}>
-                      <div className={styles.aiAvatar}>
-                        <Bot className="w-4 h-4" />
-                      </div>
+                      {renderAIAvatar('small')}
                     </div>
                     <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                       <div className={styles.messageText}>
@@ -337,9 +434,7 @@ export default function LearnModePage() {
             {isLoading && !isTyping && (
               <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
                 <div className={styles.aiAvatarContainer}>
-                  <div className={styles.aiAvatar}>
-                    <Bot className="w-4 h-4" />
-                  </div>
+                  {renderAIAvatar('small')}
                 </div>
                 <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                   <div className={styles.messageText}>
