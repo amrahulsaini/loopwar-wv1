@@ -3,7 +3,7 @@ import Database from './database';
 export class AINotesExtractor {
   
   // Extract structured learning content from AI conversation
-  static async extractLearningContent(aiResponse: string, userMessage: string): Promise<{
+  static async extractLearningContent(aiResponse: string, _userMessage?: string): Promise<{
     definitions: Array<{term: string, definition: string}>,
     analogies: Array<{concept: string, analogy: string}>,
     keyInsights: Array<string>,
@@ -110,15 +110,30 @@ export class AINotesExtractor {
       const existingNotes = await Database.query(
         'SELECT * FROM ai_learning_notes WHERE user_id = ? AND category = ? AND topic = ? AND subtopic = ? AND sort_order = ?',
         [userId, category, topic, subtopic, sortOrder]
-      ) as any[];
+      ) as Array<Record<string, unknown>>;
 
       if (existingNotes.length > 0) {
         // Update existing notes by merging new content
-        const existing = existingNotes[0];
-        const mergedDefinitions = this.mergeContent(existing.definitions || [], extractedContent.definitions, 'term');
-        const mergedAnalogies = this.mergeContent(existing.analogies || [], extractedContent.analogies, 'concept');
-        const mergedInsights = this.mergeArrayContent(existing.key_insights || [], extractedContent.keyInsights);
-        const mergedExamples = this.mergeContent(existing.examples || [], extractedContent.examples, 'concept');
+        const existing = existingNotes[0] as Record<string, unknown>;
+        const mergedDefinitions = this.mergeContent(
+          JSON.parse((existing.definitions as string) || '[]'), 
+          extractedContent.definitions, 
+          'term'
+        );
+        const mergedAnalogies = this.mergeContent(
+          JSON.parse((existing.analogies as string) || '[]'), 
+          extractedContent.analogies, 
+          'concept'
+        );
+        const mergedInsights = this.mergeArrayContent(
+          JSON.parse((existing.key_insights as string) || '[]'), 
+          extractedContent.keyInsights
+        );
+        const mergedExamples = this.mergeContent(
+          JSON.parse((existing.examples as string) || '[]'), 
+          extractedContent.examples, 
+          'concept'
+        );
 
         await Database.query(
           `UPDATE ai_learning_notes SET 
@@ -132,7 +147,7 @@ export class AINotesExtractor {
             JSON.stringify(mergedInsights),
             JSON.stringify(mergedExamples),
             `User: ${userMessage}\nAI: ${aiResponse.substring(0, 500)}...`,
-            existing.id
+            (existing.id as number)
           ]
         );
       } else {
@@ -164,12 +179,12 @@ export class AINotesExtractor {
   }
 
   // Helper function to merge content arrays without duplicates
-  private static mergeContent(existing: any[], newContent: any[], keyField: string): any[] {
+  private static mergeContent(existing: Array<Record<string, unknown>>, newContent: Array<Record<string, unknown>>, keyField: string): Array<Record<string, unknown>> {
     const merged = [...existing];
     
     newContent.forEach(newItem => {
       const exists = merged.some(existingItem => 
-        existingItem[keyField]?.toLowerCase() === newItem[keyField]?.toLowerCase()
+        String(existingItem[keyField] || '').toLowerCase() === String(newItem[keyField] || '').toLowerCase()
       );
       
       if (!exists) {
@@ -210,20 +225,23 @@ export class AINotesExtractor {
       const notes = await Database.query(
         'SELECT * FROM ai_learning_notes WHERE user_id = ? AND category = ? AND topic = ? AND subtopic = ? AND sort_order = ?',
         [userId, category, topic, subtopic, sortOrder]
-      ) as any[];
+      ) as Array<Record<string, unknown>>;
 
       if (notes.length > 0) {
-        const note = notes[0];
+        const note = notes[0] as Record<string, unknown>;
         return {
-          id: note.id,
-          definitions: JSON.parse(note.definitions || '[]'),
-          analogies: JSON.parse(note.analogies || '[]'),
-          keyInsights: JSON.parse(note.key_insights || '[]'),
-          examples: JSON.parse(note.examples || '[]'),
-          personalNotes: note.personal_notes || '',
-          userHighlights: JSON.parse(note.user_highlights || '[]'),
-          customTags: JSON.parse(note.custom_tags || '[]'),
-          lastUpdated: note.last_ai_update
+          id: note.id as number,
+          definitions: JSON.parse((note.definitions as string) || '[]'),
+          analogies: JSON.parse((note.analogies as string) || '[]'),
+          keyInsights: JSON.parse((note.key_insights as string) || '[]'),
+          examples: JSON.parse((note.examples as string) || '[]'),
+          learningPath: JSON.parse((note.learning_path as string) || '[]'),
+          connections: JSON.parse((note.connections as string) || '[]'),
+          conversationSummary: (note.conversation_summary as string) || '',
+          personalNotes: (note.personal_notes as string) || '',
+          userHighlights: JSON.parse((note.user_highlights as string) || '[]'),
+          customTags: JSON.parse((note.custom_tags as string) || '[]'),
+          lastUpdated: note.last_ai_update as string
         };
       }
       
@@ -238,7 +256,7 @@ export class AINotesExtractor {
   static async updatePersonalNotes(
     noteId: number,
     personalNotes: string,
-    userHighlights: any[] = [],
+    userHighlights: Array<Record<string, unknown>> = [],
     customTags: string[] = []
   ) {
     try {

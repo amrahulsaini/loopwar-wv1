@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
-  Code,
   Send,
   ChevronRight
 } from 'lucide-react';
@@ -267,8 +266,7 @@ export default function LearnModePage() {
         setLatestAIResponse(text); // Track latest AI response for Code Shell context
         setTypingText('');
         
-        // Extract learning notes from AI response
-        extractNotesFromResponse(text);
+        // No real-time extraction - user will trigger manually
       }
     }, typeSpeed);
 
@@ -445,39 +443,6 @@ export default function LearnModePage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typingText]);
-
-  // Extract coding question from AI response
-  const extractCodingQuestion = (aiResponse: string) => {
-    // Look for common patterns in AI responses that indicate a coding task
-    const patterns = [
-      /Write a .*? function/i,
-      /Create a .*? function/i,
-      /Implement .*? function/i,
-      /Problem:\s*(.*?)(?:\n|$)/i,
-      /Task:\s*(.*?)(?:\n|$)/i,
-      /Question:\s*(.*?)(?:\n|$)/i
-    ];
-    
-    for (const pattern of patterns) {
-      const match = aiResponse.match(pattern);
-      if (match) {
-        return match[1] || match[0];
-      }
-    }
-    
-    // Fallback: return first sentence that contains "function" or "array"
-    const sentences = aiResponse.split(/[.!?]/);
-    for (const sentence of sentences) {
-      if (sentence.toLowerCase().includes('function') || 
-          sentence.toLowerCase().includes('array') ||
-          sentence.toLowerCase().includes('implement') ||
-          sentence.toLowerCase().includes('write')) {
-        return sentence.trim();
-      }
-    }
-    
-    return '';
-  };
 
   return (
     <div className={styles.container}>

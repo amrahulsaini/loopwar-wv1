@@ -7,8 +7,11 @@ interface Note {
   analogies: Array<{concept: string, analogy: string}>;
   keyInsights: Array<string>;
   examples: Array<{concept: string, example: string}>;
+  learningPath: Array<string>;
+  connections: Array<string>;
+  conversationSummary: string;
   personalNotes: string;
-  userHighlights: Array<any>;
+  userHighlights: Array<Record<string, unknown>>;
   customTags: Array<string>;
   lastUpdated: string;
 }
@@ -31,19 +34,17 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
   const [notes, setNotes] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [personalNotes, setPersonalNotes] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     definitions: true,
     analogies: true,
     insights: true,
     examples: true,
+    learningPath: true,
+    connections: true,
     personal: true
   });
-
-  // Fetch notes when component mounts or location changes
-  useEffect(() => {
-    fetchNotes();
-  }, [category, topic, subtopic, sortOrder]);
 
   const fetchNotes = async () => {
     try {
@@ -63,6 +64,40 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
       setLoading(false);
     }
   };
+
+  const generateNotes = async () => {
+    try {
+      setIsGenerating(true);
+      const response = await fetch('/api/ai-notes/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          category,
+          topic,
+          subtopic,
+          sortOrder
+        })
+      });
+
+      if (response.ok) {
+        // Refresh notes after generation
+        await fetchNotes();
+      } else {
+        console.error('Failed to generate notes');
+      }
+    } catch (error) {
+      console.error('Error generating notes:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Fetch notes when component mounts or location changes
+  useEffect(() => {
+    fetchNotes();
+  }, [category, topic, subtopic, sortOrder]);
 
   const savePersonalNotes = async () => {
     if (!notes) return;
@@ -131,6 +166,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
       <div className={styles.header}>
         <h3>📚 Learning Notes</h3>
         <div className={styles.headerActions}>
+          <button 
+            className={styles.generateBtn}
+            onClick={generateNotes}
+            disabled={isGenerating}
+            title="Generate notes from conversation"
+          >
+            {isGenerating ? '🔄' : '🧠'} {isGenerating ? 'Generating...' : 'Generate'}
+          </button>
           <button 
             className={styles.refreshBtn}
             onClick={fetchNotes}
@@ -226,6 +269,51 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
                   <div key={index} className={styles.exampleItem}>
                     <strong className={styles.exampleConcept}>{example.concept}</strong>
                     <p className={styles.example}>{example.example}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Learning Path Section */}
+        {notes.learningPath && notes.learningPath.length > 0 && (
+          <div className={styles.section}>
+            <button 
+              className={styles.sectionHeader}
+              onClick={() => toggleSection('learningPath')}
+            >
+              <span>🎯 Learning Journey ({notes.learningPath.length})</span>
+              <span className={expandedSections.learningPath ? styles.expanded : styles.collapsed}>▼</span>
+            </button>
+            {expandedSections.learningPath && (
+              <div className={styles.sectionContent}>
+                {notes.learningPath.map((step, index) => (
+                  <div key={index} className={styles.learningPathItem}>
+                    <span className={styles.stepNumber}>{index + 1}</span>
+                    <p>{step}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Connections Section */}
+        {notes.connections && notes.connections.length > 0 && (
+          <div className={styles.section}>
+            <button 
+              className={styles.sectionHeader}
+              onClick={() => toggleSection('connections')}
+            >
+              <span>🔗 Related Concepts ({notes.connections.length})</span>
+              <span className={expandedSections.connections ? styles.expanded : styles.collapsed}>▼</span>
+            </button>
+            {expandedSections.connections && (
+              <div className={styles.sectionContent}>
+                {notes.connections.map((connection, index) => (
+                  <div key={index} className={styles.connectionItem}>
+                    <p>🔸 {connection}</p>
                   </div>
                 ))}
               </div>

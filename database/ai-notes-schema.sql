@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS ai_learning_notes (
     analogies JSON,
     key_insights JSON,
     examples JSON,
+    learning_path JSON,
+    connections JSON,
     
     -- User-editable content
     personal_notes TEXT,
@@ -19,6 +21,7 @@ CREATE TABLE IF NOT EXISTS ai_learning_notes (
     custom_tags JSON,
     
     -- Metadata
+    conversation_summary TEXT,
     conversation_context TEXT,
     last_ai_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_user_update TIMESTAMP NULL,
