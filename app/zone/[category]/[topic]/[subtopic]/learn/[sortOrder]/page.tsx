@@ -106,14 +106,10 @@ export default function LearnModePage() {
     
     return (
       <div className={containerClass}>
-        {/* Use the new custom LOOPAI SVG */}
-        <Image 
-          src="/loopwarai.svg" 
-          alt="LOOPAI Assistant"
-          className={styles.aiAvatarImage}
-          width={size === 'medium' ? 40 : 28}
-          height={size === 'medium' ? 40 : 28}
-        />
+        {/* Fallback approach - use text if SVG fails */}
+        <div className={styles.aiAvatarFallback}>
+          AI
+        </div>
       </div>
     );
   };
