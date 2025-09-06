@@ -16,19 +16,8 @@ const ai = new GoogleGenAI({
   apiKey: apiKey
 });
 
-// Problem interface for type safety
-interface Problem {
-  id: number;
-  title: string;
-  description: string;
-  difficulty: string;
-  category: string;
-  topic: string;
-  subtopic: string;
-}
-
 // Enhanced AI response processing function
-function enhanceAIResponse(response: string, userMessage: string, problem: Problem | null): string {
+function enhanceAIResponse(response: string, userMessage: string): string {
   let enhancedResponse = response;
 
   // Detect if user wants coding practice
@@ -201,38 +190,43 @@ CONVERSATION HISTORY:
 ${contextMessages || 'Fresh conversation - no previous context.'}
 
 SMART RESPONSE STRATEGY:
-✅ ANALYZE the user's question TYPE and choose perfect sections
-✅ Use appropriate emoji headers based on what they're asking
+✅ ANALYZE the user's question and CREATE CUSTOM section headers that fit perfectly
+✅ DON'T use predefined section types - create your own based on context
 ✅ Keep each section to 2-3 short bullet points maximum
 ✅ Use simple language, no complex paragraphs
 ✅ Generate 3 CLICKABLE follow-up questions (not statements)
 
-INTELLIGENT SECTION SELECTION (choose what fits their question):
-🎯 **Quick Answer** - "what is", "how does", direct questions
-💡 **Breaking it down** - complex concepts, algorithms needing explanation
-🔍 **Real example** - when they need to see it in action
-🔥 **Your turn** - practice, coding, implementation tasks
-⚠️ **Common mistakes** - debugging, "why doesn't this work", pitfalls
-💭 **Think deeper** - conceptual understanding, "how it really works"
-🚀 **Advanced stuff** - optimizations, edge cases, interview prep
-🛠️ **Let's code** - when they want to implement/practice coding
-📚 **What's next?** - ALWAYS include with 3 clickable follow-up questions
+DYNAMIC SECTION CREATION:
+Instead of using fixed section types, CREATE section headers that match the user's question:
+
+Examples:
+- If they ask "What is recursion?" → Create sections like "� **The Simple Idea**", "🧠 **How Your Brain Should Think About It**"
+- If they ask "Why won't my code work?" → Create sections like "🕵️ **Let's Debug This**", "⚠️ **Most Common Culprits**" 
+- If they ask "How to optimize this?" → Create sections like "🚀 **Speed It Up**", "� **Smart Tricks**"
+
+CREATIVE SECTION NAMING:
+- Use relevant emojis that match the topic
+- Make headers conversational and engaging
+- Focus on what the user actually needs to know
+- Create sections that feel natural for their specific question
 
 FORMAT RULES:
 - Use bullet points (•) instead of asterisks (**)
 - Keep explanations short and simple
-- Make follow-ups as clickable questions (not statements)
-- Choose sections intelligently based on question type
+- Make follow-ups as clickable questions
+- Be creative with section names based on user's question
 
 QUESTION ANALYSIS: "${message}"
 
-Analyze their question type and respond with the most helpful sections!
+Create custom section headers that perfectly match their question and make it engaging!
+
+Example headers you can use (create your own based on the question):
 🎯 **Quick Answer** - for direct questions needing immediate answers
 💡 **Let me break this down** - for complex concepts needing explanation
 🔍 **Here's an example** - when examples would help understanding
 🔥 **Try this** - for actionable steps or practice suggestions
 ⚠️ **Watch out for** - for common mistakes or important warnings
-� **Think about it** - for conceptual understanding questions
+🤔 **Think about it** - for conceptual understanding questions
 🚀 **Next level** - for advanced concepts or optimizations
 📚 **What's next?** - for follow-up questions (always include this)
 
@@ -255,7 +249,7 @@ Remember: Choose sections that fit their question, use bullets not asterisks, ke
     let response = result.text || 'Sorry, I encountered an issue generating a response.';
 
     // Enhanced response processing and validation
-    response = enhanceAIResponse(response, message, problem);
+    response = enhanceAIResponse(response, message);
 
     // Save user message to database
     await Database.query(

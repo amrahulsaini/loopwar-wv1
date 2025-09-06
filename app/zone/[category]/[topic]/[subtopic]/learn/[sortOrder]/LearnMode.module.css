@@ -1444,3 +1444,58 @@
 :global(.formattedResponse div:has(strong):first-child) {
     margin-top: 0;
 }
+
+/* Cool animations for smooth response display */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInComplete {
+    from {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(0, 100, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 100, 255, 0.6);
+    }
+}
+
+/* Smooth section animations */
+:global(.formattedResponse > div) {
+    animation: fadeInUp 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+/* Enhanced message bubble animations */
+.messageBubbleAi {
+    animation: slideInComplete 0.4s ease-out;
+}
+
+/* Follow-up buttons with cool hover effects */
+.followUpPrompt {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+}
+
+.followUpPrompt:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: pulseGlow 1.5s infinite;
+}

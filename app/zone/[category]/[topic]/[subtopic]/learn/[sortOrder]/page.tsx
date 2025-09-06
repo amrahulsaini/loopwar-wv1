@@ -317,7 +317,7 @@ export default function LearnModePage() {
     );
   };
 
-  // Smooth progressive display like Grok (no typing animation)
+  // Smooth progressive display with cool animations (no cursor, eye-catching transitions)
   const displayResponseSmoothly = useCallback((text: string) => {
     // Split response into sections for smooth display
     const sections = text.split(/(?=🎯|💡|🔍|🔥|⚠️|💭|🚀|🛠️|📚)/);
@@ -325,12 +325,25 @@ export default function LearnModePage() {
     setIsTyping(true);
     setTypingText('');
     
-    // Display sections progressively with smooth timing
+    // Display sections progressively with smooth animations
     sections.forEach((section, index) => {
       setTimeout(() => {
-        setTypingText(prev => prev + section);
+        setTypingText(prev => {
+          const newText = prev + section;
+          
+          // Add smooth fade-in animation for each section
+          setTimeout(() => {
+            const elements = document.querySelectorAll('.formattedResponse > div:last-child');
+            const lastElement = elements[elements.length - 1] as HTMLElement;
+            if (lastElement) {
+              lastElement.style.animation = 'fadeInUp 0.5s ease-out';
+            }
+          }, 50);
+          
+          return newText;
+        });
         
-        // If last section, complete the message
+        // If last section, complete the message with final animation
         if (index === sections.length - 1) {
           setTimeout(() => {
             setIsTyping(false);
@@ -346,24 +359,21 @@ export default function LearnModePage() {
             setLatestAIResponse(text);
             setTypingText('');
             
+            // Cool completion animation
+            setTimeout(() => {
+              const lastMessage = document.querySelector('.messageContainerAi:last-child') as HTMLElement;
+              if (lastMessage) {
+                lastMessage.style.animation = 'slideInComplete 0.3s ease-out';
+              }
+            }, 100);
+            
             // Update conversation context
             setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
-          }, 200); // Small delay before finalizing
+          }, 400); // Longer delay for smoother completion
         }
-      }, index * 300); // 300ms between sections for smooth flow
+      }, index * 600); // Increased timing for better visual flow
     });
   }, []);
-
-  // Backward compatibility - use smooth display instead of typing
-  const typeMessage = useCallback((text: string) => {
-    return displayResponseSmoothly(text);
-  }, [displayResponseSmoothly]);
-
-  // Enhanced smooth display (replaces old typing function)
-  const typeMessageWithSpeed = useCallback((text: string, speed: number = 8) => {
-    // Ignore speed parameter, use smooth display for all responses
-    return displayResponseSmoothly(text);
-  }, [displayResponseSmoothly]);
 
   const categoryDisplay = formatDisplayName(category);
   const topicDisplay = formatDisplayName(topic);
@@ -471,18 +481,79 @@ export default function LearnModePage() {
     }
   };
 
-  // Handle predefined prompt clicks - send directly to AI
+  // Handle predefined prompt clicks - send directly to AI (fixed double-click issue)
   const handlePromptClick = (prompt: string) => {
     if (isLoading) return; // Prevent spam clicks during loading
     
-    setInputMessage(prompt);
+    // Clear current input and set new prompt
+    setInputMessage('');
     
-    // Send immediately without delay
-    setTimeout(() => {
-      if (!isLoading) {
-        sendMessage();
+    // Send the message directly without using input field
+    sendMessageDirect(prompt);
+  };
+
+  // Direct message sending for follow-up questions (bypasses input field)
+  const sendMessageDirect = async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return;
+
+    const startTime = Date.now();
+    setIsLoading(true);
+
+    // Add user message immediately for better UX
+    const userMessageObj = { 
+      message: messageText, 
+      response: '', 
+      message_type: 'user' as const, 
+      created_at: new Date().toISOString() 
+    };
+    
+    setMessages(prev => [...prev, userMessageObj]);
+    setConversationContext(prev => [...prev.slice(-4), messageText]);
+
+    try {
+      const response = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageText,
+          category,
+          topic,
+          subtopic,
+          sortOrder,
+          conversationContext: conversationContext,
+          responseMode: responseQuality,
+          problem: problem ? {
+            title: problem.title,
+            description: problem.description,
+            difficulty: problem.difficulty,
+            hints: problem.solution_hints,
+            timeComplexity: problem.time_complexity,
+            spaceComplexity: problem.space_complexity
+          } : null
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const responseTime = Date.now() - startTime;
+        setLastResponseTime(responseTime);
+        
+        // Use smooth progressive display
+        displayResponseSmoothly(data.response);
+      } else {
+        const errorMessage = `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`;
+        displayResponseSmoothly(errorMessage);
       }
-    }, 50); // Minimal delay just to ensure state update
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = "I'm experiencing connection issues. Please make sure you're connected to the internet and try again.";
+      displayResponseSmoothly(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // CodeShell handlers
@@ -725,7 +796,7 @@ export default function LearnModePage() {
                   </div>
                 ))}
                 
-                {/* Typing Animation */}
+                {/* Smooth Response Display (no cursor) */}
                 {isTyping && (
                   <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
                     <div className={styles.aiAvatarContainer}>
@@ -735,7 +806,6 @@ export default function LearnModePage() {
                       <div className={styles.messageText}>
                         <div className={styles.formattedResponse}>
                           {formatAIResponse(typingText)}
-                          <span className={styles.typingCursor}>|</span>
                         </div>
                       </div>
                     </div>
