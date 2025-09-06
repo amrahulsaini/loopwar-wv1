@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import Database from '../../../lib/database';
 import { SecurityService } from '../../../lib/security';
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
+// Initialize Gemini AI with new SDK
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error('❌ GEMINI_API_KEY is not set in environment variables');
+} else {
+  console.log('✅ GEMINI_API_KEY is loaded:', apiKey.substring(0, 10) + '...');
+}
+
+const ai = new GoogleGenAI({
+  apiKey: apiKey
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -138,9 +148,10 @@ ${contextMessages || 'This is the start of your conversation.'}
 
 Respond as LOOPAI:`;
 
-    // Generate AI response using Gemini
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+    // Generate AI response using Gemini 2.0 Flash
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: systemPrompt,
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -149,8 +160,7 @@ Respond as LOOPAI:`;
       }
     });
 
-    const result = await model.generateContent(systemPrompt);
-    const response = result.response.text();
+    const response = result.text;
 
     // Save user message to database
     await Database.query(
