@@ -28,7 +28,7 @@ const CodeShell: React.FC<CodeShellProps> = ({
     if (!code) {
       setCode(getLanguageTemplate());
     }
-  }, [language]);
+  }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode(e.target.value);

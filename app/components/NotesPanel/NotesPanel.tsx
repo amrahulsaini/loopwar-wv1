@@ -97,7 +97,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
   // Fetch notes when component mounts or location changes
   useEffect(() => {
     fetchNotes();
-  }, [category, topic, subtopic, sortOrder]);
+  }, [category, topic, subtopic, sortOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const savePersonalNotes = async () => {
     if (!notes) return;

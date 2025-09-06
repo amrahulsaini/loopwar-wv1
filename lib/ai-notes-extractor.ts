@@ -3,7 +3,7 @@ import Database from './database';
 export class AINotesExtractor {
   
   // Extract structured learning content from AI conversation
-  static async extractLearningContent(aiResponse: string, _userMessage?: string): Promise<{
+  static async extractLearningContent(aiResponse: string): Promise<{
     definitions: Array<{term: string, definition: string}>,
     analogies: Array<{concept: string, analogy: string}>,
     keyInsights: Array<string>,
@@ -104,7 +104,7 @@ export class AINotesExtractor {
   ) {
     try {
       // Extract learning content from AI response
-      const extractedContent = await this.extractLearningContent(aiResponse, userMessage);
+      const extractedContent = await this.extractLearningContent(aiResponse);
 
       // Get existing notes
       const existingNotes = await Database.query(

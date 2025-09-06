@@ -97,7 +97,7 @@ Be comprehensive but avoid redundancy. Only include high-quality, educational co
       contents: analysisPrompt
     });
 
-    let analysisResult = result.text || '{}';
+    const analysisResult = result.text || '{}';
     
     // Try to parse the JSON response
     let extractedContent;
