@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
-  Bot,
   Code,
   Send,
   ChevronRight
@@ -106,12 +105,8 @@ export default function LearnModePage() {
     
     return (
       <div className={containerClass}>
-        {/* Use your custom LOOPAI SVG */}
-        <img 
-          src="/loopwarai.svg" 
-          alt="LOOPAI Assistant"
-          className={styles.aiAvatarImage}
-        />
+        {/* Direct SVG background approach */}
+        <div className={styles.aiAvatarSvg}></div>
       </div>
     );
   };
@@ -293,15 +288,7 @@ export default function LearnModePage() {
             </div>
 
             <div className={styles.headerRight}>
-              <div className={styles.problemInfo}>
-                <div className={styles.problemNumber}>Problem #{sortOrder}</div>
-                <div className={styles.sessionInfo}>
-                  <Bot className={`w-3 h-3 ${styles.aiIcon}`} />
-                  AI Learning Session
-                </div>
-              </div>
-              
-              {/* User Profile Section */}
+              {/* Clean header - just user profile */}
               {user && (
                 <div className={styles.userProfileSection}>
                   <div className={styles.userInfo}>
@@ -375,7 +362,7 @@ export default function LearnModePage() {
               <div className={styles.welcomeContainer}>
                 <div className={styles.welcomeAvatarContainer}>
                   <div className={styles.welcomeAvatar}>
-                    <Bot className="w-10 h-10 text-purple-400" />
+                    <div className={styles.aiAvatarSvg}></div>
                   </div>
                 </div>
                 <h3 className={styles.welcomeTitle}>Welcome to LOOPAI{user ? `, ${user.username}` : ''}!</h3>
@@ -383,14 +370,14 @@ export default function LearnModePage() {
                   I&apos;m your AI tutor for <span className={styles.welcomeHighlight}>{subtopicDisplay}</span>. 
                   I&apos;ll help you understand concepts, solve problems, and master algorithms step by step.
                 </p>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p><strong>Try asking me:</strong></p>
-                  <ul className="mt-2 space-y-1 text-left max-w-md mx-auto">
-                    <li>• &quot;Explain the basics of {subtopicDisplay}&quot;</li>
-                    <li>• &quot;What should I know before starting?&quot;</li>
-                    <li>• &quot;Walk me through this concept step by step&quot;</li>
-                    <li>• &quot;Show me a simple example&quot;</li>
-                  </ul>
+                <div className={styles.welcomePrompts}>
+                  <p className={styles.promptsTitle}>Try asking me:</p>
+                  <div className={styles.promptsList}>
+                    <div className={styles.promptItem}>&quot;Explain the basics of {subtopicDisplay}&quot;</div>
+                    <div className={styles.promptItem}>&quot;What should I know before starting?&quot;</div>
+                    <div className={styles.promptItem}>&quot;Walk me through this concept step by step&quot;</div>
+                    <div className={styles.promptItem}>&quot;Show me a simple example&quot;</div>
+                  </div>
                 </div>
               </div>
             ) : (
