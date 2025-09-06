@@ -235,15 +235,31 @@ export default function LearnModePage() {
           return <br key={index} />;
         }
         
-        // Check if we're entering the follow-up section (new structured format)
-        if (line.includes("What Would You Like?") || line.includes("Quick Follow-ups") || line.includes("What's next?")) {
+        // Check if we're entering the follow-up section
+        if (line.includes("What Would You Like?") || line.includes("What's next?") || line.includes("📚")) {
           inFollowUpSection = true;
         }
         
-        // Handle both **text** and *text* for bold formatting
-        let formattedLine = line
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
-          .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');    // *bold*
+        // Better formatting: Convert asterisks to proper HTML
+        let formattedLine = line;
+        
+        // Handle section headers with emojis (keep them bold)
+        if (line.match(/^[🎯💡🔍🔥⚠️💭🚀📚]\s*\*\*(.*?)\*\*/) || line.match(/^[🎯💡🔍🔥⚠️💭🚀📚]/)) {
+          formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+        // Convert bullet points with asterisks to proper HTML bullets
+        else if (line.match(/^\s*[\*•-]\s+/)) {
+          formattedLine = line
+            .replace(/^\s*[\*•-]\s+/, '') // Remove bullet markers
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Keep bold formatting
+          formattedLine = `• ${formattedLine}`; // Add proper bullet
+        }
+        // Handle regular text with asterisks for emphasis
+        else {
+          formattedLine = line
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
+            .replace(/(?<!\*)\*([^*\s][^*]*[^*\s])\*(?!\*)/g, '<em>$1</em>'); // *italic* (not **)
+        }
         
         // Handle inline code with `code`
         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code class="inline-code">$1</code>');

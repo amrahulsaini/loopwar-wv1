@@ -200,34 +200,32 @@ LEARNING CONTEXT:
 CONVERSATION HISTORY:
 ${contextMessages || 'Fresh conversation - no previous context.'}
 
-RESPONSE FORMAT (Use these EXACT headers with emojis):
-🎯 **Quick Answer**
-[Give the main answer in 1-2 short sentences. Use simple words.]
+RESPONSE GUIDELINES:
+✅ Choose 2-4 sections that BEST FIT the user's question
+✅ Use appropriate emoji headers based on the context
+✅ Keep each section to 2-3 short bullet points
+✅ Use simple language, no complex paragraphs
+✅ Generate specific follow-ups related to their exact question
 
-💡 **Let Me Explain More**
-[Break it down further. Use bullet points or short lines, not long paragraphs.]
-[Ask: "Does this make sense so far?" or "Want me to go deeper?"]
+AVAILABLE SECTION TYPES (choose what fits best):
+🎯 **Quick Answer** - for direct questions needing immediate answers
+💡 **Let me break this down** - for complex concepts needing explanation
+🔍 **Here's an example** - when examples would help understanding
+🔥 **Try this** - for actionable steps or practice suggestions
+⚠️ **Watch out for** - for common mistakes or important warnings
+� **Think about it** - for conceptual understanding questions
+🚀 **Next level** - for advanced concepts or optimizations
+📚 **What's next?** - for follow-up questions (always include this)
 
-🔥 **Try This Next**
-[Give ONE specific thing to do. If coding - mention Code Shell.]
-
-📚 **What Would You Like?**
-Generate 3 SPECIFIC follow-ups based on their EXACT question and current context:
-• [Something directly related to what they just asked]
-• [A practical next step or example]
-• [Something to deepen understanding or practice]
-
-RESPONSE RULES:
-✅ Use bullet points, not paragraphs
-✅ Ask questions to check understanding
-✅ Maximum 3-4 sentences per section
-✅ Generate follow-ups that match their specific question
-✅ Use words a beginner would understand
-✅ If they seem confused, offer to explain simpler
+FORMAT RULES:
+- Use bullet points (•) instead of asterisks (**)
+- Keep explanations short and simple
+- Ask questions to check understanding
+- Generate 3 follow-ups specific to their question
 
 STUDENT'S QUESTION: "${message}"
 
-Remember: Make it INSTANT, SIMPLE, and INTERACTIVE!`;
+Remember: Choose sections that fit their question, use bullets not asterisks, keep it simple!`;
 
     // Generate enhanced AI response using Gemini 2.0 Flash
     const result = await ai.models.generateContent({

@@ -1413,3 +1413,34 @@
     background: rgba(0, 100, 255, 0.1);
     padding-left: 0.5rem;
 }
+
+/* Enhanced bullet point styling for clean AI responses */
+:global(.formattedResponse div) {
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+:global(.formattedResponse div:empty) {
+    margin-bottom: 0.25rem;
+}
+
+/* Clean bullet points styling */
+:global(.formattedResponse div[style*="margin-bottom"]) {
+    color: #333;
+}
+
+/* Section headers with emojis */
+:global(.formattedResponse div strong) {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* Better spacing for bullet lists */
+:global(.formattedResponse div:has(strong)) {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+:global(.formattedResponse div:has(strong):first-child) {
+    margin-top: 0;
+}
