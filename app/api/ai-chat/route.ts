@@ -151,13 +151,7 @@ Respond as LOOPAI:`;
     // Generate AI response using Gemini 2.0 Flash
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: systemPrompt,
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 500,
-      }
+      contents: systemPrompt
     });
 
     const response = result.text;
