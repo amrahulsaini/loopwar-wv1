@@ -156,18 +156,33 @@
 
 /* Additional Avatar Styles */
 .userAvatarSmall {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: 50%;
-    border: 2px solid var(--color-purple);
+    background: var(--color-primary);
+    color: var(--color-bg);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-card-bg);
     font-size: 0.7rem;
     font-weight: 600;
-    color: white;
+    font-family: var(--font-primary);
+}
+
+.userAvatarMedium {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-primary);
 }
 
 .avatarImage {
@@ -177,7 +192,8 @@
 }
 
 .defaultAvatar {
-    background: linear-gradient(135deg, var(--color-purple), var(--color-purple-dark));
+    background: var(--color-primary);
+    color: var(--color-bg);
 }
 
 /* Chat Message Avatar Containers */
@@ -817,25 +833,25 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--color-primary);  /* Dark background for LOOPAI icon visibility */
-    border: 2px solid var(--color-border);
     flex-shrink: 0;
-    padding: 0.2rem;  /* Small padding to prevent icon from touching edges */
+    overflow: hidden;
 }
 
 .aiAvatar {
     width: 1.75rem;
     height: 1.75rem;
+    background: transparent;  /* No background for LOOPAI icon */
 }
 
 .botAvatar {
     width: 2.5rem;
     height: 2.5rem;
+    background: transparent;  /* No background for LOOPAI icon */
 }
 
 .aiAvatarImage {
-    width: 80%;  /* Slightly smaller to show background */
-    height: 80%;
+    width: 100%;  /* Full size, no background needed */
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
     object-position: center;

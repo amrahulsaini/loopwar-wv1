@@ -76,7 +76,7 @@ export default function LearnModePage() {
 
   // Render user avatar
   const renderUserAvatar = (size: 'small' | 'medium' = 'small') => {
-    const sizeClass = size === 'medium' ? styles.userAvatar : styles.userAvatarSmall;
+    const sizeClass = size === 'medium' ? styles.userAvatarMedium : styles.userAvatarSmall;
     
     if (user?.profilePicture) {
       return (
