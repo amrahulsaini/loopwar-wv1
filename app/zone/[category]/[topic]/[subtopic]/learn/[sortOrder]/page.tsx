@@ -26,6 +26,20 @@ interface UserData {
   authenticated: boolean;
 }
 
+interface ProblemData {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  solution_hints?: string;
+  time_complexity?: string;
+  space_complexity?: string;
+  tags?: string;
+  category_name: string;
+  topic_name: string;
+  subtopic_name: string;
+}
+
 export default function LearnModePage() {
   const params = useParams();
   const category = params.category as string;
@@ -39,6 +53,7 @@ export default function LearnModePage() {
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
+  const [problem, setProblem] = useState<ProblemData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check user authentication and get user data
@@ -68,10 +83,26 @@ export default function LearnModePage() {
     }
   }, []);
 
-  // Initialize user session on component mount
+  // Fetch specific problem data
+  const fetchProblemData = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/problems/${sortOrder}`);
+      if (response.ok) {
+        const problemData = await response.json();
+        setProblem(problemData);
+      } else {
+        console.error('Failed to fetch problem data');
+      }
+    } catch (error) {
+      console.error('Error fetching problem data:', error);
+    }
+  }, [sortOrder]);
+
+  // Initialize user session and problem data on component mount
   useEffect(() => {
     checkUserSession();
-  }, [checkUserSession]);
+    fetchProblemData();
+  }, [checkUserSession, fetchProblemData]);
 
   // Render user avatar
   const renderUserAvatar = (size: 'small' | 'medium' = 'small') => {
@@ -227,6 +258,14 @@ export default function LearnModePage() {
           topic,
           subtopic,
           sortOrder,
+          problem: problem ? {
+            title: problem.title,
+            description: problem.description,
+            difficulty: problem.difficulty,
+            hints: problem.solution_hints,
+            timeComplexity: problem.time_complexity,
+            spaceComplexity: problem.space_complexity
+          } : null
         }),
       });
 
@@ -255,6 +294,17 @@ export default function LearnModePage() {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  // Handle predefined prompt clicks
+  const handlePromptClick = (prompt: string) => {
+    setInputMessage(prompt);
+    // Auto-send the message
+    setTimeout(() => {
+      if (!isLoading) {
+        sendMessage();
+      }
+    }, 100);
   };
 
   // Auto scroll to bottom
@@ -366,19 +416,45 @@ export default function LearnModePage() {
                   </div>
                 </div>
                 <h3 className={styles.welcomeTitle}>Welcome to LOOPAI{user ? `, ${user.username}` : ''}!</h3>
-                <p className={styles.welcomeText}>
-                  I&apos;m your AI tutor for <span className={styles.welcomeHighlight}>{subtopicDisplay}</span>. 
-                  I&apos;ll help you understand concepts, solve problems, and master algorithms step by step.
-                </p>
-                <div className={styles.welcomePrompts}>
-                  <p className={styles.promptsTitle}>Try asking me:</p>
-                  <div className={styles.promptsList}>
-                    <div className={styles.promptItem}>&quot;Explain the basics of {subtopicDisplay}&quot;</div>
-                    <div className={styles.promptItem}>&quot;What should I know before starting?&quot;</div>
-                    <div className={styles.promptItem}>&quot;Walk me through this concept step by step&quot;</div>
-                    <div className={styles.promptItem}>&quot;Show me a simple example&quot;</div>
-                  </div>
-                </div>
+                {problem ? (
+                  <>
+                    <p className={styles.welcomeText}>
+                      I&apos;m here to help you solve <span className={styles.welcomeHighlight}>{problem.title}</span>.
+                      This is a <span className={styles.difficultyBadge}>{problem.difficulty}</span> level problem in {subtopicDisplay}.
+                    </p>
+                    <div className={styles.welcomePrompts}>
+                      <p className={styles.promptsTitle}>Choose how you&apos;d like to start:</p>
+                      <div className={styles.promptsList}>
+                        <div 
+                          className={styles.promptItem}
+                          onClick={() => handlePromptClick("Explain this problem to me step by step")}
+                        >
+                          &quot;Explain this problem to me step by step&quot;
+                        </div>
+                        <div 
+                          className={styles.promptItem}
+                          onClick={() => handlePromptClick("What approach should I use to solve this?")}
+                        >
+                          &quot;What approach should I use to solve this?&quot;
+                        </div>
+                        <div 
+                          className={styles.promptItem}
+                          onClick={() => handlePromptClick("Show me similar examples")}
+                        >
+                          &quot;Show me similar examples&quot;
+                        </div>
+                        <div 
+                          className={styles.promptItem}
+                          onClick={() => handlePromptClick("What's the optimal time and space complexity?")}
+                        >
+                          &quot;What&apos;s the optimal time and space complexity?&quot;
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles.welcomeText}>Loading problem details...</p>
+                )}
               </div>
             ) : (
               <>

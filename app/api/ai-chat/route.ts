@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { message, category, topic, subtopic, sortOrder } = await request.json();
+    const { message, category, topic, subtopic, sortOrder, problem } = await request.json();
 
     if (!message || !category || !topic || !subtopic || !sortOrder) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -123,6 +123,15 @@ Category: ${categoryDisplay}
 Topic: ${topicDisplay}  
 Subtopic: ${subtopicDisplay}
 Problem: #${sortOrder}
+
+${problem ? `SPECIFIC PROBLEM CONTEXT:
+Title: ${problem.title}
+Description: ${problem.description}
+Difficulty: ${problem.difficulty}
+${problem.hints ? `Available Hints: ${problem.hints}` : ''}
+${problem.complexity ? `Time Complexity: ${problem.complexity}` : ''}
+
+Focus your responses on helping with this specific problem rather than general subtopic information.` : ''}
 
 RESPONSE FORMATTING RULES:
 - ALWAYS format responses with proper line breaks
