@@ -182,13 +182,15 @@ Respond as the enthusiastic LOOPAI with proper formatting and engaging personali
       response += '\n\n🔥 **Want to implement this?** I can open a **Code Shell** for you to practice coding this step by step!';
     }
 
-    // Add follow-up prompts if not already present
-    if (!response.includes('What\'s next?') && !response.includes('Next step:')) {
-      const followUps = [
-        'Give me a coding challenge 💻',
-        'Explain this concept deeper 🧠', 
-        'Show me real-world examples 🌍'
-      ];
+    // Always add follow-up prompts to enhance conversation
+    const followUps = [
+      'Give me a coding challenge 💻',
+      'Explain this concept deeper 🧠', 
+      'Show me real-world examples 🌍'
+    ];
+    
+    // Only add if not already present
+    if (!response.includes('Give me a coding challenge') && !response.includes('• ')) {
       response += `\n\n**What's next? 🤔**\n${followUps.map(f => `• ${f}`).join('\n')}`;
     }
 

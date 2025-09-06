@@ -180,9 +180,16 @@ export default function LearnModePage() {
         // Handle code blocks with `code`
         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85em;">$1</code>');
         
-        // Handle follow-up prompts as clickable buttons
-        if (line.startsWith('• ')) {
-          const promptText = line.substring(2).trim();
+        // Handle follow-up prompts as clickable buttons (multiple bullet formats)
+        console.log('Checking line:', JSON.stringify(line)); // Debug: see exact line content
+        const isFollowUpPrompt = line.match(/^[•·*-]\s+/) || line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ');
+        if (isFollowUpPrompt) {
+          // Remove bullet point and any surrounding quotes
+          const promptText = line
+            .replace(/^[•·*-]\s+/, '')
+            .replace(/^["']|["']$/g, '') // Remove quotes from start/end
+            .trim();
+          console.log('✅ Found follow-up prompt:', promptText); // Debug log
           return (
             <button
               key={index}
