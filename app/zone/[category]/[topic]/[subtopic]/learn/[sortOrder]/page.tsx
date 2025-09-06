@@ -30,7 +30,6 @@ export default function LearnModePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Format display names
@@ -68,7 +67,6 @@ export default function LearnModePage() {
     if (!inputMessage.trim() || isLoading) return;
 
     setIsLoading(true);
-    setError(null);
     const userMessage = inputMessage.trim();
     setInputMessage('');
 
@@ -109,7 +107,6 @@ export default function LearnModePage() {
         };
         setMessages(prev => [...prev, aiMessageObj]);
       } else {
-        setError(data.error || 'Failed to get AI response');
         // Add error message as AI response
         const errorMessageObj = { 
           message: '', 
@@ -121,7 +118,6 @@ export default function LearnModePage() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Connection error. Please check your internet connection.');
       // Add error message as AI response
       const errorMessageObj = { 
         message: '', 
@@ -253,10 +249,10 @@ export default function LearnModePage() {
                 <div className="mt-4 text-sm text-gray-600">
                   <p><strong>Try asking me:</strong></p>
                   <ul className="mt-2 space-y-1 text-left max-w-md mx-auto">
-                    <li>• "Explain the basics of {subtopicDisplay}"</li>
-                    <li>• "What should I know before starting?"</li>
-                    <li>• "Walk me through this concept step by step"</li>
-                    <li>• "Show me a simple example"</li>
+                    <li>• &quot;Explain the basics of {subtopicDisplay}&quot;</li>
+                    <li>• &quot;What should I know before starting?&quot;</li>
+                    <li>• &quot;Walk me through this concept step by step&quot;</li>
+                    <li>• &quot;Show me a simple example&quot;</li>
                   </ul>
                 </div>
               </div>
