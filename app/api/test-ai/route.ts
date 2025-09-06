@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     
@@ -30,14 +30,17 @@ export async function GET(request: NextRequest) {
       apiKeyPrefix: apiKey.substring(0, 10) + '...'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API key test error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStatus = (error as { status?: number })?.status;
     
     return NextResponse.json({ 
       success: false,
-      error: error.message,
-      details: error.status ? `Status: ${error.status}` : 'Unknown error',
-      suggestion: error.message.includes('API key') 
+      error: errorMessage,
+      details: errorStatus ? `Status: ${errorStatus}` : 'Unknown error',
+      suggestion: errorMessage.includes('API key') 
         ? 'Check if your API key is valid and has access to Gemini 2.0 Flash'
         : 'Check your internet connection and try again'
     }, { status: 500 });
