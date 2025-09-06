@@ -11,6 +11,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
+import CodeShell from '../../../../../components/CodeShell/CodeShell';
 import styles from './LearnMode.module.css';
 
 interface ChatMessage {
@@ -54,6 +55,8 @@ export default function LearnModePage() {
   const [isTyping, setIsTyping] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
   const [problem, setProblem] = useState<ProblemData | null>(null);
+  const [showCodeShell, setShowCodeShell] = useState(false);
+  const [codeLanguage, setCodeLanguage] = useState('cpp');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check user authentication and get user data
@@ -152,11 +155,14 @@ export default function LearnModePage() {
       .join(' ');
   };
 
-  // Format AI response to handle line breaks and bold text
+  // Format AI response to handle line breaks, bold text, and Code Shell buttons
   const formatAIResponse = (text: string) => {
     if (!text) return '';
     
-    return text
+    const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
+    const hasFollowUp = text.includes("What's next?") || text.includes('• ');
+    
+    const formattedContent = text
       .split('\n')
       .map((line, index) => {
         if (line.trim() === '') {
@@ -171,10 +177,52 @@ export default function LearnModePage() {
         // Handle code blocks with `code`
         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85em;">$1</code>');
         
+        // Handle follow-up prompts as clickable buttons
+        if (line.startsWith('• ')) {
+          const promptText = line.substring(2).trim();
+          return (
+            <button
+              key={index}
+              className={styles.followUpPrompt}
+              onClick={() => handlePromptClick(promptText)}
+            >
+              {promptText}
+            </button>
+          );
+        }
+        
         return (
           <div key={index} dangerouslySetInnerHTML={{ __html: formattedLine }} style={{ marginBottom: '0.5rem' }} />
         );
       });
+
+    return (
+      <div>
+        {formattedContent}
+        {hasCodeShell && (
+          <div className={styles.codeShellActions}>
+            <button 
+              className={styles.codeShellButton}
+              onClick={() => handleOpenCodeShell('cpp')}
+            >
+              🔥 Open Code Shell (C++)
+            </button>
+            <button 
+              className={styles.codeShellButton}
+              onClick={() => handleOpenCodeShell('java')}
+            >
+              ☕ Open Code Shell (Java)
+            </button>
+            <button 
+              className={styles.codeShellButton}
+              onClick={() => handleOpenCodeShell('python')}
+            >
+              🐍 Open Code Shell (Python)
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Typing animation effect with faster speed and smoother animation
@@ -300,6 +348,30 @@ export default function LearnModePage() {
   const handlePromptClick = (prompt: string) => {
     setInputMessage(prompt);
     // Auto-send the message
+    setTimeout(() => {
+      if (!isLoading) {
+        sendMessage();
+      }
+    }, 100);
+  };
+
+  // CodeShell handlers
+  const handleOpenCodeShell = (language: string = 'cpp') => {
+    setCodeLanguage(language);
+    setShowCodeShell(true);
+  };
+
+  const handleCloseCodeShell = () => {
+    setShowCodeShell(false);
+  };
+
+  const handleSubmitCode = async (code: string) => {
+    // Send the code to AI for review
+    const codeReviewMessage = `Here's my ${codeLanguage} code for review:\n\n\`\`\`${codeLanguage}\n${code}\n\`\`\`\n\nPlease review my code and provide feedback!`;
+    setInputMessage(codeReviewMessage);
+    setShowCodeShell(false);
+    
+    // Auto-send the code review message
     setTimeout(() => {
       if (!isLoading) {
         sendMessage();
@@ -550,6 +622,17 @@ export default function LearnModePage() {
           </div>
         </div>
       </main>
+
+      {/* Code Shell Modal */}
+      {showCodeShell && problem && (
+        <CodeShell
+          language={codeLanguage}
+          problemTitle={problem.title}
+          problemDescription={problem.description}
+          onSubmitCode={handleSubmitCode}
+          onClose={handleCloseCodeShell}
+        />
+      )}
     </div>
   );
 }
