@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import CodeShell from '../../../../../../components/CodeShell/CodeShell';
+import NotesPanel from '../../../../../../components/NotesPanel/NotesPanel';
 import styles from './LearnMode.module.css';
 
 interface ChatMessage {
@@ -265,11 +266,35 @@ export default function LearnModePage() {
         setMessages(prev => [...prev, aiMessageObj]);
         setLatestAIResponse(text); // Track latest AI response for Code Shell context
         setTypingText('');
+        
+        // Extract learning notes from AI response
+        extractNotesFromResponse(text);
       }
     }, typeSpeed);
 
     return () => clearInterval(timer);
   }, []);
+
+  // Extract learning notes from AI response
+  const extractNotesFromResponse = async (aiResponse: string) => {
+    try {
+      await fetch('/api/ai-notes/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: aiResponse,
+          category,
+          topic,
+          subtopic,
+          sortOrder: parseInt(sortOrder)
+        }),
+      });
+    } catch (error) {
+      console.error('Error extracting notes:', error);
+    }
+  };
 
   const categoryDisplay = formatDisplayName(category);
   const topicDisplay = formatDisplayName(topic);
@@ -533,26 +558,15 @@ export default function LearnModePage() {
 
       {/* Main Content */}
       <main className={styles.mainContent}>
-        {/* Left Side - 30% - Future Work Placeholder */}
+        {/* Left Side - 30% - AI Learning Notes */}
         <div className={styles.leftPanel}>
-          <div className={styles.leftPanelContent}>
-            <div className={styles.workInProgressCard}>
-              <div className={styles.wipIconContainer}>
-                <div className={styles.wipIconWrapper}>
-                  <Code className={`w-16 h-16 ${styles.wipIcon}`} />
-                </div>
-              </div>
-              <h3 className={styles.wipTitle}>Work in Progress</h3>
-              <p className={styles.wipDescription}>
-                Advanced AI-powered tools and interactive features will be available here soon.
-              </p>
-              <div className={styles.wipIndicators}>
-                <div className={styles.wipDot}></div>
-                <div className={styles.wipDot}></div>
-                <div className={styles.wipDot}></div>
-              </div>
-            </div>
-          </div>
+          <NotesPanel
+            category={category}
+            topic={topic}
+            subtopic={subtopic}
+            sortOrder={parseInt(sortOrder)}
+            className={styles.notesContainer}
+          />
         </div>
 
         {/* Right Side - 70% - LOOPAI Chat */}
