@@ -86,7 +86,7 @@ export default function LearnModePage() {
   // Fetch specific problem data
   const fetchProblemData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/problems/${sortOrder}`);
+      const response = await fetch(`/api/problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`);
       if (response.ok) {
         const problemData = await response.json();
         setProblem(problemData);
@@ -96,7 +96,7 @@ export default function LearnModePage() {
     } catch (error) {
       console.error('Error fetching problem data:', error);
     }
-  }, [sortOrder]);
+  }, [category, topic, subtopic, sortOrder]);
 
   // Initialize user session and problem data on component mount
   useEffect(() => {
