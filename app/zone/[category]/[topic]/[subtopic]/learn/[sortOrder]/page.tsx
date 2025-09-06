@@ -11,7 +11,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
-import CodeShell from '../../../../../components/CodeShell/CodeShell';
+import CodeShell from '../../../../../../components/CodeShell/CodeShell';
 import styles from './LearnMode.module.css';
 
 interface ChatMessage {
