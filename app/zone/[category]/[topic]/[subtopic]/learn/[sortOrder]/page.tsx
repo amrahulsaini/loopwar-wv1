@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -164,11 +165,62 @@ export default function LearnModePage() {
     
     const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
     
+    // First, handle multi-line code blocks (```code```)
+    const codeBlockRegex = /```([\s\S]*?)```/g;
+    let formattedText = text;
+    const codeBlocks: { placeholder: string; content: React.ReactElement }[] = [];
+    
+    let match;
+    let blockIndex = 0;
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      const codeContent = match[1].trim();
+      const placeholder = `__CODE_BLOCK_${blockIndex}__`;
+      
+      // Detect language from first line if present
+      const lines = codeContent.split('\n');
+      let language = 'text';
+      let actualCode = codeContent;
+      
+      // Check if first line is a language identifier
+      if (lines[0] && lines[0].length < 20 && /^[a-zA-Z]+$/.test(lines[0].trim())) {
+        language = lines[0].trim().toLowerCase();
+        actualCode = lines.slice(1).join('\n');
+      }
+      
+      const codeElement = (
+        <div key={`code-${blockIndex}`} className={styles.codeBlock}>
+          <div className={styles.codeHeader}>
+            <span className={styles.codeLanguage}>{language}</span>
+            <button 
+              className={styles.copyButton}
+              onClick={() => navigator.clipboard.writeText(actualCode)}
+              title="Copy code"
+            >
+              Copy
+            </button>
+          </div>
+          <pre className={styles.codeContent}>
+            <code>{actualCode}</code>
+          </pre>
+        </div>
+      );
+      
+      codeBlocks.push({ placeholder, content: codeElement });
+      formattedText = formattedText.replace(match[0], placeholder);
+      blockIndex++;
+    }
+    
     // Split text into lines and track if we're in the follow-up section
-    const lines = text.split('\n');
+    const lines = formattedText.split('\n');
     let inFollowUpSection = false;
     
     const formattedContent = lines.map((line, index) => {
+        // Check for code block placeholders
+        const codeBlock = codeBlocks.find(block => line.includes(block.placeholder));
+        if (codeBlock) {
+          return codeBlock.content;
+        }
+        
         if (line.trim() === '') {
           return <br key={index} />;
         }
@@ -183,8 +235,8 @@ export default function LearnModePage() {
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
           .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');    // *bold*
         
-        // Handle code blocks with `code`
-        formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85em;">$1</code>');
+        // Handle inline code with `code`
+        formattedLine = formattedLine.replace(/`(.*?)`/g, '<code class="inline-code">$1</code>');
         
         // Only convert to buttons if we're in the follow-up section AND it's a bullet point
         const isBulletPoint = line.match(/^[•·*-]\s+/) || line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ');
