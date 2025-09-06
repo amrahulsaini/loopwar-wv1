@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css'; // Dark theme
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-python';
 import styles from './CodeShell.module.css';
 
 interface CodeShellProps {
@@ -22,6 +27,49 @@ const CodeShell: React.FC<CodeShellProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+
+  // Get Prism language key
+  const getPrismLanguage = () => {
+    switch (language.toLowerCase()) {
+      case 'cpp':
+      case 'c++':
+        return 'cpp';
+      case 'java':
+        return 'java';
+      case 'python':
+        return 'python';
+      default:
+        return 'javascript';
+    }
+  };
+
+  // Initialize code with template
+  useEffect(() => {
+    if (!code) {
+      setCode(getLanguageTemplate());
+    }
+  }, [language]);
+
+  // Update syntax highlighting
+  useEffect(() => {
+    if (preRef.current) {
+      Prism.highlightElement(preRef.current);
+    }
+  }, [code]);
+
+  // Handle scroll sync between textarea and highlighted pre
+  const handleScroll = () => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCode(e.target.value);
+  };
 
   const handleSubmit = async () => {
     if (!code.trim()) {
@@ -260,12 +308,26 @@ solve()`;
         </div>
         
         <div className={styles.codeEditor}>
-          <textarea
-            value={code || getLanguageTemplate()}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder={`Write your ${language} code here...`}
-            className={styles.codeTextarea}
-          />
+          <div className={styles.syntaxHighlightContainer}>
+            <textarea
+              ref={textareaRef}
+              value={code}
+              onChange={handleCodeChange}
+              onScroll={handleScroll}
+              placeholder={`Write your ${language} code here...`}
+              className={styles.codeTextarea}
+              spellCheck={false}
+            />
+            <pre 
+              ref={preRef}
+              className={`${styles.syntaxHighlight} language-${getPrismLanguage()}`}
+              aria-hidden="true"
+            >
+              <code className={`language-${getPrismLanguage()}`}>
+                {code + '\n'}
+              </code>
+            </pre>
+          </div>
         </div>
         
         <div className={styles.actions}>

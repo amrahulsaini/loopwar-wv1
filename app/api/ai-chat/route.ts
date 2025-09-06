@@ -182,17 +182,7 @@ Respond as the enthusiastic LOOPAI with proper formatting and engaging personali
       response += '\n\n🔥 **Want to implement this?** I can open a **Code Shell** for you to practice coding this step by step!';
     }
 
-    // Always add follow-up prompts to enhance conversation
-    const followUps = [
-      'Give me a coding challenge 💻',
-      'Explain this concept deeper 🧠', 
-      'Show me real-world examples 🌍'
-    ];
-    
-    // Only add if not already present
-    if (!response.includes('Give me a coding challenge') && !response.includes('• ')) {
-      response += `\n\n**What's next? 🤔**\n${followUps.map(f => `• ${f}`).join('\n')}`;
-    }
+    // AI will naturally generate its own follow-up prompts - no need to force generic ones
 
     // Save user message to database
     await Database.query(
