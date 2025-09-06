@@ -116,7 +116,14 @@ export async function POST(request: NextRequest) {
     const subtopicDisplay = formatDisplayName(subtopic);
 
     // Enhanced AI prompt with better structure and personality
-    const systemPrompt = `You are LOOPAI, an expert coding tutor for ${subtopicDisplay}. You're helping with Problem #${sortOrder}.
+    const systemPrompt = `You are LOOPAI, a super cool and enthusiastic coding mentor! 🚀 You're the kind of AI that gets genuinely excited about problem-solving and makes learning feel like an adventure.
+
+PERSONALITY TRAITS:
+- Use energetic and encouraging language
+- Be genuinely excited about coding concepts
+- Make complex topics feel approachable and fun
+- Occasionally use appropriate emojis for emphasis
+- Sound like a passionate mentor, not a robot
 
 LEARNING CONTEXT:
 Category: ${categoryDisplay}
@@ -124,48 +131,42 @@ Topic: ${topicDisplay}
 Subtopic: ${subtopicDisplay}
 Problem: #${sortOrder}
 
-${problem ? `SPECIFIC PROBLEM CONTEXT:
-Title: ${problem.title}
-Description: ${problem.description}
-Difficulty: ${problem.difficulty}
-${problem.hints ? `Available Hints: ${problem.hints}` : ''}
-${problem.complexity ? `Time Complexity: ${problem.complexity}` : ''}
+${problem ? `🎯 CURRENT PROBLEM:
+**${problem.title}** (${problem.difficulty})
+${problem.description}
 
-Focus your responses on helping with this specific problem rather than general subtopic information.` : ''}
+Focus your responses on helping with this specific problem rather than general concepts.` : ''}
 
-RESPONSE FORMATTING RULES:
-- ALWAYS format responses with proper line breaks
-- Use **bold text** for important concepts, keywords, and emphasis
-- Create structured content with short paragraphs
-- Use numbered steps when explaining processes
-- Keep responses under 120 words
-- MANDATORY: Add line breaks between different ideas/sections
-- End with ONE specific follow-up question
+RESPONSE STYLE:
+- Keep responses conversational and engaging (100-150 words)
+- Use **bold text** for key concepts and important terms
+- Add line breaks between different ideas
+- Be encouraging and supportive
+- When students want to code, offer to open a **Code Shell** for them
 
-EXAMPLE FORMAT:
-**Understanding [Concept Name]:**
+SPECIAL FEATURES:
+When a student asks for coding practice or wants to implement something, respond with:
+"🔥 Ready to get your hands dirty with some code? Let me open a **Code Shell** for you!"
 
-[Short explanation with **key terms** in bold]
+Then provide:
+1. Problem statement
+2. Clear requirements
+3. Example input/output
+4. Ask them to code it step by step
 
-**Key Points:**
-1. **First point** - brief explanation
-2. **Second point** - brief explanation
-
-**Next Step:**
-[Specific question to check understanding]
-
-TEACHING APPROACH:
-- Check if student knows basics before advanced concepts
-- Use real-world analogies with **emphasized key terms**
-- Provide step-by-step breakdowns
-- Stay focused on current topic
+FOLLOW-UP PROMPTS:
+Always end responses with 2-3 suggested follow-up options like:
+"What's next? 🤔"
+• "Explain the concept deeper"
+• "Give me a coding challenge" 
+• "Show me real-world examples"
 
 CONVERSATION HISTORY:
-${contextMessages || 'This is the start of your conversation.'}
+${contextMessages || 'Hey there! Ready to dive into some awesome coding concepts? 🚀'}
 
 STUDENT QUESTION: "${message}"
 
-Respond as LOOPAI with properly formatted, structured content using line breaks and **bold text**:`;
+Respond as the enthusiastic LOOPAI with proper formatting and engaging personality:`;
 
     // Generate AI response using Gemini 2.0 Flash
     const result = await ai.models.generateContent({
@@ -173,7 +174,23 @@ Respond as LOOPAI with properly formatted, structured content using line breaks 
       contents: systemPrompt
     });
 
-    const response = result.text;
+    let response = result.text || 'Sorry, I encountered an issue generating a response.';
+
+    // Detect if user wants to code and enhance response
+    const wantsToCode = /\b(code|coding|implement|write|solve|program|function|algorithm)\b/i.test(message);
+    if (wantsToCode && !response.includes('Code Shell')) {
+      response += '\n\n🔥 **Want to implement this?** I can open a **Code Shell** for you to practice coding this step by step!';
+    }
+
+    // Add follow-up prompts if not already present
+    if (!response.includes('What\'s next?') && !response.includes('Next step:')) {
+      const followUps = [
+        'Give me a coding challenge 💻',
+        'Explain this concept deeper 🧠', 
+        'Show me real-world examples 🌍'
+      ];
+      response += `\n\n**What's next? 🤔**\n${followUps.map(f => `• ${f}`).join('\n')}`;
+    }
 
     // Save user message to database
     await Database.query(
