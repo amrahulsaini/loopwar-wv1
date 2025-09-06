@@ -2,19 +2,20 @@
 .notesPanel {
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: #ffffff !important;
   border-left: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
   min-height: 400px; /* Ensure minimum height for visibility */
+  color: #000000 !important; /* Force dark text on white background */
 }
 
 .header {
   padding: 16px 20px;
   border-bottom: 1px solid #e0e0e0;
-  background: #ffffff;
+  background: #ffffff !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,7 +28,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #000000;
+  color: #000000 !important;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -464,72 +465,5 @@
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .notesPanel {
-    background: #1a1a1a;
-    border-left-color: #333333;
-  }
-  
-  .header {
-    background: #1a1a1a;
-    border-bottom-color: #333333;
-  }
-  
-  .header h3 {
-    color: #ffffff;
-  }
-  
-  .refreshBtn {
-    border-color: #333333;
-    color: #cccccc;
-    background: transparent;
-  }
-  
-  .refreshBtn:hover {
-    background: #2a2a2a;
-    border-color: #444444;
-    color: #ffffff;
-  }
-  
-  .sectionHeader {
-    background: #1a1a1a;
-    color: #ffffff;
-  }
-  
-  .sectionHeader:hover {
-    background: #2a2a2a;
-  }
-  
-  .sectionContent {
-    background: #1a1a1a;
-  }
-  
-  .definitionItem, .analogyItem, .exampleItem {
-    background: #252525;
-  }
-  
-  .insightItem {
-    background: #2a2a1a;
-  }
-  
-  .personalNotesContent {
-    background: #252525;
-  }
-  
-  .personalNotesTextarea {
-    background: #1a1a1a;
-    border-color: #333333;
-    color: #ffffff;
-  }
-  
-  .statsFooter {
-    background: #222222;
-    border-top-color: #333333;
-  }
-  
-  .statsList span {
-    background: #1a1a1a;
-    border-color: #333333;
-  }
-}
+/* Force Light Theme - No Dark Mode Override */
+/* Ensuring consistent white theme across all devices regardless of system preferences */

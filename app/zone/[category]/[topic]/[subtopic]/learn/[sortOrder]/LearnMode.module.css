@@ -239,7 +239,7 @@
 /* Left Panel - 30% */
 .leftPanel {
     width: 30%;
-    background: #ffffff;
+    background: #ffffff !important;
     border-right: 1px solid var(--color-border);
     padding: 0;
     position: relative;
