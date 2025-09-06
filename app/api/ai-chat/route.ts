@@ -200,14 +200,33 @@ LEARNING CONTEXT:
 CONVERSATION HISTORY:
 ${contextMessages || 'Fresh conversation - no previous context.'}
 
-RESPONSE GUIDELINES:
-✅ Choose 2-4 sections that BEST FIT the user's question
-✅ Use appropriate emoji headers based on the context
-✅ Keep each section to 2-3 short bullet points
+SMART RESPONSE STRATEGY:
+✅ ANALYZE the user's question TYPE and choose perfect sections
+✅ Use appropriate emoji headers based on what they're asking
+✅ Keep each section to 2-3 short bullet points maximum
 ✅ Use simple language, no complex paragraphs
-✅ Generate specific follow-ups related to their exact question
+✅ Generate 3 CLICKABLE follow-up questions (not statements)
 
-AVAILABLE SECTION TYPES (choose what fits best):
+INTELLIGENT SECTION SELECTION (choose what fits their question):
+🎯 **Quick Answer** - "what is", "how does", direct questions
+💡 **Breaking it down** - complex concepts, algorithms needing explanation
+🔍 **Real example** - when they need to see it in action
+🔥 **Your turn** - practice, coding, implementation tasks
+⚠️ **Common mistakes** - debugging, "why doesn't this work", pitfalls
+💭 **Think deeper** - conceptual understanding, "how it really works"
+🚀 **Advanced stuff** - optimizations, edge cases, interview prep
+🛠️ **Let's code** - when they want to implement/practice coding
+📚 **What's next?** - ALWAYS include with 3 clickable follow-up questions
+
+FORMAT RULES:
+- Use bullet points (•) instead of asterisks (**)
+- Keep explanations short and simple
+- Make follow-ups as clickable questions (not statements)
+- Choose sections intelligently based on question type
+
+QUESTION ANALYSIS: "${message}"
+
+Analyze their question type and respond with the most helpful sections!
 🎯 **Quick Answer** - for direct questions needing immediate answers
 💡 **Let me break this down** - for complex concepts needing explanation
 🔍 **Here's an example** - when examples would help understanding

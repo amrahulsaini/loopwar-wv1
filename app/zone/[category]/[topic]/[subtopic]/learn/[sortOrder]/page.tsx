@@ -317,71 +317,53 @@ export default function LearnModePage() {
     );
   };
 
-  // Enhanced typing animation with instant structured headers
-  const typeMessageWithSpeed = useCallback((text: string, speed: number = 8) => {
+  // Smooth progressive display like Grok (no typing animation)
+  const displayResponseSmoothly = useCallback((text: string) => {
+    // Split response into sections for smooth display
+    const sections = text.split(/(?=🎯|💡|🔍|🔥|⚠️|💭|🚀|🛠️|📚)/);
+    
     setIsTyping(true);
     setTypingText('');
     
-    // Parse structured response to show headers immediately
-    const isStructuredResponse = text.includes('<div class="response-section">') || 
-                                 text.includes('<h4>') || 
-                                 text.includes('<lucide-');
-    
-    if (isStructuredResponse) {
-      // For structured responses, show the full format immediately for better UX
-      setTypingText(text);
-      setIsTyping(false);
-      
-      // Add the message immediately
-      const aiMessageObj = { 
-        message: '', 
-        response: text, 
-        message_type: 'ai' as const, 
-        created_at: new Date().toISOString() 
-      };
-      setMessages(prev => [...prev, aiMessageObj]);
-      setLatestAIResponse(text);
-      setTypingText('');
-      
-      // Update conversation context
-      setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
-      return;
-    }
-    
-    // Regular typing animation for non-structured responses
-    let index = 0;
-    
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setTypingText(prev => prev + text.charAt(index));
-        index++;
-      } else {
-        clearInterval(timer);
-        setIsTyping(false);
+    // Display sections progressively with smooth timing
+    sections.forEach((section, index) => {
+      setTimeout(() => {
+        setTypingText(prev => prev + section);
         
-        // Add the final message to the messages array
-        const aiMessageObj = { 
-          message: '', 
-          response: text, 
-          message_type: 'ai' as const, 
-          created_at: new Date().toISOString() 
-        };
-        setMessages(prev => [...prev, aiMessageObj]);
-        setLatestAIResponse(text);
-        setTypingText('');
-        
-        // Update conversation context with AI response
-        setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
+        // If last section, complete the message
+        if (index === sections.length - 1) {
+          setTimeout(() => {
+            setIsTyping(false);
+            
+            // Add the final message to the messages array
+            const aiMessageObj = { 
+              message: '', 
+              response: text, 
+              message_type: 'ai' as const, 
+              created_at: new Date().toISOString() 
+            };
+            setMessages(prev => [...prev, aiMessageObj]);
+            setLatestAIResponse(text);
+            setTypingText('');
+            
+            // Update conversation context
+            setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
+          }, 200); // Small delay before finalizing
+        }
+      }, index * 300); // 300ms between sections for smooth flow
+    });
   }, []);
 
-  // Backward compatibility - original typing function
+  // Backward compatibility - use smooth display instead of typing
   const typeMessage = useCallback((text: string) => {
-    return typeMessageWithSpeed(text, 8);
-  }, [typeMessageWithSpeed]);
+    return displayResponseSmoothly(text);
+  }, [displayResponseSmoothly]);
+
+  // Enhanced smooth display (replaces old typing function)
+  const typeMessageWithSpeed = useCallback((text: string, speed: number = 8) => {
+    // Ignore speed parameter, use smooth display for all responses
+    return displayResponseSmoothly(text);
+  }, [displayResponseSmoothly]);
 
   const categoryDisplay = formatDisplayName(category);
   const topicDisplay = formatDisplayName(topic);
@@ -465,19 +447,18 @@ export default function LearnModePage() {
           setResponseQuality('detailed');
         }
 
-        // Use typing animation for AI response with adaptive speed
-        const typingSpeed = responseTime > 3000 ? 4 : 8; // Faster typing for slower responses
-        typeMessageWithSpeed(data.response, typingSpeed);
+        // Use smooth progressive display like Grok (no typing animation)
+        displayResponseSmoothly(data.response);
       } else {
-        // Add error message as AI response with typing animation
+        // Add error message with smooth display
         const errorMessage = `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`;
-        typeMessage(errorMessage);
+        displayResponseSmoothly(errorMessage);
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Add error message as AI response with typing animation
+      // Add error message with smooth display
       const errorMessage = "I'm experiencing connection issues. Please make sure you're connected to the internet and try again.";
-      typeMessage(errorMessage);
+      displayResponseSmoothly(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -490,15 +471,18 @@ export default function LearnModePage() {
     }
   };
 
-  // Handle predefined prompt clicks
+  // Handle predefined prompt clicks - send directly to AI
   const handlePromptClick = (prompt: string) => {
+    if (isLoading) return; // Prevent spam clicks during loading
+    
     setInputMessage(prompt);
-    // Auto-send the message
+    
+    // Send immediately without delay
     setTimeout(() => {
       if (!isLoading) {
         sendMessage();
       }
-    }, 100);
+    }, 50); // Minimal delay just to ensure state update
   };
 
   // CodeShell handlers
