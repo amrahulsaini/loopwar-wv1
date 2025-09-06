@@ -156,7 +156,7 @@ Then provide:
 
 FOLLOW-UP PROMPTS:
 Always end responses with 2-3 suggested follow-up options like:
-"What's next? 🤔"
+"**What's next? 🤔**"
 • "Explain the concept deeper"
 • "Give me a coding challenge" 
 • "Show me real-world examples"

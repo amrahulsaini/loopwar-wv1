@@ -58,6 +58,8 @@ export default function LearnModePage() {
   const [showCodeShell, setShowCodeShell] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState('cpp');
   const [latestAIResponse, setLatestAIResponse] = useState('');
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showProblemTooltip, setShowProblemTooltip] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check user authentication and get user data
@@ -232,7 +234,7 @@ export default function LearnModePage() {
     setTypingText('');
     
     let index = 0;
-    const typeSpeed = 15; // Faster typing speed (was 30)
+    const typeSpeed = 8; // Much faster typing speed
     
     const timer = setInterval(() => {
       if (index < text.length) {
@@ -381,6 +383,28 @@ export default function LearnModePage() {
     }, 100);
   };
 
+  // Full screen handlers
+  const handleFullScreen = () => {
+    if (!isFullScreen) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+    setIsFullScreen(!isFullScreen);
+  };
+
+  // Handle fullscreen change events
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    };
+  }, []);
+
   // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -440,7 +464,31 @@ export default function LearnModePage() {
                 <ChevronRight className="w-4 h-4 text-purple-400" />
                 <span className={styles.breadcrumbItem}>{subtopicDisplay}</span>
                 <ChevronRight className="w-4 h-4 text-purple-400" />
-                <span className={styles.breadcrumbActive}>LOOPAI Workspace</span>
+                <div className={styles.problemNameContainer}>
+                  <span 
+                    className={styles.breadcrumbActive}
+                    onMouseEnter={() => setShowProblemTooltip(true)}
+                    onMouseLeave={() => setShowProblemTooltip(false)}
+                  >
+                    {problem ? problem.title : 'LOOPAI Workspace'}
+                  </span>
+                  {showProblemTooltip && problem && (
+                    <div className={styles.problemTooltip}>
+                      <h4>{problem.title}</h4>
+                      <p className={styles.problemDescription}>{problem.description}</p>
+                      <span className={`${styles.difficultyBadge} ${styles[problem.difficulty.toLowerCase()]}`}>
+                        {problem.difficulty}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <button 
+                  className={styles.fullScreenButton}
+                  onClick={handleFullScreen}
+                  title={isFullScreen ? 'Exit Full Screen' : 'Enter Full Screen'}
+                >
+                  {isFullScreen ? '🗗' : '🗖'}
+                </button>
               </div>
             </div>
 
