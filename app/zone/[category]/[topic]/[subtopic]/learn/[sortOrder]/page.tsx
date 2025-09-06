@@ -8,7 +8,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
   Send,
-  ChevronRight
+  ChevronRight,
+  Zap,
+  BookOpen
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import CodeShell from '../../../../../../components/CodeShell/CodeShell';
@@ -165,21 +167,14 @@ export default function LearnModePage() {
       .join(' ');
   };
 
-  // Format AI response to handle new structured format with Lucide icons
+  // Format AI response to handle new structured format with emojis (not Lucide icons)
   const formatAIResponse = (text: string) => {
     if (!text) return '';
     
     const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
     
-    // Handle the new structured format with Lucide icons
+    // Keep text as-is with emojis, no need to replace with Lucide icons
     let formattedText = text;
-    
-    // Replace Lucide icon placeholders with actual React components
-    formattedText = formattedText
-      .replace(/<lucide-target class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>')
-      .replace(/<lucide-lightbulb class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21h6"/><path d="M12 17v4"/><path d="M12 3a5 5 0 0 1 4.88 6.09A3 3 0 0 1 15 16H9a3 3 0 0 1-1.88-6.91A5 5 0 0 1 12 3z"/></svg>')
-      .replace(/<lucide-zap class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/></svg>')
-      .replace(/<lucide-message-circle class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
     
     // First, handle multi-line code blocks (```code```)
     const codeBlockRegex = /```([\s\S]*?)```/g;
@@ -777,14 +772,14 @@ export default function LearnModePage() {
                   onClick={() => setResponseQuality('fast')}
                   title="Faster, concise responses"
                 >
-                  ⚡ Fast
+                  <Zap className="w-4 h-4" /> Fast
                 </button>
                 <button 
                   className={`${styles.modeBtn} ${responseQuality === 'detailed' ? styles.active : ''}`}
                   onClick={() => setResponseQuality('detailed')}
                   title="Detailed, comprehensive responses"
                 >
-                  📚 Detailed
+                  <BookOpen className="w-4 h-4" /> Detailed
                 </button>
               </div>
               {lastResponseTime > 0 && (

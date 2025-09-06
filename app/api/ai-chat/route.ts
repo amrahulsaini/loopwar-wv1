@@ -40,16 +40,8 @@ function enhanceAIResponse(response: string, userMessage: string, problem: Probl
     enhancedResponse += '\n\n🔥 **Ready to practice?** I can open a **Code Shell** for you to implement this step by step!';
   }
 
-  // Add problem-specific context if available
-  if (problem && !response.includes(problem.title)) {
-    const isRelevantToProblem = response.toLowerCase().includes('problem') || 
-                               response.toLowerCase().includes('solve') ||
-                               response.toLowerCase().includes('implement');
-    
-    if (isRelevantToProblem) {
-      enhancedResponse += `\n\n💡 **Remember**: We're working on "${problem.title}" - everything we discuss helps build toward solving this ${problem.difficulty} level challenge!`;
-    }
-  }
+  // Remove the repeated "Remember" line - context is already in system prompt
+  // No longer adding problem-specific context to avoid repetition
 
   // Ensure response has proper formatting
   if (!enhancedResponse.includes('**')) {
@@ -208,30 +200,22 @@ LEARNING CONTEXT:
 CONVERSATION HISTORY:
 ${contextMessages || 'Fresh conversation - no previous context.'}
 
-RESPONSE FORMAT (Use these EXACT headers with HTML for icons):
-<div class="response-section">
-<h4><lucide-target class="icon" /> Quick Answer</h4>
+RESPONSE FORMAT (Use these EXACT headers with emojis):
+🎯 **Quick Answer**
 [Give the main answer in 1-2 short sentences. Use simple words.]
-</div>
 
-<div class="response-section">
-<h4><lucide-lightbulb class="icon" /> Let Me Explain More</h4>
+💡 **Let Me Explain More**
 [Break it down further. Use bullet points or short lines, not long paragraphs.]
 [Ask: "Does this make sense so far?" or "Want me to go deeper?"]
-</div>
 
-<div class="response-section">
-<h4><lucide-zap class="icon" /> Try This Next</h4>
+🔥 **Try This Next**
 [Give ONE specific thing to do. If coding - mention Code Shell.]
-</div>
 
-<div class="response-section">
-<h4><lucide-message-circle class="icon" /> What Would You Like?</h4>
+📚 **What Would You Like?**
 Generate 3 SPECIFIC follow-ups based on their EXACT question and current context:
 • [Something directly related to what they just asked]
 • [A practical next step or example]
 • [Something to deepen understanding or practice]
-</div>
 
 RESPONSE RULES:
 ✅ Use bullet points, not paragraphs
