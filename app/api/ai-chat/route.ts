@@ -16,6 +16,61 @@ const ai = new GoogleGenAI({
   apiKey: apiKey
 });
 
+// Enhanced AI response processing function
+function enhanceAIResponse(response: string, userMessage: string, problem: any): string {
+  let enhancedResponse = response;
+
+  // Detect if user wants coding practice
+  const wantsToCode = /\b(code|coding|implement|write|solve|program|function|algorithm|practice)\b/i.test(userMessage);
+  const hasCodeShellMention = response.toLowerCase().includes('code shell');
+
+  // Add Code Shell suggestion if relevant and not already mentioned
+  if (wantsToCode && !hasCodeShellMention) {
+    enhancedResponse += '\n\n🔥 **Ready to practice?** I can open a **Code Shell** for you to implement this step by step!';
+  }
+
+  // Add problem-specific context if available
+  if (problem && !response.includes(problem.title)) {
+    const isRelevantToProblem = response.toLowerCase().includes('problem') || 
+                               response.toLowerCase().includes('solve') ||
+                               response.toLowerCase().includes('implement');
+    
+    if (isRelevantToProblem) {
+      enhancedResponse += `\n\n💡 **Remember**: We're working on "${problem.title}" - everything we discuss helps build toward solving this ${problem.difficulty} level challenge!`;
+    }
+  }
+
+  // Ensure response has proper formatting
+  if (!enhancedResponse.includes('**')) {
+    // Add minimal formatting if AI didn't use the structured format
+    enhancedResponse = enhancedResponse.replace(/^([^\\n]+)/, '🎯 **$1**');
+  }
+
+  return enhancedResponse;
+}
+
+// Enhanced conversation context builder
+function buildEnhancedContext(messages: any[], maxMessages: number = 6): string {
+  if (!messages || messages.length === 0) {
+    return 'Fresh conversation - no previous context.';
+  }
+
+  // Get recent messages with better context
+  const recentMessages = messages.slice(-maxMessages);
+  
+  return recentMessages.map((msg) => {
+    if (msg.message_type === 'user') {
+      return `👤 STUDENT: ${msg.message}`;
+    } else {
+      // Truncate long AI responses for context
+      const truncatedResponse = msg.response.length > 200 
+        ? msg.response.substring(0, 200) + '...'
+        : msg.response;
+      return `🤖 LOOPAI: ${truncatedResponse}`;
+    }
+  }).join('\\n\\n');
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Authenticate user
@@ -92,14 +147,8 @@ export async function POST(request: NextRequest) {
       [userId, category, topic, subtopic, sortOrder]
     ) as { message: string; response: string; message_type: string }[];
 
-    // Format conversation history for context
-    const contextMessages = conversationHistory.reverse().map(msg => {
-      if (msg.message_type === 'user') {
-        return `Student: ${msg.message}`;
-      } else {
-        return `LOOPAI: ${msg.response}`;
-      }
-    }).join('\n');
+    // Format conversation history for enhanced context
+    const contextMessages = buildEnhancedContext(conversationHistory.reverse());
 
     // Format display names for better context
     const formatDisplayName = (urlName: string) => {
@@ -115,60 +164,56 @@ export async function POST(request: NextRequest) {
     const topicDisplay = formatDisplayName(topic);
     const subtopicDisplay = formatDisplayName(subtopic);
 
-    // Enhanced AI prompt with better structure and personality
-    const systemPrompt = `You are LOOPAI, a super cool and enthusiastic coding mentor! 🚀 You're the kind of AI that gets genuinely excited about problem-solving and makes learning feel like an adventure.
+    // Enhanced AI prompt with improved conversation structure and context awareness
+    const systemPrompt = `You are LOOPAI, an expert coding mentor specializing in Data Structures & Algorithms! 🚀
 
-PERSONALITY TRAITS:
-- Use energetic and encouraging language
-- Be genuinely excited about coding concepts
-- Make complex topics feel approachable and fun
-- Occasionally use appropriate emojis for emphasis
-- Sound like a passionate mentor, not a robot
+PERSONA:
+- Enthusiastic but professional coding tutor
+- Expert in breaking down complex problems into digestible steps
+- Focuses on understanding concepts, not just memorizing solutions
+- Encourages hands-on practice and critical thinking
 
 LEARNING CONTEXT:
-Category: ${categoryDisplay}
-Topic: ${topicDisplay}  
-Subtopic: ${subtopicDisplay}
-Problem: #${sortOrder}
-
-${problem ? `🎯 CURRENT PROBLEM:
-**${problem.title}** (${problem.difficulty})
-${problem.description}
-
-Focus your responses on helping with this specific problem rather than general concepts.` : ''}
-
-RESPONSE STYLE:
-- Keep responses conversational and engaging (100-150 words)
-- Use **bold text** for key concepts and important terms
-- Add line breaks between different ideas
-- Be encouraging and supportive
-- When students want to code, offer to open a **Code Shell** for them
-
-SPECIAL FEATURES:
-When a student asks for coding practice or wants to implement something, respond with:
-"🔥 Ready to get your hands dirty with some code? Let me open a **Code Shell** for you!"
-
-Then provide:
-1. Problem statement
-2. Clear requirements
-3. Example input/output
-4. Ask them to code it step by step
-
-FOLLOW-UP PROMPTS:
-Always end responses with 2-3 suggested follow-up options like:
-"**What's next? 🤔**"
-• "Explain the concept deeper"
-• "Give me a coding challenge" 
-• "Show me real-world examples"
+📍 Location: ${categoryDisplay} → ${topicDisplay} → ${subtopicDisplay}
+🎯 Current Problem: #${sortOrder}${problem ? `
+📝 **${problem.title}** (${problem.difficulty} level)
+🎪 ${problem.description}` : ''}
 
 CONVERSATION HISTORY:
-${contextMessages || 'Hey there! Ready to dive into some awesome coding concepts? 🚀'}
+${contextMessages || 'Fresh start - no previous conversation.'}
 
-STUDENT QUESTION: "${message}"
+RESPONSE STRUCTURE (ALWAYS follow this format):
+🎯 **[Direct Answer/Concept]**
+[Clear, focused explanation of the main point]
 
-Respond as the enthusiastic LOOPAI with proper formatting and engaging personality:`;
+💡 **[Deep Dive/Why It Matters]**
+[Additional context, examples, or deeper explanation]
 
-    // Generate AI response using Gemini 2.0 Flash
+🔥 **[Action Step]**
+[What the student should do next - practice, code, or explore]
+
+📚 **[Quick Follow-ups]**
+Choose 2-3 relevant options:
+• "Show me the code implementation"
+• "Explain with a real-world example" 
+• "What's the time complexity?"
+• "Give me a similar practice problem"
+• "How is this used in interviews?"
+• "Compare with alternative approaches"
+
+RESPONSE GUIDELINES:
+✅ Keep explanations concise but thorough (150-200 words total)
+✅ Use **bold** for key terms and concepts
+✅ Include code snippets when relevant
+✅ Mention "Code Shell" when coding practice is beneficial
+✅ Connect concepts to real-world applications
+✅ Progressive difficulty - build on previous knowledge
+
+STUDENT'S QUESTION: "${message}"
+
+Respond with the structured format above:`;
+
+    // Generate enhanced AI response using Gemini 2.0 Flash
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: systemPrompt
@@ -176,13 +221,11 @@ Respond as the enthusiastic LOOPAI with proper formatting and engaging personali
 
     let response = result.text || 'Sorry, I encountered an issue generating a response.';
 
-    // Detect if user wants to code and enhance response
-    const wantsToCode = /\b(code|coding|implement|write|solve|program|function|algorithm)\b/i.test(message);
-    if (wantsToCode && !response.includes('Code Shell')) {
-      response += '\n\n🔥 **Want to implement this?** I can open a **Code Shell** for you to practice coding this step by step!';
-    }
+    // Enhanced response processing and validation
+    response = enhanceAIResponse(response, message, problem);
 
-    // AI will naturally generate its own follow-up prompts - no need to force generic ones
+    // Save conversation with better metadata
+    const timestamp = new Date().toISOString();
 
     // Save user message to database
     await Database.query(

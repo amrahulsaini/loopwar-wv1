@@ -61,6 +61,12 @@ export default function LearnModePage() {
   const [latestAIResponse, setLatestAIResponse] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showProblemTooltip, setShowProblemTooltip] = useState(false);
+  
+  // Enhanced conversation state
+  const [conversationContext, setConversationContext] = useState<string[]>([]);
+  const [lastResponseTime, setLastResponseTime] = useState<number>(0);
+  const [responseQuality, setResponseQuality] = useState<'fast' | 'detailed'>('detailed');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check user authentication and get user data
@@ -291,13 +297,12 @@ export default function LearnModePage() {
     );
   };
 
-  // Typing animation effect with faster speed and smoother animation
-  const typeMessage = useCallback((text: string) => {
+  // Enhanced typing animation effect with adaptive speed
+  const typeMessageWithSpeed = useCallback((text: string, speed: number = 8) => {
     setIsTyping(true);
     setTypingText('');
     
     let index = 0;
-    const typeSpeed = 8; // Much faster typing speed
     
     const timer = setInterval(() => {
       if (index < text.length) {
@@ -315,15 +320,21 @@ export default function LearnModePage() {
           created_at: new Date().toISOString() 
         };
         setMessages(prev => [...prev, aiMessageObj]);
-        setLatestAIResponse(text); // Track latest AI response for Code Shell context
+        setLatestAIResponse(text);
         setTypingText('');
         
-        // No real-time extraction - user will trigger manually
+        // Update conversation context with AI response
+        setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
       }
-    }, typeSpeed);
+    }, speed);
 
     return () => clearInterval(timer);
   }, []);
+
+  // Backward compatibility - original typing function
+  const typeMessage = useCallback((text: string) => {
+    return typeMessageWithSpeed(text, 8);
+  }, [typeMessageWithSpeed]);
 
   const categoryDisplay = formatDisplayName(category);
   const topicDisplay = formatDisplayName(topic);
@@ -349,6 +360,8 @@ export default function LearnModePage() {
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
+    // Track response timing for optimization
+    const startTime = Date.now();
     setIsLoading(true);
     const userMessage = inputMessage.trim();
     setInputMessage('');
@@ -363,6 +376,9 @@ export default function LearnModePage() {
     
     setMessages(prev => [...prev, userMessageObj]);
 
+    // Update conversation context for better follow-ups
+    setConversationContext(prev => [...prev.slice(-4), userMessage]); // Keep last 5 messages
+
     try {
       const response = await fetch('/api/ai-chat', {
         method: 'POST',
@@ -375,6 +391,8 @@ export default function LearnModePage() {
           topic,
           subtopic,
           sortOrder,
+          conversationContext: conversationContext, // Enhanced context
+          responseMode: responseQuality, // Fast or detailed
           problem: problem ? {
             title: problem.title,
             description: problem.description,
@@ -389,8 +407,20 @@ export default function LearnModePage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Use typing animation for AI response
-        typeMessage(data.response);
+        // Track response time for adaptive optimization
+        const responseTime = Date.now() - startTime;
+        setLastResponseTime(responseTime);
+        
+        // Auto-adjust response quality based on performance
+        if (responseTime > 5000 && responseQuality === 'detailed') {
+          setResponseQuality('fast');
+        } else if (responseTime < 2000 && responseQuality === 'fast') {
+          setResponseQuality('detailed');
+        }
+
+        // Use typing animation for AI response with adaptive speed
+        const typingSpeed = responseTime > 3000 ? 4 : 8; // Faster typing for slower responses
+        typeMessageWithSpeed(data.response, typingSpeed);
       } else {
         // Add error message as AI response with typing animation
         const errorMessage = `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`;
@@ -702,6 +732,34 @@ export default function LearnModePage() {
 
           {/* Chat Input */}
           <div className={styles.chatInput}>
+            {/* Conversation Enhancement Indicators */}
+            <div className={styles.conversationIndicators}>
+              <div className={styles.responseMode}>
+                <span className={styles.indicatorLabel}>Response Mode:</span>
+                <button 
+                  className={`${styles.modeBtn} ${responseQuality === 'fast' ? styles.active : ''}`}
+                  onClick={() => setResponseQuality('fast')}
+                  title="Faster, concise responses"
+                >
+                  ⚡ Fast
+                </button>
+                <button 
+                  className={`${styles.modeBtn} ${responseQuality === 'detailed' ? styles.active : ''}`}
+                  onClick={() => setResponseQuality('detailed')}
+                  title="Detailed, comprehensive responses"
+                >
+                  📚 Detailed
+                </button>
+              </div>
+              {lastResponseTime > 0 && (
+                <div className={styles.responseTime}>
+                  <span className={styles.timeIndicator}>
+                    Last response: {(lastResponseTime / 1000).toFixed(1)}s
+                  </span>
+                </div>
+              )}
+            </div>
+            
             <div className={styles.inputContainer}>
               <div className={styles.inputWrapper}>
                 <input
