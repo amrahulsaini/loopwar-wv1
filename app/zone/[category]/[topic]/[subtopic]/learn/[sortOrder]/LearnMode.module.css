@@ -835,25 +835,26 @@
     border-radius: 50%;
     flex-shrink: 0;
     overflow: hidden;
+    /* Add subtle background for SVG visibility */
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    padding: 0.15rem;
 }
 
 .aiAvatar {
     width: 1.75rem;
     height: 1.75rem;
-    background: transparent;  /* No background for LOOPAI icon */
 }
 
 .botAvatar {
     width: 2.5rem;
     height: 2.5rem;
-    background: transparent;  /* No background for LOOPAI icon */
 }
 
 .aiAvatarImage {
-    width: 100%;  /* Full size, no background needed */
-    height: 100%;
+    width: 85%;  /* Slightly smaller to show background */
+    height: 85%;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;  /* Use contain for SVG to prevent cropping */
     object-position: center;
 }
 
