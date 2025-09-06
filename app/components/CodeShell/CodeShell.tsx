@@ -1,70 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CodeShell.module.css';
-
-// Simple syntax highlighting function
-const highlightCode = (code: string, language: string): string => {
-  if (!code) return '';
-
-  let highlighted = code;
-  
-  // Define color mappings for dark theme
-  const colors = {
-    keyword: '#c792ea',
-    string: '#c3e88d',
-    comment: '#546e7a',
-    number: '#f78c6c',
-    function: '#82aaff',
-    type: '#ffcb6b',
-  };
-
-  switch (language.toLowerCase()) {
-    case 'cpp':
-    case 'c++':
-      // Keywords
-      highlighted = highlighted.replace(/\b(int|char|float|double|bool|void|if|else|for|while|do|switch|case|break|continue|return|class|struct|public|private|protected|virtual|static|const|typename|template|namespace|using|include|define|ifdef|ifndef|endif)\b/g, `<span style="color: ${colors.keyword}">$1</span>`);
-      // Strings
-      highlighted = highlighted.replace(/"([^"\\]|\\.)*"/g, `<span style="color: ${colors.string}">$&</span>`);
-      highlighted = highlighted.replace(/'([^'\\]|\\.)*'/g, `<span style="color: ${colors.string}">$&</span>`);
-      // Comments
-      highlighted = highlighted.replace(/\/\/.*$/gm, `<span style="color: ${colors.comment}">$&</span>`);
-      highlighted = highlighted.replace(/\/\*[\s\S]*?\*\//g, `<span style="color: ${colors.comment}">$&</span>`);
-      // Numbers
-      highlighted = highlighted.replace(/\b\d+\.?\d*\b/g, `<span style="color: ${colors.number}">$&</span>`);
-      break;
-
-    case 'java':
-      // Keywords
-      highlighted = highlighted.replace(/\b(public|private|protected|static|final|abstract|class|interface|extends|implements|import|package|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|throws|new|this|super|void|int|char|float|double|boolean|String|Object)\b/g, `<span style="color: ${colors.keyword}">$1</span>`);
-      // Strings
-      highlighted = highlighted.replace(/"([^"\\]|\\.)*"/g, `<span style="color: ${colors.string}">$&</span>`);
-      highlighted = highlighted.replace(/'([^'\\]|\\.)*'/g, `<span style="color: ${colors.string}">$&</span>`);
-      // Comments
-      highlighted = highlighted.replace(/\/\/.*$/gm, `<span style="color: ${colors.comment}">$&</span>`);
-      highlighted = highlighted.replace(/\/\*[\s\S]*?\*\//g, `<span style="color: ${colors.comment}">$&</span>`);
-      // Numbers
-      highlighted = highlighted.replace(/\b\d+\.?\d*\b/g, `<span style="color: ${colors.number}">$&</span>`);
-      break;
-
-    case 'python':
-      // Keywords
-      highlighted = highlighted.replace(/\b(def|class|if|elif|else|for|while|in|import|from|as|return|yield|lambda|try|except|finally|raise|with|pass|break|continue|and|or|not|is|None|True|False|global|nonlocal)\b/g, `<span style="color: ${colors.keyword}">$1</span>`);
-      // Strings
-      highlighted = highlighted.replace(/"""[\s\S]*?"""/g, `<span style="color: ${colors.string}">$&</span>`);
-      highlighted = highlighted.replace(/'''[\s\S]*?'''/g, `<span style="color: ${colors.string}">$&</span>`);
-      highlighted = highlighted.replace(/"([^"\\]|\\.)*"/g, `<span style="color: ${colors.string}">$&</span>`);
-      highlighted = highlighted.replace(/'([^'\\]|\\.)*'/g, `<span style="color: ${colors.string}">$&</span>`);
-      // Comments
-      highlighted = highlighted.replace(/#.*$/gm, `<span style="color: ${colors.comment}">$&</span>`);
-      // Numbers
-      highlighted = highlighted.replace(/\b\d+\.?\d*\b/g, `<span style="color: ${colors.number}">$&</span>`);
-      break;
-
-    default:
-      break;
-  }
-
-  return highlighted;
-};
 
 interface CodeShellProps {
   language: string;
@@ -87,23 +22,6 @@ const CodeShell: React.FC<CodeShellProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const preRef = useRef<HTMLDivElement>(null);
-
-  // Get language for syntax highlighting
-  const getLanguageForHighlighting = () => {
-    switch (language.toLowerCase()) {
-      case 'cpp':
-      case 'c++':
-        return 'cpp';
-      case 'java':
-        return 'java';
-      case 'python':
-        return 'python';
-      default:
-        return 'javascript';
-    }
-  };
 
   // Initialize code with template
   useEffect(() => {
@@ -111,14 +29,6 @@ const CodeShell: React.FC<CodeShellProps> = ({
       setCode(getLanguageTemplate());
     }
   }, [language]);
-
-  // Handle scroll sync between textarea and highlighted pre
-  const handleScroll = () => {
-    if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
-  };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode(e.target.value);
@@ -361,25 +271,13 @@ solve()`;
         </div>
         
         <div className={styles.codeEditor}>
-          <div className={styles.syntaxHighlightContainer}>
-            <textarea
-              ref={textareaRef}
-              value={code}
-              onChange={handleCodeChange}
-              onScroll={handleScroll}
-              placeholder={`Write your ${language} code here...`}
-              className={styles.codeTextarea}
-              spellCheck={false}
-            />
-            <div 
-              ref={preRef}
-              className={styles.syntaxHighlight}
-              aria-hidden="true"
-              dangerouslySetInnerHTML={{ 
-                __html: highlightCode(code, getLanguageForHighlighting()) 
-              }}
-            />
-          </div>
+          <textarea
+            value={code}
+            onChange={handleCodeChange}
+            placeholder={`Write your ${language} code here...`}
+            className={styles.codeTextarea}
+            spellCheck={false}
+          />
         </div>
         
         <div className={styles.actions}>

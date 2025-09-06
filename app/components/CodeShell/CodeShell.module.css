@@ -100,19 +100,14 @@
 }
 
 .codeTextarea {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
+  flex: 1;
+  background: #0d1117;
   border: 2px solid #333;
   border-radius: 8px;
   padding: 15px;
   font-family: 'Fira Code', 'Monaco', 'Consolas', 'SF Mono', monospace;
   font-size: 14px;
-  color: transparent;
-  caret-color: #e6edf3;
+  color: #e6edf3;
   line-height: 1.6;
   resize: none;
   outline: none;
@@ -120,14 +115,8 @@
   tab-size: 4;
   font-weight: 400;
   letter-spacing: 0.5px;
-  z-index: 2;
-  /* IDE-like styling */
-  background-image: 
-    linear-gradient(transparent 0px, transparent 24px, rgba(255,255,255,0.02) 25px, rgba(255,255,255,0.02) 26px, transparent 27px),
-    linear-gradient(90deg, #21262d 0px, #21262d 60px, transparent 61px);
-  background-size: 100% 26px, 100% 100%;
-  background-position: 0 0;
-  background-repeat: repeat, no-repeat;
+  min-height: 400px;
+  width: 100%;
 }
 
 .syntaxHighlight {
@@ -153,6 +142,33 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   color: #e6edf3;
+}
+
+/* Syntax highlighting colors */
+.syntaxHighlight :global(.syntax-keyword) {
+  color: #c792ea;
+  font-weight: 600;
+}
+
+.syntaxHighlight :global(.syntax-string) {
+  color: #c3e88d;
+}
+
+.syntaxHighlight :global(.syntax-comment) {
+  color: #546e7a;
+  font-style: italic;
+}
+
+.syntaxHighlight :global(.syntax-number) {
+  color: #f78c6c;
+}
+
+.syntaxHighlight :global(.syntax-function) {
+  color: #82aaff;
+}
+
+.syntaxHighlight :global(.syntax-type) {
+  color: #ffcb6b;
 }
 
 .codeTextarea:focus {
