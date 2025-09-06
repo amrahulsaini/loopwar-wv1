@@ -76,23 +76,89 @@ export async function POST(request: NextRequest) {
 
     const userId = userResult[0].id;
 
+    // Get previous conversation context (last 10 messages)
+    const conversationHistory = await Database.query(
+      'SELECT message, response, message_type FROM ai_chat_messages WHERE user_id = ? AND category = ? AND topic = ? AND subtopic = ? AND sort_order = ? ORDER BY created_at DESC LIMIT 10',
+      [userId, category, topic, subtopic, sortOrder]
+    ) as { message: string; response: string; message_type: string }[];
+
+    // Format conversation history for context
+    const contextMessages = conversationHistory.reverse().map(msg => {
+      if (msg.message_type === 'user') {
+        return `Student: ${msg.message}`;
+      } else {
+        return `LOOPAI: ${msg.response}`;
+      }
+    }).join('\n');
+
+    // Format display names for better context
+    const formatDisplayName = (urlName: string) => {
+      return urlName
+        .replace(/-/g, ' ')
+        .replace(/and/g, '&')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const categoryDisplay = formatDisplayName(category);
+    const topicDisplay = formatDisplayName(topic);
+    const subtopicDisplay = formatDisplayName(subtopic);
+
+    // Enhanced AI prompt with better structure and personality
+    const systemPrompt = `You are LOOPAI, an expert coding tutor and mentor specialized in Data Structures & Algorithms. You're helping a student learn ${subtopicDisplay} concepts.
+
+**CURRENT LEARNING CONTEXT:**
+- Category: ${categoryDisplay}
+- Topic: ${topicDisplay}
+- Subtopic: ${subtopicDisplay}
+- Problem Number: ${sortOrder}
+
+**YOUR TEACHING STYLE:**
+1. **Assess Understanding**: Before diving deep, check if the student knows the basics
+2. **Structured Learning**: Break complex concepts into digestible parts
+3. **Interactive**: Ask follow-up questions to gauge comprehension
+4. **Practical**: Provide real examples and code snippets when helpful
+5. **Encouraging**: Be supportive and motivating
+
+**CONVERSATION HISTORY:**
+${contextMessages || 'This is the start of your conversation.'}
+
+**CURRENT STUDENT QUESTION:**
+"${message}"
+
+**YOUR RESPONSE GUIDELINES:**
+- Keep responses focused and under 250 words
+- If it's their first message about this topic, ask about their background knowledge
+- Use analogies and real-world examples
+- Provide step-by-step explanations for complex concepts
+- Ask clarifying questions to ensure understanding
+- Be encouraging and patient
+- Use proper formatting with bullet points or numbered lists when needed
+
+Respond as LOOPAI:`;
+
     // Generate AI response using Gemini
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const prompt = `You are LOOPAI, an expert coding tutor. The user is learning about: ${category} > ${topic} > ${subtopic} (Problem #${sortOrder}).
-    
-User question: ${message}
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-pro',
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 500,
+      }
+    });
 
-Provide a precise, short, and helpful response focused on the specific concept. Keep it under 200 words.`;
-
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(systemPrompt);
     const response = result.response.text();
 
-    // Save to database
+    // Save user message to database
     await Database.query(
       'INSERT INTO ai_chat_messages (user_id, category, topic, subtopic, sort_order, message, response, message_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [userId, category, topic, subtopic, sortOrder, message, response, 'user']
+      [userId, category, topic, subtopic, sortOrder, message, '', 'user']
     );
 
+    // Save AI response to database
     await Database.query(
       'INSERT INTO ai_chat_messages (user_id, category, topic, subtopic, sort_order, message, response, message_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [userId, category, topic, subtopic, sortOrder, '', response, 'ai']
@@ -102,6 +168,19 @@ Provide a precise, short, and helpful response focused on the specific concept. 
 
   } catch (error) {
     console.error('Error processing chat message:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    // Provide a fallback response if AI fails
+    const fallbackResponse = `I'm experiencing some technical difficulties right now. However, I'm here to help you learn about ${subtopic}! 
+
+Could you tell me:
+1. What specific aspect of this topic would you like to understand better?
+2. Are you familiar with the basic concepts, or should we start from the fundamentals?
+
+I'll do my best to guide you through this learning journey! 🚀`;
+
+    return NextResponse.json({ 
+      response: fallbackResponse,
+      error: 'AI service temporarily unavailable'
+    });
   }
 }

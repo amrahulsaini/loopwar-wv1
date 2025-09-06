@@ -30,6 +30,7 @@ export default function LearnModePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Format display names
@@ -67,8 +68,19 @@ export default function LearnModePage() {
     if (!inputMessage.trim() || isLoading) return;
 
     setIsLoading(true);
+    setError(null);
     const userMessage = inputMessage.trim();
     setInputMessage('');
+
+    // Add user message immediately for better UX
+    const userMessageObj = { 
+      message: userMessage, 
+      response: '', 
+      message_type: 'user' as const, 
+      created_at: new Date().toISOString() 
+    };
+    
+    setMessages(prev => [...prev, userMessageObj]);
 
     try {
       const response = await fetch('/api/ai-chat', {
@@ -85,19 +97,39 @@ export default function LearnModePage() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        // Add the new messages to the list
-        setMessages(prev => [
-          ...prev,
-          { message: userMessage, response: '', message_type: 'user', created_at: new Date().toISOString() },
-          { message: '', response: data.response, message_type: 'ai', created_at: new Date().toISOString() }
-        ]);
+        // Add AI response
+        const aiMessageObj = { 
+          message: '', 
+          response: data.response, 
+          message_type: 'ai' as const, 
+          created_at: new Date().toISOString() 
+        };
+        setMessages(prev => [...prev, aiMessageObj]);
       } else {
-        console.error('Error sending message');
+        setError(data.error || 'Failed to get AI response');
+        // Add error message as AI response
+        const errorMessageObj = { 
+          message: '', 
+          response: `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`, 
+          message_type: 'ai' as const, 
+          created_at: new Date().toISOString() 
+        };
+        setMessages(prev => [...prev, errorMessageObj]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      setError('Connection error. Please check your internet connection.');
+      // Add error message as AI response
+      const errorMessageObj = { 
+        message: '', 
+        response: "I'm experiencing connection issues. Please make sure you're connected to the internet and try again.", 
+        message_type: 'ai' as const, 
+        created_at: new Date().toISOString() 
+      };
+      setMessages(prev => [...prev, errorMessageObj]);
     } finally {
       setIsLoading(false);
     }
@@ -215,9 +247,18 @@ export default function LearnModePage() {
                 </div>
                 <h3 className={styles.welcomeTitle}>Welcome to LOOPAI!</h3>
                 <p className={styles.welcomeText}>
-                  I&apos;m here to help you understand <span className={styles.welcomeHighlight}>{subtopicDisplay}</span>. 
-                  Ask me anything about concepts, algorithms, or implementation details!
+                  I&apos;m your AI tutor for <span className={styles.welcomeHighlight}>{subtopicDisplay}</span>. 
+                  I&apos;ll help you understand concepts, solve problems, and master algorithms step by step.
                 </p>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p><strong>Try asking me:</strong></p>
+                  <ul className="mt-2 space-y-1 text-left max-w-md mx-auto">
+                    <li>• "Explain the basics of {subtopicDisplay}"</li>
+                    <li>• "What should I know before starting?"</li>
+                    <li>• "Walk me through this concept step by step"</li>
+                    <li>• "Show me a simple example"</li>
+                  </ul>
+                </div>
               </div>
             ) : (
               messages.map((msg, index) => (
@@ -234,6 +275,25 @@ export default function LearnModePage() {
                   </div>
                 </div>
               ))
+            )}
+            {isLoading && (
+              <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
+                <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
+                  <div className={styles.aiMessageIcon}>
+                    <Bot className="w-3 h-3" />
+                  </div>
+                  <div className={styles.messageText}>
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-500">LOOPAI is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
