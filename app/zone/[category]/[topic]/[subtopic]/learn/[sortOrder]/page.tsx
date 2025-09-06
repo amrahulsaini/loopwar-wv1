@@ -163,13 +163,19 @@ export default function LearnModePage() {
     if (!text) return '';
     
     const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
-    const hasFollowUp = text.includes("What's next?") || text.includes('• ');
     
-    const formattedContent = text
-      .split('\n')
-      .map((line, index) => {
+    // Split text into lines and track if we're in the follow-up section
+    const lines = text.split('\n');
+    let inFollowUpSection = false;
+    
+    const formattedContent = lines.map((line, index) => {
         if (line.trim() === '') {
           return <br key={index} />;
+        }
+        
+        // Check if we're entering the follow-up section
+        if (line.includes("What's next?")) {
+          inFollowUpSection = true;
         }
         
         // Handle both **text** and *text* for bold formatting
@@ -180,16 +186,14 @@ export default function LearnModePage() {
         // Handle code blocks with `code`
         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85em;">$1</code>');
         
-        // Handle follow-up prompts as clickable buttons (multiple bullet formats)
-        console.log('Checking line:', JSON.stringify(line)); // Debug: see exact line content
-        const isFollowUpPrompt = line.match(/^[•·*-]\s+/) || line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ');
-        if (isFollowUpPrompt) {
+        // Only convert to buttons if we're in the follow-up section AND it's a bullet point
+        const isBulletPoint = line.match(/^[•·*-]\s+/) || line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ');
+        if (inFollowUpSection && isBulletPoint) {
           // Remove bullet point and any surrounding quotes
           const promptText = line
             .replace(/^[•·*-]\s+/, '')
             .replace(/^["']|["']$/g, '') // Remove quotes from start/end
             .trim();
-          console.log('✅ Found follow-up prompt:', promptText); // Debug log
           return (
             <button
               key={index}
@@ -489,12 +493,20 @@ export default function LearnModePage() {
                     </div>
                   )}
                 </div>
-                <button 
+                <button
                   className={styles.fullScreenButton}
                   onClick={handleFullScreen}
                   title={isFullScreen ? 'Exit Full Screen' : 'Enter Full Screen'}
                 >
-                  {isFullScreen ? '🗗' : '🗖'}
+                  {isFullScreen ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 10l7-7m0 0h-6m6 0v6M10 14l-7 7m0 0h6m-6 0v-6"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 3H3v4m0 10v4h4m10 0h4v-4M21 7V3h-4"/>
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
