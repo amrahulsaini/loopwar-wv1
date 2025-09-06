@@ -219,19 +219,19 @@ export default function LearnModePage() {
               className={styles.codeShellButton}
               onClick={() => handleOpenCodeShell('cpp')}
             >
-              🔥 Open Code Shell (C++)
+              Open Code Shell (C++)
             </button>
             <button 
               className={styles.codeShellButton}
               onClick={() => handleOpenCodeShell('java')}
             >
-              ☕ Open Code Shell (Java)
+              Open Code Shell (Java)
             </button>
             <button 
               className={styles.codeShellButton}
               onClick={() => handleOpenCodeShell('python')}
             >
-              🐍 Open Code Shell (Python)
+              Open Code Shell (Python)
             </button>
           </div>
         )}
