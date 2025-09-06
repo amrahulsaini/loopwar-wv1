@@ -16,8 +16,19 @@ const ai = new GoogleGenAI({
   apiKey: apiKey
 });
 
+// Problem interface for type safety
+interface Problem {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  category: string;
+  topic: string;
+  subtopic: string;
+}
+
 // Enhanced AI response processing function
-function enhanceAIResponse(response: string, userMessage: string, problem: any): string {
+function enhanceAIResponse(response: string, userMessage: string, problem: Problem | null): string {
   let enhancedResponse = response;
 
   // Detect if user wants coding practice
@@ -49,8 +60,16 @@ function enhanceAIResponse(response: string, userMessage: string, problem: any):
   return enhancedResponse;
 }
 
+// Message interface for type safety
+interface ChatMessage {
+  message: string;
+  response: string;
+  message_type: 'user' | 'ai';
+  created_at?: string;
+}
+
 // Enhanced conversation context builder
-function buildEnhancedContext(messages: any[], maxMessages: number = 6): string {
+function buildEnhancedContext(messages: ChatMessage[], maxMessages: number = 6): string {
   if (!messages || messages.length === 0) {
     return 'Fresh conversation - no previous context.';
   }
@@ -147,8 +166,15 @@ export async function POST(request: NextRequest) {
       [userId, category, topic, subtopic, sortOrder]
     ) as { message: string; response: string; message_type: string }[];
 
+    // Type-safe conversion to ChatMessage array
+    const typedMessages: ChatMessage[] = conversationHistory.map(msg => ({
+      message: msg.message,
+      response: msg.response,
+      message_type: msg.message_type as 'user' | 'ai'
+    }));
+
     // Format conversation history for enhanced context
-    const contextMessages = buildEnhancedContext(conversationHistory.reverse());
+    const contextMessages = buildEnhancedContext(typedMessages.reverse());
 
     // Format display names for better context
     const formatDisplayName = (urlName: string) => {
@@ -223,9 +249,6 @@ Respond with the structured format above:`;
 
     // Enhanced response processing and validation
     response = enhanceAIResponse(response, message, problem);
-
-    // Save conversation with better metadata
-    const timestamp = new Date().toISOString();
 
     // Save user message to database
     await Database.query(
