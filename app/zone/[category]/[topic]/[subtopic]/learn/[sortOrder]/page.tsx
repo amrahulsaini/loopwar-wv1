@@ -130,18 +130,25 @@ export default function LearnModePage() {
 
   // Format AI response to handle line breaks and bold text
   const formatAIResponse = (text: string) => {
+    if (!text) return '';
+    
     return text
       .split('\n')
       .map((line, index) => {
-        // Handle bold text with **text**
-        const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
         if (line.trim() === '') {
           return <br key={index} />;
         }
         
+        // Handle both **text** and *text* for bold formatting
+        let formattedLine = line
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
+          .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');    // *bold*
+        
+        // Handle code blocks with `code`
+        formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85em;">$1</code>');
+        
         return (
-          <div key={index} dangerouslySetInnerHTML={{ __html: formattedLine }} />
+          <div key={index} dangerouslySetInnerHTML={{ __html: formattedLine }} style={{ marginBottom: '0.5rem' }} />
         );
       });
   };
