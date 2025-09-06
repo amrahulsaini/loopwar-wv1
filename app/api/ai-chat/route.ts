@@ -140,7 +140,7 @@ Respond as LOOPAI:`;
 
     // Generate AI response using Gemini
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-pro',
+      model: 'gemini-2.0-flash',
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -170,7 +170,7 @@ Respond as LOOPAI:`;
     console.error('Error processing chat message:', error);
     
     // Provide a fallback response if AI fails
-    const fallbackResponse = `I'm experiencing some technical difficulties right now. However, I'm here to help you learn about ${subtopic}! 
+    const fallbackResponse = `I'm experiencing some technical difficulties right now. However, I'm here to help you learn! 
 
 Could you tell me:
 1. What specific aspect of this topic would you like to understand better?
