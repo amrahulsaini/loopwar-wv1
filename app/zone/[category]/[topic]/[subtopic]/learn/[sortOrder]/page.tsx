@@ -30,6 +30,8 @@ export default function LearnModePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [typingText, setTypingText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Format display names
@@ -41,6 +43,37 @@ export default function LearnModePage() {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
+
+  // Typing animation effect
+  const typeMessage = useCallback((text: string) => {
+    setIsTyping(true);
+    setTypingText('');
+    
+    let index = 0;
+    const typeSpeed = 30; // Adjust speed as needed
+    
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setTypingText(prev => prev + text.charAt(index));
+        index++;
+      } else {
+        clearInterval(timer);
+        setIsTyping(false);
+        
+        // Add the final message to the messages array
+        const aiMessageObj = { 
+          message: '', 
+          response: text, 
+          message_type: 'ai' as const, 
+          created_at: new Date().toISOString() 
+        };
+        setMessages(prev => [...prev, aiMessageObj]);
+        setTypingText('');
+      }
+    }, typeSpeed);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const categoryDisplay = formatDisplayName(category);
   const topicDisplay = formatDisplayName(topic);
@@ -98,34 +131,18 @@ export default function LearnModePage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Add AI response
-        const aiMessageObj = { 
-          message: '', 
-          response: data.response, 
-          message_type: 'ai' as const, 
-          created_at: new Date().toISOString() 
-        };
-        setMessages(prev => [...prev, aiMessageObj]);
+        // Use typing animation for AI response
+        typeMessage(data.response);
       } else {
-        // Add error message as AI response
-        const errorMessageObj = { 
-          message: '', 
-          response: `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`, 
-          message_type: 'ai' as const, 
-          created_at: new Date().toISOString() 
-        };
-        setMessages(prev => [...prev, errorMessageObj]);
+        // Add error message as AI response with typing animation
+        const errorMessage = `Sorry, I'm having trouble responding right now. ${data.error || 'Please try again.'}`;
+        typeMessage(errorMessage);
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Add error message as AI response
-      const errorMessageObj = { 
-        message: '', 
-        response: "I'm experiencing connection issues. Please make sure you're connected to the internet and try again.", 
-        message_type: 'ai' as const, 
-        created_at: new Date().toISOString() 
-      };
-      setMessages(prev => [...prev, errorMessageObj]);
+      // Add error message as AI response with typing animation
+      const errorMessage = "I'm experiencing connection issues. Please make sure you're connected to the internet and try again.";
+      typeMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +158,7 @@ export default function LearnModePage() {
   // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, typingText]);
 
   return (
     <div className={styles.container}>
@@ -257,22 +274,40 @@ export default function LearnModePage() {
                 </div>
               </div>
             ) : (
-              messages.map((msg, index) => (
-                <div key={index} className={`${styles.messageContainer} ${msg.message_type === 'user' ? styles.messageContainerUser : styles.messageContainerAi}`}>
-                  <div className={`${styles.messageBubble} ${msg.message_type === 'user' ? styles.messageBubbleUser : styles.messageBubbleAi}`}>
-                    {msg.message_type === 'ai' && (
+              <>
+                {messages.map((msg, index) => (
+                  <div key={index} className={`${styles.messageContainer} ${msg.message_type === 'user' ? styles.messageContainerUser : styles.messageContainerAi}`}>
+                    <div className={`${styles.messageBubble} ${msg.message_type === 'user' ? styles.messageBubbleUser : styles.messageBubbleAi}`}>
+                      {msg.message_type === 'ai' && (
+                        <div className={styles.aiMessageIcon}>
+                          <Bot className="w-3 h-3" />
+                        </div>
+                      )}
+                      <div className={styles.messageText}>
+                        {msg.message_type === 'user' ? msg.message : msg.response}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing Animation */}
+                {isTyping && (
+                  <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
+                    <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                       <div className={styles.aiMessageIcon}>
                         <Bot className="w-3 h-3" />
                       </div>
-                    )}
-                    <div className={styles.messageText}>
-                      {msg.message_type === 'user' ? msg.message : msg.response}
+                      <div className={styles.messageText}>
+                        {typingText}
+                        <span className="animate-pulse">|</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )}
+              </>
             )}
-            {isLoading && (
+            
+            {isLoading && !isTyping && (
               <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
                 <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                   <div className={styles.aiMessageIcon}>

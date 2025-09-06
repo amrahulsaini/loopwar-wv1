@@ -5,13 +5,18 @@
 
 /* Main Container */
 .container {
-    min-height: 100vh;
+    height: 100vh;
     background: var(--color-bg);
     font-family: var(--font-primary);
     color: var(--color-text);
     display: flex;
     flex-direction: column;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
 /* Header */
@@ -116,7 +121,8 @@
 .mainContent {
     display: flex;
     flex: 1;
-    min-height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem);
+    overflow: hidden;
 }
 
 /* Left Panel - 30% */
@@ -302,25 +308,35 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    scroll-behavior: smooth;
+    max-height: calc(100vh - 200px);
 }
 
-/* Custom Scrollbar */
+/* Enhanced Custom Scrollbar */
 .messagesContainer::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .messagesContainer::-webkit-scrollbar-track {
     background: var(--color-primary-light);
-    border-radius: 3px;
+    border-radius: 4px;
+    margin: 8px 0;
 }
 
 .messagesContainer::-webkit-scrollbar-thumb {
     background: var(--color-border);
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: background var(--transition-speed);
 }
 
 .messagesContainer::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-secondary);
+}
+
+/* Firefox scrollbar */
+.messagesContainer {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) var(--color-primary-light);
 }
 
 /* Welcome Message */
