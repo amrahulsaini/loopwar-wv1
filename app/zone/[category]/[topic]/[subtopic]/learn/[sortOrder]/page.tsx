@@ -44,13 +44,31 @@ export default function LearnModePage() {
       .join(' ');
   };
 
-  // Typing animation effect
+  // Format AI response to handle line breaks and bold text
+  const formatAIResponse = (text: string) => {
+    return text
+      .split('\n')
+      .map((line, index) => {
+        // Handle bold text with **text**
+        const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        if (line.trim() === '') {
+          return <br key={index} />;
+        }
+        
+        return (
+          <div key={index} dangerouslySetInnerHTML={{ __html: formattedLine }} />
+        );
+      });
+  };
+
+  // Typing animation effect with faster speed and smoother animation
   const typeMessage = useCallback((text: string) => {
     setIsTyping(true);
     setTypingText('');
     
     let index = 0;
-    const typeSpeed = 30; // Adjust speed as needed
+    const typeSpeed = 15; // Faster typing speed (was 30)
     
     const timer = setInterval(() => {
       if (index < text.length) {
@@ -277,14 +295,19 @@ export default function LearnModePage() {
               <>
                 {messages.map((msg, index) => (
                   <div key={index} className={`${styles.messageContainer} ${msg.message_type === 'user' ? styles.messageContainerUser : styles.messageContainerAi}`}>
-                    <div className={`${styles.messageBubble} ${msg.message_type === 'user' ? styles.messageBubbleUser : styles.messageBubbleAi}`}>
-                      {msg.message_type === 'ai' && (
-                        <div className={styles.aiMessageIcon}>
-                          <Bot className="w-3 h-3" />
+                    {msg.message_type === 'ai' && (
+                      <div className={styles.aiAvatarContainer}>
+                        <div className={styles.aiAvatar}>
+                          <Bot className="w-4 h-4" />
                         </div>
-                      )}
+                      </div>
+                    )}
+                    <div className={`${styles.messageBubble} ${msg.message_type === 'user' ? styles.messageBubbleUser : styles.messageBubbleAi}`}>
                       <div className={styles.messageText}>
-                        {msg.message_type === 'user' ? msg.message : msg.response}
+                        {msg.message_type === 'user' 
+                          ? msg.message 
+                          : <div className={styles.formattedResponse}>{formatAIResponse(msg.response)}</div>
+                        }
                       </div>
                     </div>
                   </div>
@@ -293,13 +316,17 @@ export default function LearnModePage() {
                 {/* Typing Animation */}
                 {isTyping && (
                   <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
-                    <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
-                      <div className={styles.aiMessageIcon}>
-                        <Bot className="w-3 h-3" />
+                    <div className={styles.aiAvatarContainer}>
+                      <div className={styles.aiAvatar}>
+                        <Bot className="w-4 h-4" />
                       </div>
+                    </div>
+                    <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                       <div className={styles.messageText}>
-                        {typingText}
-                        <span className="animate-pulse">|</span>
+                        <div className={styles.formattedResponse}>
+                          {formatAIResponse(typingText)}
+                          <span className={styles.typingCursor}>|</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -309,10 +336,12 @@ export default function LearnModePage() {
             
             {isLoading && !isTyping && (
               <div className={`${styles.messageContainer} ${styles.messageContainerAi}`}>
-                <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
-                  <div className={styles.aiMessageIcon}>
-                    <Bot className="w-3 h-3" />
+                <div className={styles.aiAvatarContainer}>
+                  <div className={styles.aiAvatar}>
+                    <Bot className="w-4 h-4" />
                   </div>
+                </div>
+                <div className={`${styles.messageBubble} ${styles.messageBubbleAi}`}>
                   <div className={styles.messageText}>
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">

@@ -387,6 +387,8 @@
 .messageContainer {
     display: flex;
     animation: fadeInUp 0.3s ease-out;
+    align-items: flex-start;
+    gap: 0.75rem;
 }
 
 .messageContainerUser {
@@ -397,47 +399,81 @@
     justify-content: flex-start;
 }
 
-.messageBubble {
-    max-width: 24rem;
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
-    border: 1px solid var(--color-border);
+/* AI Avatar Container - Outside message bubbles */
+.aiAvatarContainer {
+    flex-shrink: 0;
+    margin-top: 0.5rem;
 }
 
-.messageBubbleUser {
-    background: var(--color-primary);
-    color: var(--color-bg);
-    margin-left: 1rem;
-    border-color: var(--color-primary);
-}
-
-.messageBubbleAi {
-    background: var(--color-card-bg);
-    color: var(--color-text);
-    margin-right: 1rem;
-    border-color: var(--color-border);
-}
-
-.aiMessageIcon {
-    position: absolute;
-    left: -0.75rem;
-    top: 1rem;
-    width: 1.5rem;
-    height: 1.5rem;
+.aiAvatar {
+    width: 2rem;
+    height: 2rem;
     background: var(--color-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--color-bg);
-    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--color-card-bg);
+}
+
+.messageBubble {
+    max-width: 24rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    flex: 1;
+}
+
+.messageBubbleUser {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+}
+
+.messageBubbleAi {
+    background: var(--color-card-bg);
+    color: var(--color-text);
+    border-color: var(--color-border);
 }
 
 .messageText {
     font-size: 0.875rem;
     line-height: 1.6;
+}
+
+/* Formatted AI Response Styling */
+.formattedResponse {
+    line-height: 1.7;
+}
+
+.formattedResponse strong {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.formattedResponse div {
+    margin-bottom: 0.25rem;
+}
+
+.formattedResponse div:empty {
+    margin-bottom: 0.75rem;
+}
+
+/* Typing Cursor Animation */
+.typingCursor {
+    display: inline-block;
+    animation: blink 1s infinite;
+    font-weight: 300;
+    color: var(--color-primary);
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 /* Chat Input */
