@@ -152,6 +152,7 @@
   letter-spacing: 0.5px;
   white-space: pre-wrap;
   word-wrap: break-word;
+  color: #e6edf3;
 }
 
 .codeTextarea:focus {
