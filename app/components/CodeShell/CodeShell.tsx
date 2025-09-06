@@ -256,7 +256,7 @@ solve()`;
       <div className={styles.codeShell}>
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <h3>🔥 Code Shell - {language.toUpperCase()}</h3>
+            <h3>Code Shell - {language.toUpperCase()}</h3>
             <p className={styles.problemTitle}>{problemTitle}</p>
           </div>
           <button className={styles.closeBtn} onClick={onClose}>×</button>
@@ -286,7 +286,7 @@ solve()`;
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? '🔄 Reviewing...' : '🚀 Submit for Review'}
+            {isSubmitting ? 'Reviewing...' : 'Submit for Review'}
           </button>
           <button className={styles.cancelBtn} onClick={onClose}>
             Cancel

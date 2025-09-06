@@ -19,7 +19,7 @@
   border-radius: 12px;
   width: 90%;
   max-width: 900px;
-  height: 80vh;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   border: 2px solid #333;
@@ -33,7 +33,7 @@
   align-items: center;
   padding: 20px;
   border-bottom: 2px solid #333;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2d3748;
   border-radius: 10px 10px 0 0;
 }
 
@@ -90,6 +90,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* Important: prevents flex item from growing beyond container */
 }
 
 /* Syntax Highlighting Container */
@@ -115,7 +116,8 @@
   tab-size: 4;
   font-weight: 400;
   letter-spacing: 0.5px;
-  min-height: 400px;
+  min-height: 300px;
+  max-height: 500px;
   width: 100%;
 }
 
@@ -194,12 +196,13 @@
   justify-content: flex-end;
   background: #1a1a1a;
   border-radius: 0 0 10px 10px;
+  flex-shrink: 0; /* Prevent this section from shrinking */
 }
 
 .submitBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #2d3748;
+  border: 2px solid #e1e5e9;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: bold;
@@ -210,7 +213,9 @@
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  border-color: #2d3748;
+  background: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .submitBtn:disabled {
