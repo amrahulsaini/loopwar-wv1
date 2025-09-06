@@ -106,9 +106,9 @@ export default function LearnModePage() {
     
     return (
       <div className={containerClass}>
-        {/* Use the SVG version for better visibility */}
+        {/* Use the new custom LOOPAI SVG */}
         <Image 
-          src="/loopwar-logo-icon.svg" 
+          src="/loopwarai.svg" 
           alt="LOOPAI Assistant"
           className={styles.aiAvatarImage}
           width={size === 'medium' ? 40 : 28}
