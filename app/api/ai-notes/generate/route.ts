@@ -150,27 +150,48 @@ Be comprehensive but avoid redundancy. Only include high-quality, educational co
         ]
       );
     } else {
-      // Create new notes
-      await Database.query(
-        `INSERT INTO ai_learning_notes 
-          (user_id, category, topic, subtopic, sort_order, definitions, analogies, key_insights, examples, learning_path, connections, conversation_summary, conversation_context)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          userId,
-          category,
-          topic,
-          subtopic,
-          sortOrder,
-          JSON.stringify(extractedContent.definitions || []),
-          JSON.stringify(extractedContent.analogies || []),
-          JSON.stringify(extractedContent.key_insights || []),
-          JSON.stringify(extractedContent.examples || []),
-          JSON.stringify(extractedContent.learning_path || []),
-          JSON.stringify(extractedContent.connections || []),
-          extractedContent.conversation_summary || '',
-          conversationText.substring(0, 1000) + '...'
-        ]
-      );
+      // Create new notes - try with full schema first, fall back to basic schema if columns don't exist
+      try {
+        await Database.query(
+          `INSERT INTO ai_learning_notes 
+            (user_id, category, topic, subtopic, sort_order, definitions, analogies, key_insights, examples, learning_path, connections, conversation_summary, conversation_context)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            userId,
+            category,
+            topic,
+            subtopic,
+            sortOrder,
+            JSON.stringify(extractedContent.definitions || []),
+            JSON.stringify(extractedContent.analogies || []),
+            JSON.stringify(extractedContent.key_insights || []),
+            JSON.stringify(extractedContent.examples || []),
+            JSON.stringify(extractedContent.learning_path || []),
+            JSON.stringify(extractedContent.connections || []),
+            extractedContent.conversation_summary || '',
+            conversationText.substring(0, 1000) + '...'
+          ]
+        );
+      } catch (dbError: any) {
+        // Fallback to basic schema if enhanced columns don't exist
+        console.warn('Enhanced schema failed, falling back to basic schema:', dbError.message);
+        await Database.query(
+          `INSERT INTO ai_learning_notes 
+            (user_id, category, topic, subtopic, sort_order, definitions, analogies, key_insights, examples)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            userId,
+            category,
+            topic,
+            subtopic,
+            sortOrder,
+            JSON.stringify(extractedContent.definitions || []),
+            JSON.stringify(extractedContent.analogies || []),
+            JSON.stringify(extractedContent.key_insights || []),
+            JSON.stringify(extractedContent.examples || [])
+          ]
+        );
+      }
     }
 
     return NextResponse.json({ 

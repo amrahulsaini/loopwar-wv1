@@ -170,8 +170,12 @@
   transition: transform 0.2s ease;
 }
 
+.expanded {
+  transform: rotate(180deg);
+}
+
 .collapsed {
-  transform: rotate(-90deg);
+  transform: rotate(0deg);
 }
 
 .sectionContent {

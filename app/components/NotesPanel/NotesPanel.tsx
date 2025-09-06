@@ -1,4 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  BookOpen, 
+  Brain, 
+  RefreshCw, 
+  Search, 
+  Globe, 
+  Lightbulb, 
+  FileText, 
+  Target, 
+  Link, 
+  Edit3, 
+  Plus, 
+  Save, 
+  X, 
+  ChevronDown,
+  BarChart3 
+} from 'lucide-react';
 import styles from './NotesPanel.module.css';
 
 interface Note {
@@ -158,7 +175,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
     return (
       <div className={`${styles.notesPanel} ${className}`}>
         <div className={styles.header}>
-          <h3>📚 Learning Notes</h3>
+          <h3><BookOpen size={16} /> Learning Notes</h3>
         </div>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
@@ -172,7 +189,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
     return (
       <div className={`${styles.notesPanel} ${className}`}>
         <div className={styles.header}>
-          <h3>📚 Learning Notes</h3>
+          <h3><BookOpen size={16} /> Learning Notes</h3>
           <div className={styles.headerActions}>
             <button 
               className={styles.generateBtn}
@@ -180,19 +197,19 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               disabled={isGenerating}
               title="Generate notes from conversation"
             >
-              {isGenerating ? '🔄' : '🧠'} {isGenerating ? 'Generating...' : 'Generate'}
+              <Brain size={14} /> {isGenerating ? 'Generating...' : 'Generate'}
             </button>
             <button 
               className={styles.refreshBtn}
               onClick={fetchNotes}
               title="Refresh notes"
             >
-              ↻
+              <RefreshCw size={14} />
             </button>
           </div>
         </div>
         <div className={styles.emptyState}>
-          <p>💡 No notes yet - click Generate to create AI learning notes!</p>
+          <p><Lightbulb size={16} /> No notes yet - click Generate to create AI learning notes!</p>
           <small>AI will analyze your conversations and create structured learning content</small>
         </div>
       </div>
@@ -202,7 +219,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
   return (
     <div className={`${styles.notesPanel} ${className}`}>
       <div className={styles.header}>
-        <h3>📚 Learning Notes</h3>
+        <h3><BookOpen size={16} /> Learning Notes</h3>
         <div className={styles.headerActions}>
           <button 
             className={styles.generateBtn}
@@ -210,14 +227,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
             disabled={isGenerating}
             title="Generate notes from conversation"
           >
-            {isGenerating ? '🔄' : '🧠'} {isGenerating ? 'Generating...' : 'Generate'}
+            <Brain size={14} /> {isGenerating ? 'Generating...' : 'Generate'}
           </button>
           <button 
             className={styles.refreshBtn}
             onClick={fetchNotes}
             title="Refresh notes"
           >
-            ↻
+            <RefreshCw size={14} />
           </button>
         </div>
       </div>
@@ -230,8 +247,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('definitions')}
             >
-              <span>🔍 Definitions ({notes.definitions.length})</span>
-              <span className={expandedSections.definitions ? styles.expanded : styles.collapsed}>▼</span>
+              <span><Search size={14} /> Definitions ({notes.definitions.length})</span>
+              <ChevronDown size={14} className={expandedSections.definitions ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.definitions && (
               <div className={styles.sectionContent}>
@@ -253,15 +270,15 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('analogies')}
             >
-              <span>🌍 Real-World Analogies ({notes.analogies.length})</span>
-              <span className={expandedSections.analogies ? styles.expanded : styles.collapsed}>▼</span>
+              <span><Globe size={14} /> Real-World Analogies ({notes.analogies.length})</span>
+              <ChevronDown size={14} className={expandedSections.analogies ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.analogies && (
               <div className={styles.sectionContent}>
                 {notes.analogies.map((analogy, index) => (
                   <div key={index} className={styles.analogyItem}>
                     <strong className={styles.concept}>{analogy.concept}</strong>
-                    <p className={styles.analogy}>💭 {analogy.analogy}</p>
+                    <p className={styles.analogy}><Lightbulb size={12} /> {analogy.analogy}</p>
                   </div>
                 ))}
               </div>
@@ -276,14 +293,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('insights')}
             >
-              <span>💡 Key Insights ({notes.keyInsights.length})</span>
-              <span className={expandedSections.insights ? styles.expanded : styles.collapsed}>▼</span>
+              <span><Lightbulb size={14} /> Key Insights ({notes.keyInsights.length})</span>
+              <ChevronDown size={14} className={expandedSections.insights ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.insights && (
               <div className={styles.sectionContent}>
                 {notes.keyInsights.map((insight, index) => (
                   <div key={index} className={styles.insightItem}>
-                    <p>⚡ {insight}</p>
+                    <p><Target size={12} /> {insight}</p>
                   </div>
                 ))}
               </div>
@@ -298,8 +315,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('examples')}
             >
-              <span>📝 Examples ({notes.examples.length})</span>
-              <span className={expandedSections.examples ? styles.expanded : styles.collapsed}>▼</span>
+              <span><FileText size={14} /> Examples ({notes.examples.length})</span>
+              <ChevronDown size={14} className={expandedSections.examples ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.examples && (
               <div className={styles.sectionContent}>
@@ -321,8 +338,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('learningPath')}
             >
-              <span>🎯 Learning Journey ({notes.learningPath.length})</span>
-              <span className={expandedSections.learningPath ? styles.expanded : styles.collapsed}>▼</span>
+              <span><Target size={14} /> Learning Journey ({notes.learningPath.length})</span>
+              <ChevronDown size={14} className={expandedSections.learningPath ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.learningPath && (
               <div className={styles.sectionContent}>
@@ -344,14 +361,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
               className={styles.sectionHeader}
               onClick={() => toggleSection('connections')}
             >
-              <span>🔗 Related Concepts ({notes.connections.length})</span>
-              <span className={expandedSections.connections ? styles.expanded : styles.collapsed}>▼</span>
+              <span><Link size={14} /> Related Concepts ({notes.connections.length})</span>
+              <ChevronDown size={14} className={expandedSections.connections ? styles.expanded : styles.collapsed} />
             </button>
             {expandedSections.connections && (
               <div className={styles.sectionContent}>
                 {notes.connections.map((connection, index) => (
                   <div key={index} className={styles.connectionItem}>
-                    <p>🔸 {connection}</p>
+                    <p><Link size={12} /> {connection}</p>
                   </div>
                 ))}
               </div>
@@ -365,8 +382,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
             className={styles.sectionHeader}
             onClick={() => toggleSection('personal')}
           >
-            <span>✏️ My Personal Notes</span>
-            <span className={expandedSections.personal ? styles.expanded : styles.collapsed}>▼</span>
+            <span><Edit3 size={14} /> My Personal Notes</span>
+            <ChevronDown size={14} className={expandedSections.personal ? styles.expanded : styles.collapsed} />
           </button>
           {expandedSections.personal && (
             <div className={styles.sectionContent}>
@@ -384,7 +401,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
                       className={styles.saveBtn}
                       onClick={savePersonalNotes}
                     >
-                      Save
+                      <Save size={12} /> Save
                     </button>
                     <button 
                       className={styles.cancelBtn}
@@ -393,7 +410,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
                         setPersonalNotes(notes.personalNotes || '');
                       }}
                     >
-                      Cancel
+                      <X size={12} /> Cancel
                     </button>
                   </div>
                 </div>
@@ -406,7 +423,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
                         className={styles.editBtn}
                         onClick={() => setIsEditing(true)}
                       >
-                        Edit
+                        <Edit3 size={12} /> Edit
                       </button>
                     </div>
                   ) : (
@@ -416,7 +433,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
                         className={styles.addNotesBtn}
                         onClick={() => setIsEditing(true)}
                       >
-                        Add Notes
+                        <Plus size={12} /> Add Notes
                       </button>
                     </div>
                   )}
@@ -429,7 +446,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
         {/* Stats Footer */}
         <div className={styles.statsFooter}>
           <div className={styles.stats}>
-            <span>📊 Progress</span>
+            <span><BarChart3 size={14} /> Progress</span>
             <div className={styles.statsList}>
               <span>Concepts: {notes.definitions.length + notes.analogies.length}</span>
               <span>Insights: {notes.keyInsights.length}</span>
