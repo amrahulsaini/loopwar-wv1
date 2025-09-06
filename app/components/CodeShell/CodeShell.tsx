@@ -5,6 +5,8 @@ interface CodeShellProps {
   language: string;
   problemTitle: string;
   problemDescription: string;
+  conversationContext?: string; // Latest AI response for context
+  currentQuestion?: string; // Current coding question being asked
   onSubmitCode: (code: string) => void;
   onClose: () => void;
 }
@@ -13,6 +15,8 @@ const CodeShell: React.FC<CodeShellProps> = ({
   language,
   problemTitle,
   problemDescription,
+  conversationContext,
+  currentQuestion,
   onSubmitCode,
   onClose
 }) => {
@@ -31,26 +35,54 @@ const CodeShell: React.FC<CodeShellProps> = ({
   };
 
   const getLanguageTemplate = () => {
+    // Extract specific coding requirements from conversation context
+    const context = conversationContext || '';
+    const question = currentQuestion || '';
+    
+    // Check if it's about array update function
+    const isArrayUpdate = context.includes('updateArray') || question.includes('updateArray') || 
+                         context.includes('Update Element') || question.includes('Update Element');
+    
+    // Check if it's about specific array operations
+    const isArrayAccess = context.includes('Access Element') || question.includes('Access Element');
+    const isArrayInit = context.includes('Initialize') || question.includes('Initialize');
+    
+    // Extract function signature if mentioned
+    const functionMatch = context.match(/(\w+)\s*\([^)]*\)/);
+    const functionName = functionMatch ? functionMatch[1] : '';
+    
     switch (language.toLowerCase()) {
       case 'cpp':
       case 'c++':
-        return `#include <iostream>
+        if (isArrayUpdate) {
+          return `#include <iostream>
 using namespace std;
 
-// Write your solution here
+// ${currentQuestion || problemDescription}
 void updateArray(int arr[], int size, int index, int newValue) {
-    // Your code goes here
+    // TODO: Check if index is valid (within bounds)
+    // Hint: index should be >= 0 and < size
+    
+    // TODO: Update the element at the given index
+    // Your code here
     
 }
 
 int main() {
-    // Test your function here
+    // Test your function
     int arr[] = {1, 2, 3, 4, 5};
     int size = 5;
     
+    cout << "Original array: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    // Test updating element at index 2 to value 10
     updateArray(arr, size, 2, 10);
     
-    // Print array to verify
+    cout << "Updated array: ";
     for (int i = 0; i < size; i++) {
         cout << arr[i] << " ";
     }
@@ -58,36 +90,153 @@ int main() {
     
     return 0;
 }`;
+        } else if (isArrayAccess) {
+          return `#include <iostream>
+using namespace std;
+
+// ${currentQuestion || problemDescription}
+int accessElement(int arr[], int size, int index) {
+    // TODO: Check if index is valid
+    // TODO: Return the element at the given index
+    // Your code here
+    
+    return -1; // placeholder
+}
+
+int main() {
+    int arr[] = {10, 20, 30, 40, 50};
+    int size = 5;
+    
+    // Test accessing different elements
+    cout << "Element at index 2: " << accessElement(arr, size, 2) << endl;
+    
+    return 0;
+}`;
+        } else if (isArrayInit) {
+          return `#include <iostream>
+using namespace std;
+
+// ${currentQuestion || problemDescription}
+int* initializeArray(int size) {
+    // TODO: Create array of given size
+    // TODO: Initialize all elements to 0
+    // Your code here
+    
+    return nullptr; // placeholder
+}
+
+int main() {
+    int size = 5;
+    int* arr = initializeArray(size);
+    
+    // Print the initialized array
+    if (arr != nullptr) {
+        for (int i = 0; i < size; i++) {
+            cout << arr[i] << " ";
+        }
+        cout << endl;
+        delete[] arr; // Don't forget to free memory
+    }
+    
+    return 0;
+}`;
+        } else {
+          return `#include <iostream>
+using namespace std;
+
+// ${currentQuestion || problemDescription}
+${functionName ? `// Function: ${functionName}` : '// Write your solution here'}
+
+int main() {
+    // Test your solution here
+    
+    return 0;
+}`;
+        }
+        
       case 'java':
-        return `public class Solution {
-    // Write your solution here
+        if (isArrayUpdate) {
+          return `public class Solution {
+    // ${currentQuestion || problemDescription}
     public static void updateArray(int[] arr, int index, int newValue) {
-        // Your code goes here
+        // TODO: Check if index is valid (within bounds)
+        // Hint: index should be >= 0 and < arr.length
+        
+        // TODO: Update the element at the given index
+        // Your code here
         
     }
     
     public static void main(String[] args) {
         int[] arr = {1, 2, 3, 4, 5};
+        
+        System.out.print("Original array: ");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+        
+        // Test updating element at index 2 to value 10
         updateArray(arr, 2, 10);
         
-        // Print array to verify
+        System.out.print("Updated array: ");
         for (int i = 0; i < arr.length; i++) {
             System.out.print(arr[i] + " ");
         }
         System.out.println();
     }
 }`;
+        } else {
+          return `public class Solution {
+    // ${currentQuestion || problemDescription}
+    ${functionName ? `// Function: ${functionName}` : '// Write your solution here'}
+    
+    public static void main(String[] args) {
+        // Test your solution here
+        
+    }
+}`;
+        }
+        
       case 'python':
-        return `def update_array(arr, index, new_value):
-    # Write your solution here
+        if (isArrayUpdate) {
+          return `# ${currentQuestion || problemDescription}
+def update_array(arr, index, new_value):
+    """
+    TODO: Check if index is valid (within bounds)
+    Hint: index should be >= 0 and < len(arr)
+    
+    TODO: Update the element at the given index
+    Your code here
+    """
     pass
 
 # Test your function
 arr = [1, 2, 3, 4, 5]
+
+print("Original array:", arr)
+
+# Test updating element at index 2 to value 10
 update_array(arr, 2, 10)
-print(arr)`;
+
+print("Updated array:", arr)`;
+        } else {
+          return `# ${currentQuestion || problemDescription}
+${functionName ? `# Function: ${functionName}` : '# Write your solution here'}
+
+def solve():
+    # Your code here
+    pass
+
+# Test your solution
+solve()`;
+        }
+        
       default:
-        return '// Write your code here\n';
+        return `// ${currentQuestion || problemDescription}
+// Write your ${language} code here
+
+`;
     }
   };
 
@@ -103,6 +252,10 @@ print(arr)`;
         </div>
         
         <div className={styles.problemDescription}>
+          <p><strong>Problem:</strong> {problemTitle}</p>
+          {currentQuestion && (
+            <p><strong>Current Task:</strong> {currentQuestion}</p>
+          )}
           <p>{problemDescription}</p>
         </div>
         

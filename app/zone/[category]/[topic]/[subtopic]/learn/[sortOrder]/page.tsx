@@ -57,6 +57,7 @@ export default function LearnModePage() {
   const [problem, setProblem] = useState<ProblemData | null>(null);
   const [showCodeShell, setShowCodeShell] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState('cpp');
+  const [latestAIResponse, setLatestAIResponse] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check user authentication and get user data
@@ -249,6 +250,7 @@ export default function LearnModePage() {
           created_at: new Date().toISOString() 
         };
         setMessages(prev => [...prev, aiMessageObj]);
+        setLatestAIResponse(text); // Track latest AI response for Code Shell context
         setTypingText('');
       }
     }, typeSpeed);
@@ -383,6 +385,39 @@ export default function LearnModePage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typingText]);
+
+  // Extract coding question from AI response
+  const extractCodingQuestion = (aiResponse: string) => {
+    // Look for common patterns in AI responses that indicate a coding task
+    const patterns = [
+      /Write a .*? function/i,
+      /Create a .*? function/i,
+      /Implement .*? function/i,
+      /Problem:\s*(.*?)(?:\n|$)/i,
+      /Task:\s*(.*?)(?:\n|$)/i,
+      /Question:\s*(.*?)(?:\n|$)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = aiResponse.match(pattern);
+      if (match) {
+        return match[1] || match[0];
+      }
+    }
+    
+    // Fallback: return first sentence that contains "function" or "array"
+    const sentences = aiResponse.split(/[.!?]/);
+    for (const sentence of sentences) {
+      if (sentence.toLowerCase().includes('function') || 
+          sentence.toLowerCase().includes('array') ||
+          sentence.toLowerCase().includes('implement') ||
+          sentence.toLowerCase().includes('write')) {
+        return sentence.trim();
+      }
+    }
+    
+    return '';
+  };
 
   return (
     <div className={styles.container}>
@@ -629,6 +664,14 @@ export default function LearnModePage() {
           language={codeLanguage}
           problemTitle={problem.title}
           problemDescription={problem.description}
+          conversationContext={latestAIResponse}
+          currentQuestion={latestAIResponse.includes('function') || latestAIResponse.includes('Function') ? 
+            latestAIResponse.split('\n').find(line => 
+              line.toLowerCase().includes('function') || 
+              line.toLowerCase().includes('write') ||
+              line.toLowerCase().includes('implement')
+            ) || problem.title : problem.title
+          }
           onSubmitCode={handleSubmitCode}
           onClose={handleCloseCodeShell}
         />
@@ -636,3 +679,36 @@ export default function LearnModePage() {
     </div>
   );
 }
+
+  // Extract coding question from AI response
+  const extractCodingQuestion = (aiResponse: string) => {
+    // Look for common patterns in AI responses that indicate a coding task
+    const patterns = [
+      /Write a .*? function/i,
+      /Create a .*? function/i,
+      /Implement .*? function/i,
+      /Problem:\s*(.*?)(?:\n|$)/i,
+      /Task:\s*(.*?)(?:\n|$)/i,
+      /Question:\s*(.*?)(?:\n|$)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = aiResponse.match(pattern);
+      if (match) {
+        return match[1] || match[0];
+      }
+    }
+    
+    // Fallback: return first sentence that contains "function" or "array"
+    const sentences = aiResponse.split(/[.!?]/);
+    for (const sentence of sentences) {
+      if (sentence.toLowerCase().includes('function') || 
+          sentence.toLowerCase().includes('array') ||
+          sentence.toLowerCase().includes('implement') ||
+          sentence.toLowerCase().includes('write')) {
+        return sentence.trim();
+      }
+    }
+    
+    return '';
+  };
