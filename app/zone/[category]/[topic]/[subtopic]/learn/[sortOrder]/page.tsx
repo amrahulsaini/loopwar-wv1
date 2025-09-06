@@ -165,15 +165,24 @@ export default function LearnModePage() {
       .join(' ');
   };
 
-  // Format AI response to handle line breaks, bold text, and Code Shell buttons
+  // Format AI response to handle new structured format with Lucide icons
   const formatAIResponse = (text: string) => {
     if (!text) return '';
     
     const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
     
+    // Handle the new structured format with Lucide icons
+    let formattedText = text;
+    
+    // Replace Lucide icon placeholders with actual React components
+    formattedText = formattedText
+      .replace(/<lucide-target class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>')
+      .replace(/<lucide-lightbulb class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21h6"/><path d="M12 17v4"/><path d="M12 3a5 5 0 0 1 4.88 6.09A3 3 0 0 1 15 16H9a3 3 0 0 1-1.88-6.91A5 5 0 0 1 12 3z"/></svg>')
+      .replace(/<lucide-zap class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/></svg>')
+      .replace(/<lucide-message-circle class="icon" \/>/g, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
+    
     // First, handle multi-line code blocks (```code```)
     const codeBlockRegex = /```([\s\S]*?)```/g;
-    let formattedText = text;
     const codeBlocks: { placeholder: string; content: React.ReactElement }[] = [];
     
     let match;
@@ -231,8 +240,8 @@ export default function LearnModePage() {
           return <br key={index} />;
         }
         
-        // Check if we're entering the follow-up section
-        if (line.includes("What's next?")) {
+        // Check if we're entering the follow-up section (new structured format)
+        if (line.includes("What Would You Like?") || line.includes("Quick Follow-ups") || line.includes("What's next?")) {
           inFollowUpSection = true;
         }
         
@@ -244,7 +253,7 @@ export default function LearnModePage() {
         // Handle inline code with `code`
         formattedLine = formattedLine.replace(/`(.*?)`/g, '<code class="inline-code">$1</code>');
         
-        // Only convert to buttons if we're in the follow-up section AND it's a bullet point
+        // Convert follow-up bullets to clickable buttons (works with both old and new format)
         const isBulletPoint = line.match(/^[•·*-]\s+/) || line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ');
         if (inFollowUpSection && isBulletPoint) {
           // Remove bullet point and any surrounding quotes
@@ -297,11 +306,38 @@ export default function LearnModePage() {
     );
   };
 
-  // Enhanced typing animation effect with adaptive speed
+  // Enhanced typing animation with instant structured headers
   const typeMessageWithSpeed = useCallback((text: string, speed: number = 8) => {
     setIsTyping(true);
     setTypingText('');
     
+    // Parse structured response to show headers immediately
+    const isStructuredResponse = text.includes('<div class="response-section">') || 
+                                 text.includes('<h4>') || 
+                                 text.includes('<lucide-');
+    
+    if (isStructuredResponse) {
+      // For structured responses, show the full format immediately for better UX
+      setTypingText(text);
+      setIsTyping(false);
+      
+      // Add the message immediately
+      const aiMessageObj = { 
+        message: '', 
+        response: text, 
+        message_type: 'ai' as const, 
+        created_at: new Date().toISOString() 
+      };
+      setMessages(prev => [...prev, aiMessageObj]);
+      setLatestAIResponse(text);
+      setTypingText('');
+      
+      // Update conversation context
+      setConversationContext(prev => [...prev.slice(-4), `AI: ${text.substring(0, 100)}...`]);
+      return;
+    }
+    
+    // Regular typing animation for non-structured responses
     let index = 0;
     
     const timer = setInterval(() => {
