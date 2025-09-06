@@ -8,6 +8,7 @@
   flex-direction: column;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
+  min-height: 400px; /* Ensure minimum height for visibility */
 }
 
 .header {
@@ -111,6 +112,10 @@
 .emptyState {
   padding: 40px 20px;
   text-align: center;
+  background: #f8f9fa;
+  border: 2px dashed #e0e0e0;
+  margin: 20px;
+  border-radius: 8px;
 }
 
 .emptyState p {

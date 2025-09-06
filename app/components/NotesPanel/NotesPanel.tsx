@@ -46,20 +46,34 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
     personal: true
   });
 
+  // Debug log to verify component is rendering
+  console.log('NotesPanel rendering with props:', { category, topic, subtopic, sortOrder });
+
   const fetchNotes = async () => {
     try {
       setLoading(true);
+      console.log('Fetching notes for:', { category, topic, subtopic, sortOrder });
+      
       const response = await fetch(
         `/api/ai-notes?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`
       );
       
+      console.log('Notes fetch response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Notes fetch data:', data);
         setNotes(data.notes);
         setPersonalNotes(data.notes?.personalNotes || '');
+      } else {
+        console.warn('Notes fetch failed:', response.status, response.statusText);
+        // Don't fail silently - show empty state with generate button
+        setNotes(null);
       }
     } catch (error) {
       console.error('Error fetching notes:', error);
+      // Don't fail silently - show empty state with generate button
+      setNotes(null);
     } finally {
       setLoading(false);
     }
@@ -68,6 +82,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
   const generateNotes = async () => {
     try {
       setIsGenerating(true);
+      console.log('Generating notes for:', { category, topic, subtopic, sortOrder });
+      
       const response = await fetch('/api/ai-notes/generate', {
         method: 'POST',
         headers: {
@@ -81,11 +97,16 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
         })
       });
 
+      console.log('Generate notes response status:', response.status);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('Generate notes result:', result);
         // Refresh notes after generation
         await fetchNotes();
       } else {
-        console.error('Failed to generate notes');
+        const errorText = await response.text();
+        console.error('Failed to generate notes:', response.status, errorText);
       }
     } catch (error) {
       console.error('Error generating notes:', error);
@@ -141,7 +162,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
         </div>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>Generating notes...</p>
+          <p>Loading notes...</p>
         </div>
       </div>
     );
@@ -152,10 +173,27 @@ const NotesPanel: React.FC<NotesPanelProps> = ({
       <div className={`${styles.notesPanel} ${className}`}>
         <div className={styles.header}>
           <h3>📚 Learning Notes</h3>
+          <div className={styles.headerActions}>
+            <button 
+              className={styles.generateBtn}
+              onClick={generateNotes}
+              disabled={isGenerating}
+              title="Generate notes from conversation"
+            >
+              {isGenerating ? '🔄' : '🧠'} {isGenerating ? 'Generating...' : 'Generate'}
+            </button>
+            <button 
+              className={styles.refreshBtn}
+              onClick={fetchNotes}
+              title="Refresh notes"
+            >
+              ↻
+            </button>
+          </div>
         </div>
         <div className={styles.emptyState}>
-          <p>💡 Start chatting with LOOPAI to generate notes!</p>
-          <small>Notes will appear here as you learn</small>
+          <p>💡 No notes yet - click Generate to create AI learning notes!</p>
+          <small>AI will analyze your conversations and create structured learning content</small>
         </div>
       </div>
     );
