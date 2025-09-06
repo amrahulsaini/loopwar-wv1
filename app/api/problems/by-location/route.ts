@@ -55,7 +55,17 @@ export async function GET(request: NextRequest) {
       WHERE subtopic_id = ? 
       ORDER BY id ASC
       LIMIT 1 OFFSET ?
-    `, [subtopicData[0].id, parseInt(sortOrder) - 1]) as any[];
+    `, [subtopicData[0].id, parseInt(sortOrder) - 1]) as {
+      id: number;
+      title: string;
+      description: string;
+      difficulty: string;
+      hints: string;
+      time_complexity: string;
+      space_complexity: string;
+      problem_statement: string;
+      examples: string;
+    }[];
 
     if (!problems.length) {
       return NextResponse.json(
