@@ -38,7 +38,7 @@ interface TestResult {
 
 const STARTER_CODE: Record<string, string> = {
   javascript: `function twoSum(nums, target) {
-    // Your solution here
+    // Write your solution here
     for (let i = 0; i < nums.length; i++) {
         for (let j = i + 1; j < nums.length; j++) {
             if (nums[i] + nums[j] === target) {
@@ -49,25 +49,36 @@ const STARTER_CODE: Record<string, string> = {
     return [];
 }
 
-// Test the function
-const nums = JSON.parse(process.argv[2]);
-const target = parseInt(process.argv[3]);
-console.log(JSON.stringify(twoSum(nums, target)));`,
+// Test runner - reads from stdin
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.on('line', (input) => {
+    const inputData = JSON.parse(input.trim());
+    const nums = inputData.slice(0, -1);
+    const target = inputData[inputData.length - 1];
+    console.log(JSON.stringify(twoSum(nums, target)));
+    rl.close();
+});`,
   
   python: `def two_sum(nums, target):
-    # Your solution here
+    # Write your solution here
     for i in range(len(nums)):
         for j in range(i + 1, len(nums)):
             if nums[i] + nums[j] == target:
                 return [i, j]
     return []
 
-# Test the function
-import sys
+# Test runner - reads from stdin
 import json
-nums = json.loads(sys.argv[1])
-target = int(sys.argv[2])
-print(json.dumps(two_sum(nums, target)))`,
+input_data = json.loads(input().strip())
+nums = input_data[:-1]
+target = input_data[-1]
+result = two_sum(nums, target)
+print(json.dumps(result))`,
   
   java: `import java.util.*;
 
@@ -154,16 +165,20 @@ int main(int argc, char* argv[]) {
 
 const TEST_CASES: TestCase[] = [
   {
-    input: "[2,7,11,15] 9",
-    expected: "[0,1]"
+    input: JSON.stringify([2, 7, 11, 15, 9]),
+    expected: JSON.stringify([0, 1])
   },
   {
-    input: "[3,2,4] 6", 
-    expected: "[1,2]"
+    input: JSON.stringify([3, 2, 4, 6]), 
+    expected: JSON.stringify([1, 2])
   },
   {
-    input: "[3,3] 6",
-    expected: "[0,1]"
+    input: JSON.stringify([3, 3, 6]),
+    expected: JSON.stringify([0, 1])
+  },
+  {
+    input: JSON.stringify([1, 2, 3, 4, 5, 6, 7]),
+    expected: JSON.stringify([0, 5])
   }
 ];
 
@@ -279,7 +294,7 @@ export default function CodeTesting() {
               onClick={handleRunCode}
               disabled={isRunning}
             >
-              {isRunning ? '⏳ Running...' : '▶️ Run Code'}
+              {isRunning ? 'Running...' : 'Run Code'}
             </button>
           </div>
 
@@ -300,7 +315,7 @@ export default function CodeTesting() {
                   className={styles.overallStatus}
                   style={{ color: getStatusColor(allTestsPassed || false) }}
                 >
-                  {allTestsPassed ? '✅ All Tests Passed!' : '❌ Some Tests Failed'}
+                  {allTestsPassed ? 'All Tests Passed!' : 'Some Tests Failed'}
                 </span>
               </div>
 
