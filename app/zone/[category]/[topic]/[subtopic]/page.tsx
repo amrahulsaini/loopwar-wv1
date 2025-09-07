@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   Clock,
   Target,
-  Database
+  Database,
+  ChevronDown
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
@@ -47,7 +48,7 @@ export default function SubtopicPracticePage() {
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
-  const [showAllProblems, setShowAllProblems] = useState<boolean>(false);
+  const [visibleProblemsCount, setVisibleProblemsCount] = useState<number>(9);
   const [errorState, setErrorState] = useState<string | null>(null);
   
   // URL parameters
@@ -242,10 +243,10 @@ export default function SubtopicPracticePage() {
   };
 
   const handleShowMoreProblems = () => {
-    setShowAllProblems(true);
+    setVisibleProblemsCount(prev => Math.min(prev + 9, problems.length));
   };
 
-  const displayedProblems = showAllProblems ? problems : problems.slice(0, 9);
+  const displayedProblems = problems.slice(0, visibleProblemsCount);
 
   const handleProblemClick = (sortOrder: number) => {
     setLastProblemId(sortOrder);
@@ -440,42 +441,11 @@ export default function SubtopicPracticePage() {
             </div>
           </div>
 
-          {/* Subtopics Navigation */}
-          {allSubtopics.length > 1 && (
-            <div className="subtopics-section">
-              <h2 className="subtopics-title">Subtopics ({allSubtopics.length}):</h2>
-              <div className="subtopics-grid">
-                {allSubtopics.map((subtopicItem) => {
-                  const subtopicUrlName = subtopicItem.name
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/&/g, 'and')
-                    .replace(/[^a-z0-9-]/g, '');
-                  
-                  const isActive = subtopicUrlName === subtopic;
-                  
-                  return (
-                    <Link
-                      key={subtopicItem.id}
-                      href={`/zone/${category}/${topic}/${subtopicUrlName}`}
-                      className={`subtopic-card ${isActive ? 'active' : ''}`}
-                    >
-                      <h3 className="subtopic-name">{subtopicItem.name}</h3>
-                      <div className="subtopic-indicator">
-                        {isActive ? 'Current' : 'View'}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Problems List */}
           <div className="problems-section">
             <div className="problems-header">
               <h2 className="problems-title">
-                {activeMode.toUpperCase()} Problems ({displayedProblems.length}{!showAllProblems && problems.length > 9 ? ` of ${problems.length}` : ''})
+                {activeMode.toUpperCase()} Problems ({displayedProblems.length}{visibleProblemsCount < problems.length ? ` of ${problems.length}` : ''})
               </h2>
               <div className="problems-stats">
                 <div className="stat">
@@ -517,10 +487,13 @@ export default function SubtopicPracticePage() {
                       key={problem.id}
                       className={`problem-card${isLast ? ' last-active-problem' : ''}`}
                       onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
-                      style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
+                      style={{
+                        ...(isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}),
+                        animationDelay: `${index * 0.1}s`
+                      }}
                     >
                       <div className="problem-header">
-                        <div className="problem-number">#{index + 1}</div>
+                        <div className="problem-number">{problem.sortOrder || index + 1}</div>
                         <h3 className="problem-title">{problem.title}</h3>
                         <div
                           className="problem-difficulty"
@@ -556,10 +529,11 @@ export default function SubtopicPracticePage() {
             </div>
 
             {/* View More Button */}
-            {!isLoading && !showAllProblems && problems.length > 9 && (
+            {!isLoading && visibleProblemsCount < problems.length && (
               <div className="view-more-section">
                 <button className="view-more-btn" onClick={handleShowMoreProblems}>
-                  View More Problems ({problems.length - 9} remaining)
+                  <ChevronDown size={18} />
+                  View More Problems ({Math.min(9, problems.length - visibleProblemsCount)} more)
                 </button>
               </div>
             )}
