@@ -138,14 +138,32 @@ class Judge0Service {
         if (submission.status.id === 3) { // Accepted
           actual = (submission.stdout || '').trim();
           const expected = testCase.expected.trim();
-          passed = actual === expected;
+          
+          // Normalize JSON outputs for comparison
+          let normalizedActual = actual;
+          let normalizedExpected = expected;
+          
+          try {
+            // Try to parse and re-stringify both to normalize JSON format
+            const parsedActual = JSON.parse(actual);
+            const parsedExpected = JSON.parse(expected);
+            normalizedActual = JSON.stringify(parsedActual);
+            normalizedExpected = JSON.stringify(parsedExpected);
+          } catch (e) {
+            // If not valid JSON, just use trimmed strings
+            normalizedActual = actual;
+            normalizedExpected = expected;
+          }
+          
+          passed = normalizedActual === normalizedExpected;
           
           if (passed) passedCount++;
           
           console.log(`Test case ${i + 1} result:`, {
             passed,
-            expected,
-            actual,
+            expected: normalizedExpected,
+            actual: normalizedActual,
+            originalActual: actual,
             status: submission.status.description
           });
         } else {
@@ -157,7 +175,8 @@ class Judge0Service {
             status: submission.status,
             error,
             stderr: submission.stderr,
-            compile_output: submission.compile_output
+            compile_output: submission.compile_output,
+            stdout: submission.stdout
           });
         }
 
@@ -187,7 +206,7 @@ class Judge0Service {
     }
 
     const overallStatus = passedCount === testCases.length 
-      ? 'All tests passed!' 
+      ? `All ${testCases.length} tests passed!` 
       : `${passedCount}/${testCases.length} tests passed`;
 
     return {
