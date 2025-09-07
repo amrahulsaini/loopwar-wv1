@@ -25,19 +25,38 @@ interface ExecutionResult {
   error?: string;
 }
 
-interface TestResult {
-  test_case_number: number;
-  status: string;
-  output: string;
-  expected_output: string;
-  execution_time: number;
-  memory_usage: number;
-  passed: boolean;
-  error?: string;
-}
+const CodeTesting: React.FC = () => {
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('python');
+  const [code, setCode] = useState<string>('');
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [results, setResults] = useState<ExecutionResult | null>(null);
+  const [showResults, setShowResults] = useState<boolean>(false);
 
-const STARTER_CODE: Record<string, string> = {
-  javascript: `function twoSum(nums, target) {
+  // Two Sum problem test cases
+  const TEST_CASES: TestCase[] = [
+    {
+      input: JSON.stringify([2, 7, 11, 15, 9]),
+      expected: JSON.stringify([0, 1])
+    },
+    {
+      input: JSON.stringify([3, 2, 4, 6]), 
+      expected: JSON.stringify([1, 2])
+    },
+    {
+      input: JSON.stringify([3, 3, 6]),
+      expected: JSON.stringify([0, 1])
+    },
+    {
+      input: JSON.stringify([1, 2, 3, 4, 5, 6, 7]),
+      expected: JSON.stringify([0, 5])
+    }
+  ];
+
+  // Language configurations with starter code
+  const LANGUAGES = {
+    javascript: {
+      name: 'JavaScript',
+      starterCode: `function twoSum(nums, target) {
     // Write your solution here
     for (let i = 0; i < nums.length; i++) {
         for (let j = i + 1; j < nums.length; j++) {
@@ -50,21 +69,16 @@ const STARTER_CODE: Record<string, string> = {
 }
 
 // Test runner - reads from stdin
-const readline = require('readline');
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-rl.on('line', (input) => {
-    const inputData = JSON.parse(input.trim());
-    const nums = inputData.slice(0, -1);
-    const target = inputData[inputData.length - 1];
-    console.log(JSON.stringify(twoSum(nums, target)));
-    rl.close();
-});`,
-  
-  python: `def two_sum(nums, target):
+const fs = require('fs');
+const input = fs.readFileSync('/dev/stdin', 'utf8').trim();
+const inputData = JSON.parse(input);
+const nums = inputData.slice(0, -1);
+const target = inputData[inputData.length - 1];
+console.log(JSON.stringify(twoSum(nums, target)));`
+    },
+    python: {
+      name: 'Python',
+      starterCode: `def two_sum(nums, target):
     # Write your solution here
     for i in range(len(nums)):
         for j in range(i + 1, len(nums)):
@@ -74,17 +88,21 @@ rl.on('line', (input) => {
 
 # Test runner - reads from stdin
 import json
-input_data = json.loads(input().strip())
+import sys
+input_data = json.loads(sys.stdin.read().strip())
 nums = input_data[:-1]
 target = input_data[-1]
 result = two_sum(nums, target)
-print(json.dumps(result))`,
-  
-  java: `import java.util.*;
+print(json.dumps(result))`
+    },
+    java: {
+      name: 'Java',
+      starterCode: `import java.util.*;
+import java.io.*;
 
-public class Solution {
+public class Main {
     public static int[] twoSum(int[] nums, int target) {
-        // Your solution here
+        // Write your solution here
         for (int i = 0; i < nums.length; i++) {
             for (int j = i + 1; j < nums.length; j++) {
                 if (nums[i] + nums[j] == target) {
@@ -95,17 +113,19 @@ public class Solution {
         return new int[]{};
     }
     
-    public static void main(String[] args) {
-        // Parse input
-        String numsStr = args[0].replace("[", "").replace("]", "");
-        String[] numsArray = numsStr.split(",");
-        int[] nums = new int[numsArray.length];
-        for (int i = 0; i < numsArray.length; i++) {
-            nums[i] = Integer.parseInt(numsArray[i].trim());
-        }
-        int target = Integer.parseInt(args[1]);
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String input = reader.readLine();
         
-        // Call function and print result
+        // Parse JSON array: [2,7,11,15,9] -> nums=[2,7,11,15], target=9
+        input = input.trim().substring(1, input.length() - 1); // Remove [ ]
+        String[] parts = input.split(",");
+        int[] nums = new int[parts.length - 1];
+        for (int i = 0; i < parts.length - 1; i++) {
+            nums[i] = Integer.parseInt(parts[i].trim());
+        }
+        int target = Integer.parseInt(parts[parts.length - 1].trim());
+        
         int[] result = twoSum(nums, target);
         System.out.print("[");
         for (int i = 0; i < result.length; i++) {
@@ -114,16 +134,18 @@ public class Solution {
         }
         System.out.println("]");
     }
-}`,
-  
-  cpp: `#include <iostream>
+}`
+    },
+    cpp: {
+      name: 'C++',
+      starterCode: `#include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
 using namespace std;
 
 vector<int> twoSum(vector<int>& nums, int target) {
-    // Your solution here
+    // Write your solution here
     for (int i = 0; i < nums.size(); i++) {
         for (int j = i + 1; j < nums.size(); j++) {
             if (nums[i] + nums[j] == target) {
@@ -134,67 +156,44 @@ vector<int> twoSum(vector<int>& nums, int target) {
     return {};
 }
 
-int main(int argc, char* argv[]) {
-    // Parse input
-    string numsStr = argv[1];
-    int target = stoi(argv[2]);
+int main() {
+    string line;
+    getline(cin, line);
     
-    // Parse array from string like "[2,7,11,15]"
-    vector<int> nums;
-    numsStr = numsStr.substr(1, numsStr.length() - 2); // Remove [ ]
-    stringstream ss(numsStr);
+    // Parse JSON array: [2,7,11,15,9] -> nums=[2,7,11,15], target=9
+    line = line.substr(1, line.length() - 2); // Remove [ ]
+    vector<int> input;
+    stringstream ss(line);
     string item;
+    
     while (getline(ss, item, ',')) {
-        nums.push_back(stoi(item));
+        input.push_back(stoi(item));
     }
     
-    // Call function
+    vector<int> nums(input.begin(), input.end() - 1);
+    int target = input.back();
+    
     vector<int> result = twoSum(nums, target);
-    
-    // Print result
-    cout << "[";
-    for (int i = 0; i < result.size(); i++) {
-        cout << result[i];
-        if (i < result.size() - 1) cout << ",";
-    }
-    cout << "]" << endl;
+    cout << "[" << result[0] << "," << result[1] << "]" << endl;
     
     return 0;
 }`
-};
-
-const TEST_CASES: TestCase[] = [
-  {
-    input: JSON.stringify([2, 7, 11, 15, 9]),
-    expected: JSON.stringify([0, 1])
-  },
-  {
-    input: JSON.stringify([3, 2, 4, 6]), 
-    expected: JSON.stringify([1, 2])
-  },
-  {
-    input: JSON.stringify([3, 3, 6]),
-    expected: JSON.stringify([0, 1])
-  },
-  {
-    input: JSON.stringify([1, 2, 3, 4, 5, 6, 7]),
-    expected: JSON.stringify([0, 5])
-  }
-];
-
-export default function CodeTesting() {
-  const [selectedLanguage, setSelectedLanguage] = useState('python');
-  const [code, setCode] = useState(STARTER_CODE.python);
-  const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<ExecutionResult | null>(null);
-  const [showResults, setShowResults] = useState(false);
-
-  const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
-    setCode(STARTER_CODE[language as keyof typeof STARTER_CODE] || '');
-    setResults(null);
-    setShowResults(false);
+    }
   };
+
+  // Set starter code when language changes
+  React.useEffect(() => {
+    if (LANGUAGES[selectedLanguage as keyof typeof LANGUAGES]) {
+      setCode(LANGUAGES[selectedLanguage as keyof typeof LANGUAGES].starterCode);
+    }
+  }, [selectedLanguage]);
+
+  // Initialize with Python starter code
+  React.useEffect(() => {
+    if (!code && LANGUAGES.python) {
+      setCode(LANGUAGES.python.starterCode);
+    }
+  }, []);
 
   const handleRunCode = async () => {
     if (!code.trim()) {
@@ -228,18 +227,20 @@ export default function CodeTesting() {
   };
 
   const getStatusColor = (passed: boolean) => {
-    return passed ? '#4ade80' : '#f87171';
+    return passed ? '#000000' : '#666666';
   };
 
   const allTestsPassed = results?.results && results.results.length > 0 && results.results.every(r => r.passed);
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>Code Testing Platform</h1>
         <p className={styles.subtitle}>Practice coding problems with real-time execution</p>
       </div>
 
+      {/* Main Content */}
       <div className={styles.mainContent}>
         {/* Problem Panel */}
         <div className={styles.problemPanel}>
@@ -254,20 +255,32 @@ export default function CodeTesting() {
               return indices of the two numbers such that they add up to target.
             </p>
             
-            <h4>Example:</h4>
+            <p>
+              You may assume that each input would have <strong>exactly one solution</strong>, 
+              and you may not use the same element twice.
+            </p>
+            
+            <p>You can return the answer in any order.</p>
+            
+            <h4>Example 1:</h4>
             <div className={styles.example}>
               <strong>Input:</strong> nums = [2,7,11,15], target = 9<br/>
               <strong>Output:</strong> [0,1]<br/>
               <strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].
             </div>
-
+            
+            <h4>Example 2:</h4>
+            <div className={styles.example}>
+              <strong>Input:</strong> nums = [3,2,4], target = 6<br/>
+              <strong>Output:</strong> [1,2]
+            </div>
+            
             <h4>Test Cases:</h4>
             <div className={styles.testCases}>
               {TEST_CASES.map((testCase, index) => (
                 <div key={index} className={styles.testCase}>
-                  <strong>Test {index + 1}:</strong>
-                  <div>Input: {testCase.input}</div>
-                  <div>Expected: {testCase.expected}</div>
+                  <div><strong>Input:</strong> {testCase.input}</div>
+                  <div><strong>Expected:</strong> {testCase.expected}</div>
                 </div>
               ))}
             </div>
@@ -278,18 +291,18 @@ export default function CodeTesting() {
         <div className={styles.codePanel}>
           <div className={styles.codeHeader}>
             <div className={styles.languageSelector}>
-              {Object.keys(STARTER_CODE).map((lang) => (
+              {Object.entries(LANGUAGES).map(([key, lang]) => (
                 <button
-                  key={lang}
-                  className={`${styles.languageBtn} ${selectedLanguage === lang ? styles.active : ''}`}
-                  onClick={() => handleLanguageChange(lang)}
+                  key={key}
+                  className={`${styles.languageBtn} ${selectedLanguage === key ? styles.active : ''}`}
+                  onClick={() => setSelectedLanguage(key)}
                 >
-                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                  {lang.name}
                 </button>
               ))}
             </div>
             
-            <button 
+            <button
               className={styles.runButton}
               onClick={handleRunCode}
               disabled={isRunning}
@@ -297,7 +310,7 @@ export default function CodeTesting() {
               {isRunning ? 'Running...' : 'Run Code'}
             </button>
           </div>
-
+          
           <textarea
             className={styles.codeEditor}
             value={code}
@@ -305,55 +318,66 @@ export default function CodeTesting() {
             placeholder="Write your code here..."
             spellCheck={false}
           />
-
+          
           {/* Results Panel */}
-          {showResults && (
+          {showResults && results && (
             <div className={styles.resultsPanel}>
               <div className={styles.resultsHeader}>
                 <h3>Test Results</h3>
-                <span 
+                <div 
                   className={styles.overallStatus}
                   style={{ color: getStatusColor(allTestsPassed || false) }}
                 >
                   {allTestsPassed ? 'All Tests Passed!' : 'Some Tests Failed'}
-                </span>
+                </div>
               </div>
-
+              
               <div className={styles.resultsList}>
-                {results?.results?.map((result, index) => (
-                  <div 
-                    key={index} 
-                    className={styles.resultItem}
-                    style={{ borderLeft: `4px solid ${getStatusColor(result.passed)}` }}
-                  >
-                    <div className={styles.resultHeader}>
-                      <span className={styles.testNumber}>Test Case {result.testCase}</span>
-                      <span 
-                        className={styles.status}
-                        style={{ color: getStatusColor(result.passed) }}
-                      >
-                        {result.passed ? 'PASSED' : 'FAILED'}
-                      </span>
-                    </div>
-                    
-                    <div className={styles.resultDetails}>
-                      <div><strong>Input:</strong> {result.input}</div>
-                      <div><strong>Expected:</strong> {result.expected}</div>
-                      <div><strong>Actual:</strong> {result.actual || 'No output'}</div>
-                      {result.executionTime && (
-                        <div><strong>Time:</strong> {result.executionTime}s</div>
-                      )}
-                      {result.memory && (
-                        <div><strong>Memory:</strong> {Math.round(result.memory / 1024)}KB</div>
-                      )}
-                      {result.error && (
-                        <div className={styles.error}>
-                          <strong>Error:</strong> {result.error}
-                        </div>
-                      )}
+                {results.error ? (
+                  <div className={styles.resultItem}>
+                    <div className={styles.error}>
+                      <strong>Error:</strong> {results.error}
                     </div>
                   </div>
-                ))}
+                ) : (
+                  results.results.map((result, index) => (
+                    <div key={index} className={styles.resultItem}>
+                      <div className={styles.resultHeader}>
+                        <span className={styles.testNumber}>
+                          Test Case {result.testCase}
+                        </span>
+                        <span 
+                          className={styles.status}
+                          style={{ 
+                            color: getStatusColor(result.passed) 
+                          }}
+                        >
+                          {result.error ? 'ERROR' : result.passed ? 'PASSED' : 'FAILED'}
+                        </span>
+                      </div>
+                      
+                      <div className={styles.resultDetails}>
+                        <div><strong>Input:</strong> {result.input}</div>
+                        <div><strong>Expected:</strong> {result.expected}</div>
+                        <div><strong>Actual:</strong> {result.actual || 'No output'}</div>
+                        
+                        {result.executionTime && (
+                          <div><strong>Time:</strong> {result.executionTime}s</div>
+                        )}
+                        
+                        {result.memory && (
+                          <div><strong>Memory:</strong> {Math.round(result.memory / 1024)}KB</div>
+                        )}
+                        
+                        {result.error && (
+                          <div className={styles.error}>
+                            <strong>Error:</strong> {result.error}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -361,4 +385,6 @@ export default function CodeTesting() {
       </div>
     </div>
   );
-}
+};
+
+export default CodeTesting;
