@@ -42,11 +42,13 @@ export default function SubtopicPracticePage() {
   const params = useParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(true); // Start as initialized to show layout immediately
   const [username, setUsername] = useState('');
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
   const [showAllProblems, setShowAllProblems] = useState<boolean>(false);
+  const [errorState, setErrorState] = useState<string | null>(null);
   
   // URL parameters
   const category = params.category as string;
@@ -70,19 +72,21 @@ export default function SubtopicPracticePage() {
   useEffect(() => {
     const fetchUserAndProblems = async () => {
       try {
+        setIsLoading(true);
+        
         // Fetch user session
         const userResponse = await fetch('/api/user', {
           method: 'GET',
           credentials: 'include',
         });
 
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUsername(userData.username);
-        } else {
+        if (!userResponse.ok) {
           router.push('/login');
           return;
         }
+
+        const userData = await userResponse.json();
+        setUsername(userData.username);
 
         // First validate if this category/topic/subtopic exists in database
         try {
@@ -172,7 +176,7 @@ export default function SubtopicPracticePage() {
             const problemsData = await problemsResponse.json();
             console.log('Problems response:', problemsData);
             
-            if (problemsData.success) {
+            if (problemsData.success && problemsData.problems) {
               if (problemsData.problems.length > 0) {
                 // Convert database problems to frontend format
                 const formattedProblems = problemsData.problems.map((p: {
@@ -221,7 +225,9 @@ export default function SubtopicPracticePage() {
         
       } catch (error) {
         console.error('Error fetching data:', error);
-        router.push('/login');
+        setErrorState('Failed to load page data');
+        // Don't redirect on error, just show loading failed state
+        setProblems([]);
       } finally {
         setIsLoading(false);
       }
@@ -268,8 +274,29 @@ export default function SubtopicPracticePage() {
     }
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-white">
+        <LoadingSpinner global={true} text="Loading practice page..." />
+      </div>
+    );
+  }
+
+  if (errorState) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center p-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Error Loading Page</h2>
+          <p className="text-gray-600 mb-6">{errorState}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -463,52 +490,73 @@ export default function SubtopicPracticePage() {
             </div>
 
             <div className="problems-grid">
-              {displayedProblems.map((problem, index) => {
-                const isLast = lastProblemId === (problem.sortOrder || problem.id);
-                return (
-                  <div
-                    key={problem.id}
-                    className={`problem-card${isLast ? ' last-active-problem' : ''}`}
-                    onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
-                    style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
-                  >
+              {isLoading ? (
+                // Loading skeleton
+                Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="problem-card animate-pulse">
                     <div className="problem-header">
-                      <div className="problem-number">#{index + 1}</div>
-                      <h3 className="problem-title">{problem.title}</h3>
-                      <div
-                        className="problem-difficulty"
-                        style={{ color: getDifficultyColor(problem.difficulty) }}
-                      >
-                        {problem.difficulty}
+                      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/3"></div>
                       </div>
                     </div>
-                    <p className="problem-description">{problem.description}</p>
-                    <div className="problem-footer">
-                      <div className="problem-status">
-                        {problem.solved ? (
-                          <div className="status-solved">
-                            <CheckCircle2 size={16} />
-                            <span>Solved</span>
-                          </div>
-                        ) : (
-                          <div className="status-unsolved">
-                            <Clock size={16} />
-                            <span>Not Started</span>
-                          </div>
-                        )}
-                      </div>
-                      <button className="start-problem-btn">
-                        <Play size={16} />
-                        <span>Start {activeMode}</span>
-                      </button>
+                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      <div className="h-8 bg-gray-200 rounded w-24"></div>
                     </div>
                   </div>
-                );
-              })}
+                ))
+              ) : (
+                displayedProblems.map((problem, index) => {
+                  const isLast = lastProblemId === (problem.sortOrder || problem.id);
+                  return (
+                    <div
+                      key={problem.id}
+                      className={`problem-card${isLast ? ' last-active-problem' : ''}`}
+                      onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
+                      style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
+                    >
+                      <div className="problem-header">
+                        <div className="problem-number">#{index + 1}</div>
+                        <h3 className="problem-title">{problem.title}</h3>
+                        <div
+                          className="problem-difficulty"
+                          style={{ color: getDifficultyColor(problem.difficulty) }}
+                        >
+                          {problem.difficulty}
+                        </div>
+                      </div>
+                      <p className="problem-description">{problem.description}</p>
+                      <div className="problem-footer">
+                        <div className="problem-status">
+                          {problem.solved ? (
+                            <div className="status-solved">
+                              <CheckCircle2 size={16} />
+                              <span>Solved</span>
+                            </div>
+                          ) : (
+                            <div className="status-unsolved">
+                              <Clock size={16} />
+                              <span>Not Started</span>
+                            </div>
+                          )}
+                        </div>
+                        <button className="start-problem-btn">
+                          <Play size={16} />
+                          <span>Start {activeMode}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* View More Button */}
-            {!showAllProblems && problems.length > 9 && (
+            {!isLoading && !showAllProblems && problems.length > 9 && (
               <div className="view-more-section">
                 <button className="view-more-btn" onClick={handleShowMoreProblems}>
                   View More Problems ({problems.length - 9} remaining)
@@ -517,7 +565,7 @@ export default function SubtopicPracticePage() {
             )}
 
             {/* No Problems Added Message */}
-            {problems.length === 0 && (
+            {!isLoading && problems.length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">
                   <Database size={48} />
