@@ -487,10 +487,7 @@ export default function SubtopicPracticePage() {
                       key={problem.id}
                       className={`problem-card${isLast ? ' last-active-problem' : ''}`}
                       onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
-                      style={{
-                        ...(isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}),
-                        animationDelay: `${index * 0.1}s`
-                      }}
+                      style={isLast ? { border: '2px solid #2563eb', boxShadow: '0 0 8px #2563eb33' } : {}}
                     >
                       <div className="problem-header">
                         <div className="problem-number">{problem.sortOrder || index + 1}</div>
