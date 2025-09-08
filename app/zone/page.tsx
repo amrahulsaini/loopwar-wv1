@@ -713,6 +713,12 @@ export default function ZonePage() {
                                   href="/challengers"
                                   className="challenge-icon-btn"
                                   title="Practice hardcore coding challenges"
+                                  onMouseEnter={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const tooltip = e.currentTarget;
+                                    tooltip.style.setProperty('--tooltip-x', `${rect.left + rect.width / 2}px`);
+                                    tooltip.style.setProperty('--tooltip-y', `${rect.top - 10}px`);
+                                  }}
                                 >
                                   <Zap size={20} />
                                 </Link>
