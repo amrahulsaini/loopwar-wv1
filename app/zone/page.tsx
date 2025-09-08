@@ -13,7 +13,9 @@ import {
   Bot,
   LogOut,
   Settings,
-  TreePine
+  TreePine,
+  Zap,
+  Trophy
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner'; 
@@ -464,12 +466,6 @@ export default function ZonePage() {
     window.location.href = subtopicUrl;
   };
 
-  const handleTopicStart = (topicName: string) => {
-    console.log(`🚀 Starting practice for topic: ${topicName}`);
-    // TODO: Navigate to topic overview page
-    // This is where you can add navigation to topic content
-  };
-
   // Authentication check on mount
   useEffect(() => {
     const fetchUsername = async () => {
@@ -713,12 +709,14 @@ export default function ZonePage() {
                               )}
 
                               <div className="topic-actions">
-                                <button 
-                                  className="start-topic-btn primary"
-                                  onClick={() => handleTopicStart(topic.name)}
+                                <Link 
+                                  href="/challengers"
+                                  className="challenge-btn"
+                                  title="Challenge Problems"
                                 >
-                                  🚀 Start Topic Practice
-                                </button>
+                                  <Zap size={18} />
+                                  <span>Challenges</span>
+                                </Link>
                                 {selectedSubtopic?.topic === topic.name && (
                                   <button className="start-subtopic-btn secondary">
                                     📚 Practice: {selectedSubtopic.subtopic}
