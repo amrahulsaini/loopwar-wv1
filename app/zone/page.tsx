@@ -712,7 +712,7 @@ export default function ZonePage() {
                                 <Link 
                                   href="/challengers"
                                   className="challenge-icon-btn"
-                                  title="Practice the most tough, difficult and hardcore code challenges"
+                                  title="Practice hardcore coding challenges"
                                 >
                                   <Zap size={20} />
                                 </Link>
