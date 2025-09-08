@@ -711,17 +711,11 @@ export default function ZonePage() {
                               <div className="topic-actions">
                                 <Link 
                                   href="/challengers"
-                                  className="challenge-btn"
-                                  title="Challenge Problems"
+                                  className="challenge-icon-btn"
+                                  title="Practice the most tough, difficult and hardcore code challenges"
                                 >
-                                  <Zap size={18} />
-                                  <span>Challenges</span>
+                                  <Zap size={20} />
                                 </Link>
-                                {selectedSubtopic?.topic === topic.name && (
-                                  <button className="start-subtopic-btn secondary">
-                                    📚 Practice: {selectedSubtopic.subtopic}
-                                  </button>
-                                )}
                               </div>
                             </div>
                           ))}
