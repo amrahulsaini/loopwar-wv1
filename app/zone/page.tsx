@@ -640,8 +640,25 @@ export default function ZonePage() {
                       {/* Topics Content */}
                       <div className="topics-content">
                         <div className="topics-header">
-                          <h2>{renderIcon(selectedCategoryData?.icon || '', 24)} {selectedCategory}</h2>
-                          <p>{selectedCategoryData?.topics.length} topics available</p>
+                          <div className="header-content">
+                            <div className="header-info">
+                              <h2>{renderIcon(selectedCategoryData?.icon || '', 24)} {selectedCategory}</h2>
+                              <p>{selectedCategoryData?.topics.length} topics available</p>
+                            </div>
+                            
+                            <Link 
+                              href="/challengers"
+                              className="challenge-master-btn"
+                            >
+                              <div className="challenge-icon-wrapper">
+                                <Zap size={24} />
+                              </div>
+                              <div className="challenge-content">
+                                <h3>Challenge Mode</h3>
+                                <p>Practice hardcore challenging questions with logical thinking assisted by LoopAI</p>
+                              </div>
+                            </Link>
+                          </div>
                         </div>
 
                         <div className="topics-grid">
@@ -708,79 +725,7 @@ export default function ZonePage() {
                                 </div>
                               )}
 
-                              <div className="topic-actions">
-                                <Link 
-                                  href="/challengers"
-                                  className="challenge-icon-btn"
-                                  title="Practice hardcore coding challenges"
-                                  onMouseEnter={(e) => {
-                                    const button = e.currentTarget;
-                                    const rect = button.getBoundingClientRect();
-                                    const tooltipWidth = 220; // Approximate tooltip width
-                                    const tooltipHeight = 50; // Approximate tooltip height
-                                    const margin = 15; // Margin from edges
-                                    
-                                    // Get viewport dimensions
-                                    const viewportWidth = window.innerWidth;
-                                    const viewportHeight = window.innerHeight;
-                                    
-                                    // Calculate button center
-                                    const buttonCenterX = rect.left + rect.width / 2;
-                                    const buttonCenterY = rect.top + rect.height / 2;
-                                    
-                                    let tooltipX = buttonCenterX;
-                                    let tooltipY = rect.top - tooltipHeight - margin;
-                                    let position = 'top';
-                                    
-                                    // Smart positioning logic
-                                    
-                                    // Check if tooltip fits above
-                                    if (tooltipY < margin) {
-                                      // Try below
-                                      tooltipY = rect.bottom + margin;
-                                      position = 'bottom';
-                                      
-                                      // If doesn't fit below either, try left/right
-                                      if (tooltipY + tooltipHeight > viewportHeight - margin) {
-                                        tooltipY = buttonCenterY;
-                                        
-                                        // Try right side
-                                        tooltipX = rect.right + margin;
-                                        position = 'right';
-                                        
-                                        // If doesn't fit right, try left
-                                        if (tooltipX + tooltipWidth > viewportWidth - margin) {
-                                          tooltipX = rect.left - tooltipWidth - margin;
-                                          position = 'left';
-                                        }
-                                      }
-                                    }
-                                    
-                                    // Ensure tooltip doesn't go off-screen horizontally for top/bottom positions
-                                    if (position === 'top' || position === 'bottom') {
-                                      const minX = tooltipWidth / 2 + margin;
-                                      const maxX = viewportWidth - tooltipWidth / 2 - margin;
-                                      tooltipX = Math.max(minX, Math.min(maxX, tooltipX));
-                                    }
-                                    
-                                    // Ensure tooltip doesn't go off-screen vertically for left/right positions  
-                                    if (position === 'left' || position === 'right') {
-                                      const minY = tooltipHeight / 2 + margin;
-                                      const maxY = viewportHeight - tooltipHeight / 2 - margin;
-                                      tooltipY = Math.max(minY, Math.min(maxY, tooltipY));
-                                    }
-                                    
-                                    // Set CSS custom properties
-                                    button.style.setProperty('--tooltip-x', `${tooltipX}px`);
-                                    button.style.setProperty('--tooltip-y', `${tooltipY}px`);
-                                    button.style.setProperty('--tooltip-position', position);
-                                    button.style.setProperty('--button-x', `${buttonCenterX}px`);
-                                    button.style.setProperty('--button-y', `${buttonCenterY}px`);
-                                  }}
-                                >
-                                  <Zap size={20} />
-                                </Link>
-                              </div>
+
                             </div>
                           ))}
                         </div>
