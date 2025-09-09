@@ -67,6 +67,7 @@ export default function Home() {
               <li><a href="#showcase">Showcase</a></li>
               <li><a href="#meetup">AI Meetup</a></li>
               <li><a href="#community">Community</a></li>
+              <li><Link href="/challengers">Challengers</Link></li>
             </ul>
             <div className="nav-actions">
               <Link href="/join" className="btn btn-join">Join the War</Link>
