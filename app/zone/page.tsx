@@ -14,8 +14,7 @@ import {
   LogOut,
   Settings,
   TreePine,
-  Zap,
-  Trophy
+  Zap
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner'; 

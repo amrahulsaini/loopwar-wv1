@@ -3,7 +3,7 @@ export const ADDITIONAL_PROBLEMS = {
   'two-sum': {
     id: 'two-sum',
     title: 'Two Sum',
-    difficulty: 'Easy' as 'Easy',
+    difficulty: 'Easy' as const,
     description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
 
 You may assume that each input would have exactly one solution, and you may not use the same element twice.
@@ -51,7 +51,7 @@ You can return the answer in any order.`,
   'longest-substring': {
     id: 'longest-substring',
     title: 'Longest Substring Without Repeating Characters',
-    difficulty: 'Medium' as 'Medium',
+    difficulty: 'Medium' as const,
     description: `Given a string s, find the length of the longest substring without repeating characters.
 
 A substring is a contiguous non-empty sequence of characters within a string.`,

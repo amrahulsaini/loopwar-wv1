@@ -43,7 +43,6 @@ export default function SubtopicPracticePage() {
   const params = useParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(true); // Start as initialized to show layout immediately
   const [username, setUsername] = useState('');
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -275,7 +274,7 @@ export default function SubtopicPracticePage() {
     }
   };
 
-  if (!isInitialized) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
         <LoadingSpinner global={true} text="Loading practice page..." />

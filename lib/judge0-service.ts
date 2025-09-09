@@ -149,7 +149,7 @@ class Judge0Service {
             const parsedExpected = JSON.parse(expected);
             normalizedActual = JSON.stringify(parsedActual);
             normalizedExpected = JSON.stringify(parsedExpected);
-          } catch (e) {
+          } catch {
             // If not valid JSON, just use trimmed strings
             normalizedActual = actual;
             normalizedExpected = expected;

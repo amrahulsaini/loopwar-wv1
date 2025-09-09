@@ -193,7 +193,7 @@ int main() {
     if (!code && LANGUAGES.python) {
       setCode(LANGUAGES.python.starterCode);
     }
-  }, []);
+  }, [code]);
 
   const handleRunCode = async () => {
     if (!code.trim()) {

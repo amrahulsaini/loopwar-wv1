@@ -41,18 +41,8 @@ interface Problem {
   testCases: TestCase[];
 }
 
-const ChallengersPage: React.FC = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('python');
-  const [code, setCode] = useState<string>('');
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [results, setResults] = useState<ExecutionResult | null>(null);
-  const [showResults, setShowResults] = useState<boolean>(false);
-  const [fontSize, setFontSize] = useState<number>(14);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [selectedProblem, setSelectedProblem] = useState<string>('k-diverse-partition');
-
-  // Merge K-Diverse Partition with Additional Problems
-  const PROBLEMS: Record<string, Problem> = {
+// Merge K-Diverse Partition with Additional Problems
+const PROBLEMS: Record<string, Problem> = {
     'k-diverse-partition': {
       id: 'k-diverse-partition',
       title: 'K-Diverse Partition',
@@ -119,8 +109,18 @@ Return the minimum number of partitions needed.`,
     ...ADDITIONAL_PROBLEMS
   };
 
+const ChallengersPage: React.FC = () => {
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('python');
+  const [code, setCode] = useState<string>('');
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [results, setResults] = useState<ExecutionResult | null>(null);
+  const [showResults, setShowResults] = useState<boolean>(false);
+  const [fontSize, setFontSize] = useState<number>(14);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [selectedProblem, setSelectedProblem] = useState<string>('k-diverse-partition');
+
   // Get current language configurations based on selected problem
-  const getCurrentLanguages = () => {
+  const getCurrentLanguages = useCallback(() => {
     const problemLanguages = PROBLEM_LANGUAGES[selectedProblem as keyof typeof PROBLEM_LANGUAGES];
     return problemLanguages || {
       python: {
@@ -134,7 +134,7 @@ Return the minimum number of partitions needed.`,
         starterCode: '// Write your solution here\n'
       }
     };
-  };
+  }, [selectedProblem]);
 
   // Set starter code when language or problem changes
   useEffect(() => {
@@ -142,7 +142,7 @@ Return the minimum number of partitions needed.`,
     if (currentLanguages[selectedLanguage as keyof typeof currentLanguages]) {
       setCode(currentLanguages[selectedLanguage as keyof typeof currentLanguages].starterCode);
     }
-  }, [selectedLanguage, selectedProblem]);
+  }, [selectedLanguage, selectedProblem, getCurrentLanguages]);
 
   // Initialize with Python starter code
   useEffect(() => {
@@ -152,9 +152,9 @@ Return the minimum number of partitions needed.`,
         setCode(currentLanguages.python.starterCode);
       }
     }
-  }, []);
+  }, [code, getCurrentLanguages]);
 
-  const handleRunCode = async () => {
+  const handleRunCode = useCallback(async () => {
     if (!code.trim()) {
       alert('Please enter some code!');
       return;
@@ -185,14 +185,14 @@ Return the minimum number of partitions needed.`,
     } finally {
       setIsRunning(false);
     }
-  };
+  }, [code, selectedLanguage, selectedProblem]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.key === 'Enter') {
       e.preventDefault();
       handleRunCode();
     }
-  }, [code, selectedLanguage]);
+  }, [handleRunCode]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
