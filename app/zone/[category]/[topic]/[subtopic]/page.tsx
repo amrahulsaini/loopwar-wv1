@@ -611,65 +611,52 @@ export default function SubtopicPracticePage() {
                   </div>
                 ))
               ) : activeMode === 'quiz' ? (
-                // Quiz Cards
-                displayedQuizzes.map((quiz) => (
+                // Problems as Quiz Cards
+                displayedProblems.map((problem, index) => (
                   <div
-                    key={quiz.id}
+                    key={problem.id}
                     className="quiz-card"
-                    onClick={() => handleQuizClick(quiz.sortOrder || quiz.id)}
+                    onClick={() => handleProblemClick(problem.sortOrder || problem.id)}
                   >
                     <div className="quiz-header">
                       <div className="quiz-type-indicator">
-                        {quiz.isAIGenerated ? (
-                          <div className="ai-badge">
-                            <Zap size={14} />
-                            <span>AI</span>
-                          </div>
-                        ) : (
-                          <div className="manual-badge">
-                            <Users size={14} />
-                            <span>Manual</span>
-                          </div>
-                        )}
+                        <div className="ai-badge">
+                          <Zap size={14} />
+                          <span>Quiz</span>
+                        </div>
                       </div>
-                      <h3 className="quiz-title">{quiz.title}</h3>
+                      <div className="problem-number">{problem.sortOrder || index + 1}</div>
+                      <h3 className="quiz-title">{problem.title}</h3>
                       <div
                         className="quiz-difficulty"
-                        style={{ color: getDifficultyColor(quiz.difficulty) }}
+                        style={{ color: getDifficultyColor(problem.difficulty) }}
                       >
-                        {quiz.difficulty}
+                        {problem.difficulty}
                       </div>
                     </div>
-                    <p className="quiz-description">{quiz.description}</p>
+                    <p className="quiz-description">Take a quiz based on: {problem.description}</p>
                     
                     <div className="quiz-meta">
                       <div className="quiz-info">
                         <div className="quiz-questions">
                           <HelpCircle size={14} />
-                          <span>{quiz.questionCount} Questions</span>
+                          <span>10-15 Questions</span>
                         </div>
                         <div className="quiz-types">
                           <Brain size={14} />
-                          <span>{quiz.questionTypes.join(', ')}</span>
+                          <span>MCQ, True/False, Logical</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="quiz-footer">
                       <div className="quiz-stats">
-                        {quiz.bestScore !== undefined ? (
-                          <div className="quiz-best-score">
-                            <Award size={16} />
-                            <span>Best: {quiz.bestScore}%</span>
-                          </div>
-                        ) : (
-                          <div className="quiz-not-attempted">
-                            <Clock size={16} />
-                            <span>Not Attempted</span>
-                          </div>
-                        )}
-                        <div className="quiz-attempts">
-                          <span>{quiz.attempts} attempt{quiz.attempts !== 1 ? 's' : ''}</span>
+                        <div className="quiz-not-attempted">
+                          <Clock size={16} />
+                          <span>Ready to Start</span>
+                        </div>
+                        <div className="quiz-info-text">
+                          <span>Click to generate or take quiz</span>
                         </div>
                       </div>
                       <button className="start-quiz-btn">
@@ -736,43 +723,27 @@ export default function SubtopicPracticePage() {
               </div>
             )}
             
-            {!isLoading && activeMode !== 'quiz' && visibleProblemsCount < problems.length && (
+            {!isLoading && visibleProblemsCount < problems.length && (
               <div className="view-more-section">
                 <button className="view-more-btn" onClick={handleShowMoreProblems}>
                   <ChevronDown size={18} />
-                  View More Problems ({Math.min(9, problems.length - visibleProblemsCount)} more)
+                  {activeMode === 'quiz' 
+                    ? `View More Quiz Options (${Math.min(9, problems.length - visibleProblemsCount)} more)`
+                    : `View More Problems (${Math.min(9, problems.length - visibleProblemsCount)} more)`
+                  }
                 </button>
               </div>
             )}
 
             {/* Empty State Messages */}
-            {!isLoading && activeMode === 'quiz' && quizzes.length === 0 && (
+            {!isLoading && activeMode === 'quiz' && problems.length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">
                   <HelpCircle size={48} />
                 </div>
-                <h3>No Quizzes Available</h3>
-                <p>No quizzes have been created for <strong>{subtopicDisplay}</strong> yet.</p>
-                <div className="empty-actions">
-                  <button 
-                    className="generate-first-quiz-btn"
-                    onClick={generateNewQuiz}
-                    disabled={isGeneratingQuiz}
-                  >
-                    {isGeneratingQuiz ? (
-                      <>
-                        <div className="spinner"></div>
-                        <span>Generating Your First Quiz...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Zap size={20} />
-                        <span>Generate First Quiz with AI</span>
-                      </>
-                    )}
-                  </button>
-                  <p className="help-text">Our AI will create personalized questions covering key concepts!</p>
-                </div>
+                <h3>No Problems Available for Quizzes</h3>
+                <p>Add problems via the admin dashboard to enable quiz mode.</p>
+                <p className="help-text">Each problem can be turned into an AI-generated quiz!</p>
               </div>
             )}
             
