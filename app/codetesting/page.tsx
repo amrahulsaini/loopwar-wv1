@@ -186,14 +186,14 @@ int main() {
     if (LANGUAGES[selectedLanguage as keyof typeof LANGUAGES]) {
       setCode(LANGUAGES[selectedLanguage as keyof typeof LANGUAGES].starterCode);
     }
-  }, [selectedLanguage]);
+  }, [selectedLanguage, LANGUAGES]);
 
   // Initialize with Python starter code
   React.useEffect(() => {
     if (!code && LANGUAGES.python) {
       setCode(LANGUAGES.python.starterCode);
     }
-  }, [code]);
+  }, [code, LANGUAGES.python]);
 
   const handleRunCode = async () => {
     if (!code.trim()) {

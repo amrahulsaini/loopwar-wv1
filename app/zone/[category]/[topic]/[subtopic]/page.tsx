@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -264,7 +264,7 @@ export default function SubtopicPracticePage() {
   }, [category, topic, subtopic, router]);
 
   // Fetch quizzes for this subtopic
-  const fetchQuizzes = async () => {
+  const fetchQuizzes = useCallback(async () => {
     try {
       const response = await fetch(`/api/quizzes?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
         method: 'GET',
@@ -285,7 +285,14 @@ export default function SubtopicPracticePage() {
       console.error('Error fetching quizzes:', error);
       setQuizzes([]);
     }
-  };
+  }, [category, topic, subtopic]);
+
+  // Load quizzes when component mounts or dependencies change
+  useEffect(() => {
+    if (activeMode === 'quiz') {
+      fetchQuizzes();
+    }
+  }, [activeMode, fetchQuizzes]);
 
   // Generate new quiz using AI
   const generateNewQuiz = async () => {

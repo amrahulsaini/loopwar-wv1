@@ -83,6 +83,38 @@ export default function QuizPage() {
     fetchQuiz();
   }, [fetchQuiz]);
 
+  const handleQuizSubmit = useCallback(async () => {
+    if (!quiz) return;
+
+    setIsQuizCompleted(true);
+
+    // Calculate final score
+    const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length;
+    const totalPoints = userAnswers.reduce((total, answer, index) => {
+      return total + (answer.isCorrect ? quiz.questions[index]?.points || 0 : 0);
+    }, 0);
+
+    // Save quiz result to database
+    try {
+      await fetch('/api/quiz/result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizId: quiz.id,
+          userAnswers,
+          score: totalPoints,
+          totalQuestions: quiz.questions.length,
+          correctAnswers,
+          timeSpent: quiz.time_limit ? (quiz.time_limit * 60 - timeLeft) : null,
+        }),
+      });
+    } catch (error) {
+      console.error('Error saving quiz result:', error);
+    }
+  }, [quiz, userAnswers, timeLeft]);
+
   // Timer effect
   useEffect(() => {
     if (quiz && quiz.time_limit && timeLeft > 0 && !isQuizCompleted) {
@@ -91,7 +123,7 @@ export default function QuizPage() {
     } else if (timeLeft === 0 && quiz?.time_limit && !isQuizCompleted) {
       handleQuizSubmit();
     }
-  }, [timeLeft, quiz, isQuizCompleted]);
+  }, [timeLeft, quiz, isQuizCompleted, handleQuizSubmit]);
 
   const generateQuizWithAI = async () => {
     try {
@@ -177,37 +209,7 @@ export default function QuizPage() {
     }
   };
 
-  const handleQuizSubmit = async () => {
-    if (!quiz) return;
 
-    setIsQuizCompleted(true);
-
-    // Calculate final score
-    const correctAnswers = userAnswers.filter(answer => answer.isCorrect).length;
-    const totalPoints = userAnswers.reduce((total, answer, index) => {
-      return total + (answer.isCorrect ? quiz.questions[index]?.points || 0 : 0);
-    }, 0);
-
-    // Save quiz result to database
-    try {
-      await fetch('/api/quiz/result', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          quizId: quiz.id,
-          userAnswers,
-          score: totalPoints,
-          totalQuestions: quiz.questions.length,
-          correctAnswers,
-          timeSpent: quiz.time_limit ? (quiz.time_limit * 60 - timeLeft) : null,
-        }),
-      });
-    } catch (error) {
-      console.error('Error saving quiz result:', error);
-    }
-  };
 
   const resetQuiz = () => {
     setCurrentQuestionIndex(0);

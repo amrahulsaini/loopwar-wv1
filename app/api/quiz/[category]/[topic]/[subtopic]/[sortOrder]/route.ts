@@ -30,10 +30,10 @@ interface QuestionRow {
 // GET /api/quiz/[category]/[topic]/[subtopic]/[sortOrder]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { category: string; topic: string; subtopic: string; sortOrder: string } }
+  { params }: { params: Promise<{ category: string; topic: string; subtopic: string; sortOrder: string }> }
 ) {
   try {
-    const { category, topic, subtopic, sortOrder } = params;
+    const { category, topic, subtopic, sortOrder } = await params;
 
     // First, check if quiz exists
     const quizRows = await Database.query(
