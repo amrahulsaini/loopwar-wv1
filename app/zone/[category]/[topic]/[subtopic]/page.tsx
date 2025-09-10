@@ -605,7 +605,7 @@ export default function SubtopicPracticePage() {
                 ))
               ) : activeMode === 'quiz' ? (
                 // Quiz Cards
-                displayedQuizzes.map((quiz, index) => (
+                displayedQuizzes.map((quiz) => (
                   <div
                     key={quiz.id}
                     className="quiz-card"

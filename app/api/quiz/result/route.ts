@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
        (quiz_id, user_id, score, total_questions, correct_answers, time_spent, completed_at) 
        VALUES (?, ?, ?, ?, ?, ?, NOW())`,
       [quizId, userId, score, totalQuestions, correctAnswers, timeSpent]
-    ) as any;
+    ) as { insertId: number };
 
     // Insert individual answer records
     for (const answer of userAnswers) {

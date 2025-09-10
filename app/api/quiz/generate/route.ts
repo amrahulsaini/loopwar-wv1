@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       `SELECT id FROM quizzes 
        WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
       [category, topic, subtopic, sortOrder]
-    ) as any[];
+    ) as Array<{ id: number }>;
 
     if (existingQuiz.length > 0) {
       return NextResponse.json(
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate total points
-    const totalPoints = quizData.questions.reduce((sum: number, q: any) => sum + (q.points || 1), 0);
+    const totalPoints = quizData.questions.reduce((sum: number, q: { points?: number }) => sum + (q.points || 1), 0);
 
     // Insert quiz into database
     const quizResult = await Database.query(
@@ -134,13 +134,21 @@ export async function POST(request: NextRequest) {
         quizData.time_limit || 30,
         1
       ]
-    ) as any;
+    ) as { insertId: number };
 
     const quizId = quizResult.insertId;
 
     // Insert questions
     for (let i = 0; i < quizData.questions.length; i++) {
-      const question = quizData.questions[i];
+      const question = quizData.questions[i] as { 
+        type: string; 
+        question: string; 
+        options?: string[]; 
+        correct_answer: string | boolean | string[]; 
+        explanation?: string; 
+        difficulty?: string; 
+        points?: number; 
+      };
       
       let correctAnswerType = 'string';
       let correctAnswerValue = question.correct_answer;
@@ -185,7 +193,15 @@ export async function POST(request: NextRequest) {
       time_limit: quizData.time_limit || 30,
       is_ai_generated: true,
       created_at: new Date().toISOString(),
-      questions: quizData.questions.map((q: any, index: number) => ({
+      questions: quizData.questions.map((q: { 
+        type: string; 
+        question: string; 
+        options?: string[]; 
+        correct_answer: string | boolean | string[]; 
+        explanation?: string; 
+        difficulty?: string; 
+        points?: number; 
+      }, index: number) => ({
         id: `temp_${index}`,
         type: q.type,
         question: q.question,

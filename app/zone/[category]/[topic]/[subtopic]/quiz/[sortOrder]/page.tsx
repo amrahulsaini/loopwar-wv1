@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Clock, CheckCircle, XCircle, RotateCcw, Zap, Brain, FileText, CheckSquare } from 'lucide-react';
 import './quiz.css';
@@ -54,22 +54,7 @@ export default function QuizPage() {
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Fetch quiz data
-  useEffect(() => {
-    fetchQuiz();
-  }, [sortOrder]);
-
-  // Timer effect
-  useEffect(() => {
-    if (quiz && quiz.time_limit && timeLeft > 0 && !isQuizCompleted) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && quiz?.time_limit && !isQuizCompleted) {
-      handleQuizSubmit();
-    }
-  }, [timeLeft, quiz, isQuizCompleted]);
-
-  const fetchQuiz = async () => {
+  const fetchQuiz = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/quiz/${category}/${topic}/${subtopic}/${sortOrder}`);
@@ -91,7 +76,22 @@ export default function QuizPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, topic, subtopic, sortOrder]);
+
+  // Fetch quiz data
+  useEffect(() => {
+    fetchQuiz();
+  }, [fetchQuiz]);
+
+  // Timer effect
+  useEffect(() => {
+    if (quiz && quiz.time_limit && timeLeft > 0 && !isQuizCompleted) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && quiz?.time_limit && !isQuizCompleted) {
+      handleQuizSubmit();
+    }
+  }, [timeLeft, quiz, isQuizCompleted]);
 
   const generateQuizWithAI = async () => {
     try {
@@ -357,7 +357,7 @@ export default function QuizPage() {
           <div className="quiz-not-found-content">
             <Zap className="quiz-not-found-icon" />
             <h2>No Quiz Available</h2>
-            <p>There's no pre-generated quiz for this topic yet. Would you like to generate one using AI?</p>
+            <p>There&apos;s no pre-generated quiz for this topic yet. Would you like to generate one using AI?</p>
             
             <button 
               onClick={generateQuizWithAI}

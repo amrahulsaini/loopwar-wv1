@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from '@/lib/database';
 
+interface QuizRow {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  topic: string;
+  subtopic: string;
+  sort_order: number;
+  total_points: number;
+  time_limit: number;
+  created_at: string;
+  is_ai_generated: boolean;
+}
+
+interface QuestionRow {
+  id: number;
+  question_type: string;
+  question_text: string;
+  options: string | null;
+  correct_answer: string;
+  correct_answer_type: string;
+  explanation: string;
+  difficulty: string;
+  points: number;
+}
+
 // GET /api/quiz/[category]/[topic]/[subtopic]/[sortOrder]
 export async function GET(
   request: NextRequest,
@@ -17,7 +43,7 @@ export async function GET(
        WHERE q.category = ? AND q.topic = ? AND q.subtopic = ? AND q.sort_order = ?
        GROUP BY q.id`,
       [category, topic, subtopic, parseInt(sortOrder)]
-    ) as any[];
+    ) as QuizRow[];
 
     if (!quizRows || quizRows.length === 0) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
@@ -31,7 +57,7 @@ export async function GET(
        WHERE quiz_id = ? 
        ORDER BY question_order`,
       [quiz.id]
-    ) as any[];
+    ) as QuestionRow[];
 
     const quizData = {
       id: quiz.id,
@@ -45,7 +71,7 @@ export async function GET(
       time_limit: quiz.time_limit,
       created_at: quiz.created_at,
       is_ai_generated: quiz.is_ai_generated,
-      questions: questionRows.map((q: any) => ({
+      questions: questionRows.map((q: QuestionRow) => ({
         id: q.id,
         type: q.question_type,
         question: q.question_text,
