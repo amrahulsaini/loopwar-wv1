@@ -13,7 +13,11 @@ import {
   Clock,
   Target,
   Database,
-  ChevronDown
+  ChevronDown,
+  Zap,
+  Award,
+  Users,
+  Brain
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
@@ -35,7 +39,23 @@ interface Subtopic {
   topic_id: number;
 }
 
-type PracticeMode = 'learn' | 'mcq' | 'code';
+type PracticeMode = 'learn' | 'quiz' | 'code';
+
+interface Quiz {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  questionCount: number;
+  questionTypes: string[];
+  isAIGenerated: boolean;
+  createdAt: string;
+  lastAttempt?: string;
+  bestScore?: number;
+  attempts: number;
+  totalQuestions: number;
+  sortOrder?: number;
+}
 
 export default function SubtopicPracticePage() {
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
@@ -46,9 +66,12 @@ export default function SubtopicPracticePage() {
   const [username, setUsername] = useState('');
   const [activeMode, setActiveMode] = useState<PracticeMode>('learn');
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
   const [visibleProblemsCount, setVisibleProblemsCount] = useState<number>(9);
+  const [visibleQuizzesCount, setVisibleQuizzesCount] = useState<number>(9);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState<boolean>(false);
   
   // URL parameters
   const category = params.category as string;
@@ -222,12 +245,16 @@ export default function SubtopicPracticePage() {
           // On error, set empty array (will show "No problems" message)
           setProblems([]);
         }
+
+        // Fetch quizzes for the quiz mode
+        await fetchQuizzes();
         
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrorState('Failed to load page data');
         // Don't redirect on error, just show loading failed state
         setProblems([]);
+        setQuizzes([]);
       } finally {
         setIsLoading(false);
       }
@@ -235,6 +262,70 @@ export default function SubtopicPracticePage() {
 
     fetchUserAndProblems();
   }, [category, topic, subtopic, router]);
+
+  // Fetch quizzes for this subtopic
+  const fetchQuizzes = async () => {
+    try {
+      const response = await fetch(`/api/quizzes?category=${encodeURIComponent(category)}&topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const quizzesData = await response.json();
+        if (quizzesData.success && quizzesData.quizzes) {
+          setQuizzes(quizzesData.quizzes);
+        } else {
+          setQuizzes([]);
+        }
+      } else {
+        setQuizzes([]);
+      }
+    } catch (error) {
+      console.error('Error fetching quizzes:', error);
+      setQuizzes([]);
+    }
+  };
+
+  // Generate new quiz using AI
+  const generateNewQuiz = async () => {
+    try {
+      setIsGeneratingQuiz(true);
+      
+      const response = await fetch('/api/quizzes/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          category,
+          topic,
+          subtopic,
+          difficulty: 'Medium',
+          questionCount: 10,
+          questionTypes: ['mcq', 'true_false', 'logical_thinking']
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Refresh quizzes after generation
+          await fetchQuizzes();
+          console.log('✅ Quiz generated successfully!');
+        } else {
+          console.error('Failed to generate quiz:', result.error);
+        }
+      } else {
+        console.error('Quiz generation failed');
+      }
+    } catch (error) {
+      console.error('Error generating quiz:', error);
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
 
   const handleModeChange = (mode: PracticeMode) => {
     setActiveMode(mode);
@@ -245,7 +336,12 @@ export default function SubtopicPracticePage() {
     setVisibleProblemsCount(prev => Math.min(prev + 9, problems.length));
   };
 
+  const handleShowMoreQuizzes = () => {
+    setVisibleQuizzesCount(prev => Math.min(prev + 9, quizzes.length));
+  };
+
   const displayedProblems = problems.slice(0, visibleProblemsCount);
+  const displayedQuizzes = quizzes.slice(0, visibleQuizzesCount);
 
   const handleProblemClick = (sortOrder: number) => {
     setLastProblemId(sortOrder);
@@ -255,6 +351,12 @@ export default function SubtopicPracticePage() {
     const practiceUrl = `/zone/${category}/${topic}/${subtopic}/${activeMode}/${sortOrder}`;
     console.log(`🚀 Starting ${activeMode} practice for problem with sort order ${sortOrder}`);
     router.push(practiceUrl);
+  };
+
+  const handleQuizClick = (sortOrder: number) => {
+    const quizUrl = `/zone/${category}/${topic}/${subtopic}/quiz/${sortOrder}`;
+    console.log(`🎯 Starting quiz for sort order ${sortOrder} in ${subtopicDisplay}`);
+    router.push(quizUrl);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -269,7 +371,7 @@ export default function SubtopicPracticePage() {
   const getModeIcon = (mode: PracticeMode) => {
     switch (mode) {
       case 'learn': return <BookOpen size={20} />;
-      case 'mcq': return <HelpCircle size={20} />;
+      case 'quiz': return <HelpCircle size={20} />;
       case 'code': return <Code size={20} />;
     }
   };
@@ -417,13 +519,13 @@ export default function SubtopicPracticePage() {
               </button>
 
               <button
-                className={`mode-btn ${activeMode === 'mcq' ? 'active' : ''}`}
-                onClick={() => handleModeChange('mcq')}
+                className={`mode-btn ${activeMode === 'quiz' ? 'active' : ''}`}
+                onClick={() => handleModeChange('quiz')}
               >
-                <div className="mode-icon mcq">{getModeIcon('mcq')}</div>
+                <div className="mode-icon quiz">{getModeIcon('quiz')}</div>
                 <div className="mode-content">
-                  <h3>MCQ</h3>
-                  <p>Multiple choice questions and quizzes</p>
+                  <h3>Quiz</h3>
+                  <p>MCQs, True/False, Logic & AI-generated questions</p>
                 </div>
               </button>
 
@@ -440,21 +542,44 @@ export default function SubtopicPracticePage() {
             </div>
           </div>
 
-          {/* Problems List */}
+          {/* Content List - Problems or Quizzes */}
           <div className="problems-section">
             <div className="problems-header">
               <h2 className="problems-title">
-                {activeMode.toUpperCase()} Problems ({displayedProblems.length}{visibleProblemsCount < problems.length ? ` of ${problems.length}` : ''})
+                {activeMode === 'quiz' ? (
+                  <>Quizzes ({displayedQuizzes.length}{visibleQuizzesCount < quizzes.length ? ` of ${quizzes.length}` : ''})</>
+                ) : (
+                  <>{activeMode.toUpperCase()} Problems ({displayedProblems.length}{visibleProblemsCount < problems.length ? ` of ${problems.length}` : ''})</>
+                )}
               </h2>
               <div className="problems-stats">
                 <div className="stat">
                   <CheckCircle2 size={16} />
-                  <span>0 Solved</span>
+                  <span>{activeMode === 'quiz' ? '0 Completed' : '0 Solved'}</span>
                 </div>
                 <div className="stat">
                   <Target size={16} />
-                  <span>{problems.length} Total</span>
+                  <span>{activeMode === 'quiz' ? quizzes.length : problems.length} Total</span>
                 </div>
+                {activeMode === 'quiz' && (
+                  <button 
+                    className="generate-quiz-btn"
+                    onClick={generateNewQuiz}
+                    disabled={isGeneratingQuiz}
+                  >
+                    {isGeneratingQuiz ? (
+                      <>
+                        <div className="spinner"></div>
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={16} />
+                        <span>Generate Quiz</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -478,7 +603,77 @@ export default function SubtopicPracticePage() {
                     </div>
                   </div>
                 ))
+              ) : activeMode === 'quiz' ? (
+                // Quiz Cards
+                displayedQuizzes.map((quiz, index) => (
+                  <div
+                    key={quiz.id}
+                    className="quiz-card"
+                    onClick={() => handleQuizClick(quiz.sortOrder || quiz.id)}
+                  >
+                    <div className="quiz-header">
+                      <div className="quiz-type-indicator">
+                        {quiz.isAIGenerated ? (
+                          <div className="ai-badge">
+                            <Zap size={14} />
+                            <span>AI</span>
+                          </div>
+                        ) : (
+                          <div className="manual-badge">
+                            <Users size={14} />
+                            <span>Manual</span>
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="quiz-title">{quiz.title}</h3>
+                      <div
+                        className="quiz-difficulty"
+                        style={{ color: getDifficultyColor(quiz.difficulty) }}
+                      >
+                        {quiz.difficulty}
+                      </div>
+                    </div>
+                    <p className="quiz-description">{quiz.description}</p>
+                    
+                    <div className="quiz-meta">
+                      <div className="quiz-info">
+                        <div className="quiz-questions">
+                          <HelpCircle size={14} />
+                          <span>{quiz.questionCount} Questions</span>
+                        </div>
+                        <div className="quiz-types">
+                          <Brain size={14} />
+                          <span>{quiz.questionTypes.join(', ')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="quiz-footer">
+                      <div className="quiz-stats">
+                        {quiz.bestScore !== undefined ? (
+                          <div className="quiz-best-score">
+                            <Award size={16} />
+                            <span>Best: {quiz.bestScore}%</span>
+                          </div>
+                        ) : (
+                          <div className="quiz-not-attempted">
+                            <Clock size={16} />
+                            <span>Not Attempted</span>
+                          </div>
+                        )}
+                        <div className="quiz-attempts">
+                          <span>{quiz.attempts} attempt{quiz.attempts !== 1 ? 's' : ''}</span>
+                        </div>
+                      </div>
+                      <button className="start-quiz-btn">
+                        <Play size={16} />
+                        <span>Start Quiz</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
               ) : (
+                // Problem Cards
                 displayedProblems.map((problem, index) => {
                   const isLast = lastProblemId === (problem.sortOrder || problem.id);
                   return (
@@ -525,7 +720,16 @@ export default function SubtopicPracticePage() {
             </div>
 
             {/* View More Button */}
-            {!isLoading && visibleProblemsCount < problems.length && (
+            {!isLoading && activeMode === 'quiz' && visibleQuizzesCount < quizzes.length && (
+              <div className="view-more-section">
+                <button className="view-more-btn" onClick={handleShowMoreQuizzes}>
+                  <ChevronDown size={18} />
+                  View More Quizzes ({Math.min(9, quizzes.length - visibleQuizzesCount)} more)
+                </button>
+              </div>
+            )}
+            
+            {!isLoading && activeMode !== 'quiz' && visibleProblemsCount < problems.length && (
               <div className="view-more-section">
                 <button className="view-more-btn" onClick={handleShowMoreProblems}>
                   <ChevronDown size={18} />
@@ -534,8 +738,38 @@ export default function SubtopicPracticePage() {
               </div>
             )}
 
-            {/* No Problems Added Message */}
-            {!isLoading && problems.length === 0 && (
+            {/* Empty State Messages */}
+            {!isLoading && activeMode === 'quiz' && quizzes.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <HelpCircle size={48} />
+                </div>
+                <h3>No Quizzes Available</h3>
+                <p>No quizzes have been created for <strong>{subtopicDisplay}</strong> yet.</p>
+                <div className="empty-actions">
+                  <button 
+                    className="generate-first-quiz-btn"
+                    onClick={generateNewQuiz}
+                    disabled={isGeneratingQuiz}
+                  >
+                    {isGeneratingQuiz ? (
+                      <>
+                        <div className="spinner"></div>
+                        <span>Generating Your First Quiz...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={20} />
+                        <span>Generate First Quiz with AI</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="help-text">Our AI will create personalized questions covering key concepts!</p>
+                </div>
+              </div>
+            )}
+            
+            {!isLoading && activeMode !== 'quiz' && problems.length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">
                   <Database size={48} />
