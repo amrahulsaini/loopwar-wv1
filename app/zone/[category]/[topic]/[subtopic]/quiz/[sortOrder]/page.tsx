@@ -143,15 +143,24 @@ export default function QuizPage() {
 
       if (response.ok) {
         const generatedQuiz = await response.json();
-        setQuiz(generatedQuiz);
-        if (generatedQuiz.time_limit) {
-          setTimeLeft(generatedQuiz.time_limit * 60);
+        console.log('Generated quiz:', generatedQuiz);
+        
+        // Ensure the quiz data is properly structured
+        if (generatedQuiz && generatedQuiz.questions && Array.isArray(generatedQuiz.questions)) {
+          setQuiz(generatedQuiz);
+          if (generatedQuiz.time_limit) {
+            setTimeLeft(generatedQuiz.time_limit * 60);
+          }
+        } else {
+          throw new Error('Invalid quiz data structure received');
         }
       } else {
-        throw new Error('Failed to generate quiz');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate quiz' }));
+        throw new Error(errorData.error || 'Failed to generate quiz');
       }
     } catch (error) {
       console.error('Error generating quiz:', error);
+      alert(`Error generating quiz: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }

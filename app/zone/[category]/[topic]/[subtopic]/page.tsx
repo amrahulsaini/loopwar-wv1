@@ -273,6 +273,7 @@ export default function SubtopicPracticePage() {
       const firstProblem = problems[0];
       if (!firstProblem) {
         alert('No problems available to generate quiz from!');
+        setIsGeneratingQuiz(false);
         return;
       }
 
@@ -292,9 +293,20 @@ export default function SubtopicPracticePage() {
       if (response.ok) {
         const result = await response.json();
         console.log('✅ Quiz generated successfully!', result);
-        alert(`Quiz "${result.title}" generated successfully! Click on a problem to take the quiz.`);
+        
+        // Ensure we have a valid result before accessing properties
+        if (result && typeof result === 'object') {
+          const title = result.title || 'Quiz';
+          const questionCount = result.questions?.length || 'Multiple';
+          alert(`Quiz "${title}" generated successfully! ${questionCount} questions created. Click on a problem to take the quiz.`);
+        } else {
+          alert('Quiz generated successfully! Click on a problem to take the quiz.');
+        }
+        
+        // Optionally refresh the problems to show the quiz is available
+        // You might want to add a state refresh here if needed
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('Failed to generate quiz:', errorData.error);
         alert(`Failed to generate quiz: ${errorData.error}`);
       }

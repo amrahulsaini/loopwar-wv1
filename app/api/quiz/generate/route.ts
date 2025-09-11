@@ -151,12 +151,56 @@ RESPOND WITH ONLY THE JSON OBJECT - NO OTHER TEXT!`;
 
     console.log(`Quiz generated successfully: ${savedQuestions} questions saved`);
 
-    return NextResponse.json({ 
-      success: true, 
-      quizId,
-      message: 'Quiz generated successfully!',
-      questionsCount: savedQuestions
-    });
+    // Fetch the complete quiz data to return to frontend
+    const completeQuiz = await Database.query(
+      'SELECT * FROM quizzes WHERE id = ?',
+      [quizId]
+    ) as Array<{
+      id: number;
+      title: string;
+      description: string;
+      category: string;
+      topic: string;
+      subtopic: string;
+      sort_order: number;
+      total_points: number;
+      time_limit: number;
+      is_ai_generated: boolean;
+      created_at: string;
+    }>;
+
+    const questions = await Database.query(
+      'SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY question_order',
+      [quizId]
+    ) as Array<{
+      id: number;
+      quiz_id: number;
+      question_type: string;
+      question_text: string;
+      options: string;
+      correct_answer: string;
+      explanation: string;
+      difficulty: string;
+      points: number;
+      question_order: number;
+    }>;
+
+    const quizWithQuestions = {
+      ...completeQuiz[0],
+      questions: questions.map(q => ({
+        id: q.id,
+        type: q.question_type,
+        question: q.question_text,
+        options: q.options ? JSON.parse(q.options) : null,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation,
+        difficulty: q.difficulty,
+        points: q.points,
+        question_order: q.question_order
+      }))
+    };
+
+    return NextResponse.json(quizWithQuestions);
 
   } catch (error) {
     console.error('Error generating quiz:', error);
