@@ -1,224 +1,165 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Database from '@/lib/database';
+import { GoogleGenAI } from '@google/genai';
+import Database from '../../../../lib/database';
+import { SecurityService } from '../../../../lib/security';
+
+// Initialize Gemini AI
+const apiKey = process.env.GEMINI_API_KEY;
+const ai = new GoogleGenAI({
+  apiKey: apiKey
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { category, topic, subtopic, sortOrder } = body;
+    // Authenticate user
+    const auth = SecurityService.authenticateUser(request);
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { category, topic, subtopic, sortOrder } = await request.json();
 
     if (!category || !topic || !subtopic || sortOrder === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check if quiz already exists
-    const existingQuiz = await Database.query(
-      `SELECT id FROM quizzes 
-       WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
-      [category, topic, subtopic, sortOrder]
-    ) as Array<{ id: number }>;
+    // Verify user exists (for authentication purposes)
+    const userResult = await Database.query(
+      'SELECT id FROM users WHERE username = ?',
+      [auth.username]
+    ) as { id: number }[];
 
-    if (existingQuiz.length > 0) {
-      return NextResponse.json(
-        { error: 'Quiz already exists for this topic' },
-        { status: 409 }
-      );
+    if (!userResult || userResult.length === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Generate quiz using AI (LoopAI)
-    const aiPrompt = `Generate a comprehensive quiz for the topic "${topic}" in the "${category}" category, specifically focusing on "${subtopic}".
+    // Format display names for better context
+    const formatDisplayName = (urlName: string) => {
+      return urlName
+        .replace(/-/g, ' ')
+        .replace(/and/g, '&')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
 
-    Create 10-15 questions with the following distribution:
-    - 5-7 Multiple Choice Questions (MCQ)
-    - 2-3 True/False Questions
-    - 2-3 Logical Thinking Questions
-    - 1-2 Fill in the Blanks Questions
+    const categoryDisplay = formatDisplayName(category);
+    const topicDisplay = formatDisplayName(topic);
+    const subtopicDisplay = formatDisplayName(subtopic);
 
-    For each question, provide:
-    1. Question text
-    2. Question type (mcq, true_false, logical_thinking, fill_blanks)
-    3. Options (for MCQ)
-    4. Correct answer
-    5. Explanation
-    6. Difficulty level (easy, medium, hard)
-    7. Points (easy: 1 point, medium: 2 points, hard: 3 points)
+    // Generate quiz using AI directly
+    const quizPrompt = `You are a quiz generation expert. Create a comprehensive 10-question multiple choice quiz for: ${categoryDisplay} → ${topicDisplay} → ${subtopicDisplay}
 
-    Make sure questions are relevant, educational, and progressively challenging.
-    Focus on practical understanding and real-world applications.
+IMPORTANT: Your response MUST be ONLY valid JSON with no additional text, markdown, or explanation.
 
-    Format the response as JSON with the following structure:
+Generate a quiz with this EXACT JSON structure:
+{
+  "title": "Quiz Title Here",
+  "description": "Brief quiz description",
+  "questions": [
     {
-      "title": "Quiz Title",
-      "description": "Quiz Description",
-      "time_limit": 30,
-      "questions": [
-        {
-          "type": "mcq",
-          "question": "Question text?",
-          "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correct_answer": "Option A",
-          "explanation": "Explanation text",
-          "difficulty": "easy",
-          "points": 1
-        }
-      ]
-    }`;
+      "question": "Question text here",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct": 0,
+      "explanation": "Why this answer is correct"
+    }
+  ]
+}
 
-    // Call LoopAI service
-    const aiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: aiPrompt,
-        type: 'quiz_generation'
-      }),
+Requirements:
+- Exactly 10 questions
+- Mix of difficulty: 3 easy, 4 medium, 3 hard
+- Each question has exactly 4 options
+- "correct" field is index (0-3) of correct option
+- Include detailed explanations
+- Focus on practical understanding and key concepts
+- Questions should test comprehension, not just memorization
+
+RESPOND WITH ONLY THE JSON OBJECT - NO OTHER TEXT!`;
+
+    console.log('Generating quiz with AI for:', categoryDisplay, '→', topicDisplay, '→', subtopicDisplay);
+
+    // Generate quiz using Gemini AI directly
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: quizPrompt
     });
 
-    if (!aiResponse.ok) {
-      throw new Error('Failed to generate quiz with AI');
-    }
+    const aiResponse = result.text || '';
+    console.log('Raw AI Response:', aiResponse.substring(0, 200) + '...');
 
-    const aiResult = await aiResponse.json();
+    // Clean up the response to extract JSON
     let quizData;
-
     try {
-      // Parse AI response (it might be wrapped in markdown code blocks)
-      let responseText = aiResult.response || aiResult.message || '';
+      // Remove markdown code blocks if present
+      let jsonString = aiResponse.replace(/```json\s*|\s*```/g, '').trim();
       
-      // Remove markdown code block syntax if present
-      responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      // Find JSON object in the response
+      const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonString = jsonMatch[0];
+      }
       
-      quizData = JSON.parse(responseText);
+      quizData = JSON.parse(jsonString);
+      console.log('Parsed quiz data:', { title: quizData.title, questionsCount: quizData.questions?.length });
     } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      
-      // Fallback: Create a basic quiz structure
-      quizData = {
-        title: `${subtopic} Quiz`,
-        description: `A comprehensive quiz on ${subtopic} in ${topic}`,
-        time_limit: 30,
-        questions: [
-          {
-            type: 'mcq',
-            question: `What is a key concept in ${subtopic}?`,
-            options: ['Option A', 'Option B', 'Option C', 'Option D'],
-            correct_answer: 'Option A',
-            explanation: 'This is a basic explanation.',
-            difficulty: 'medium',
-            points: 2
-          }
-        ]
-      };
+      console.error('Failed to parse AI response as JSON:', parseError);
+      console.log('AI Response for debugging:', aiResponse);
+      return NextResponse.json({ error: 'Failed to parse quiz data from AI' }, { status: 500 });
     }
 
-    // Calculate total points
-    const totalPoints = quizData.questions.reduce((sum: number, q: { points?: number }) => sum + (q.points || 1), 0);
+    // Validate quiz data structure
+    if (!quizData.questions || !Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+      console.error('Invalid quiz structure:', quizData);
+      return NextResponse.json({ error: 'AI generated invalid quiz structure' }, { status: 500 });
+    }
 
-    // Insert quiz into database
-    const quizResult = await Database.query(
-      `INSERT INTO quizzes 
-       (title, description, category, topic, subtopic, sort_order, total_points, time_limit, is_ai_generated, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [
-        quizData.title,
-        quizData.description,
-        category,
-        topic,
-        subtopic,
-        sortOrder,
-        totalPoints,
-        quizData.time_limit || 30,
-        1
-      ]
+    // Save quiz to database
+    const quizInsertResult = await Database.query(
+      'INSERT INTO quizzes (category, topic, subtopic, sort_order, title, description, total_points, time_limit, is_ai_generated, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [category, topic, subtopic, sortOrder, quizData.title || 'Generated Quiz', quizData.description || 'AI Generated Quiz', quizData.questions.length * 2, 30, 1]
     ) as { insertId: number };
 
-    const quizId = quizResult.insertId;
+    const quizId = quizInsertResult.insertId;
 
-    // Insert questions
+    // Save questions
+    let savedQuestions = 0;
     for (let i = 0; i < quizData.questions.length; i++) {
-      const question = quizData.questions[i] as { 
-        type: string; 
-        question: string; 
-        options?: string[]; 
-        correct_answer: string | boolean | string[]; 
-        explanation?: string; 
-        difficulty?: string; 
-        points?: number; 
-      };
+      const question = quizData.questions[i];
       
-      let correctAnswerType = 'string';
-      let correctAnswerValue = question.correct_answer;
-
-      if (question.type === 'true_false') {
-        correctAnswerType = 'boolean';
-        correctAnswerValue = String(question.correct_answer);
-      } else if (question.type === 'fill_blanks' && Array.isArray(question.correct_answer)) {
-        correctAnswerType = 'json';
-        correctAnswerValue = JSON.stringify(question.correct_answer);
+      if (!question.question || !question.options || !Array.isArray(question.options) || question.options.length !== 4) {
+        console.warn(`Skipping invalid question at index ${i}:`, question);
+        continue;
       }
 
       await Database.query(
-        `INSERT INTO quiz_questions 
-         (quiz_id, question_type, question_text, options, correct_answer, correct_answer_type, explanation, difficulty, points, question_order) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        'INSERT INTO quiz_questions (quiz_id, question_type, question_text, options, correct_answer, explanation, difficulty, points, question_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           quizId,
-          question.type,
+          'mcq',
           question.question,
-          question.options ? JSON.stringify(question.options) : null,
-          correctAnswerValue,
-          correctAnswerType,
+          JSON.stringify(question.options),
+          question.options[question.correct] || question.options[0],
           question.explanation || '',
-          question.difficulty || 'medium',
-          question.points || 1,
+          'medium',
+          2,
           i + 1
         ]
       );
+      savedQuestions++;
     }
 
-    // Return the created quiz
-    const createdQuiz = {
-      id: quizId,
-      title: quizData.title,
-      description: quizData.description,
-      category,
-      topic,
-      subtopic,
-      sort_order: sortOrder,
-      total_points: totalPoints,
-      time_limit: quizData.time_limit || 30,
-      is_ai_generated: true,
-      created_at: new Date().toISOString(),
-      questions: quizData.questions.map((q: { 
-        type: string; 
-        question: string; 
-        options?: string[]; 
-        correct_answer: string | boolean | string[]; 
-        explanation?: string; 
-        difficulty?: string; 
-        points?: number; 
-      }, index: number) => ({
-        id: `temp_${index}`,
-        type: q.type,
-        question: q.question,
-        options: q.options || null,
-        correct_answer: q.correct_answer,
-        explanation: q.explanation || '',
-        difficulty: q.difficulty || 'medium',
-        points: q.points || 1
-      }))
-    };
+    console.log(`Quiz generated successfully: ${savedQuestions} questions saved`);
 
-    return NextResponse.json(createdQuiz);
+    return NextResponse.json({ 
+      success: true, 
+      quizId,
+      message: 'Quiz generated successfully!',
+      questionsCount: savedQuestions
+    });
+
   } catch (error) {
     console.error('Error generating quiz:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate quiz' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
