@@ -13,7 +13,8 @@ import {
   Clock,
   Target,
   Database,
-  ChevronDown
+  ChevronDown,
+  Zap
 } from 'lucide-react';
 import Logo from '../../../../components/Logo';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
@@ -51,6 +52,7 @@ export default function SubtopicPracticePage() {
   const [allSubtopics, setAllSubtopics] = useState<Subtopic[]>([]);
   const [visibleProblemsCount, setVisibleProblemsCount] = useState<number>(9);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState<boolean>(false);
   
   // URL parameters
   const category = params.category as string;
@@ -262,6 +264,48 @@ export default function SubtopicPracticePage() {
     setVisibleProblemsCount(prev => Math.min(prev + 9, problems.length));
   };
 
+  // Generate new quiz using AI for all problems
+  const generateNewQuiz = async () => {
+    try {
+      setIsGeneratingQuiz(true);
+      
+      // Generate a quiz for the first problem as an example
+      const firstProblem = problems[0];
+      if (!firstProblem) {
+        alert('No problems available to generate quiz from!');
+        return;
+      }
+
+      const response = await fetch('/api/quiz/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category,
+          topic,
+          subtopic,
+          sortOrder: firstProblem.sortOrder || 1,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Quiz generated successfully!', result);
+        alert(`Quiz "${result.title}" generated successfully! Click on a problem to take the quiz.`);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to generate quiz:', errorData.error);
+        alert(`Failed to generate quiz: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error('Error generating quiz:', error);
+      alert('Error generating quiz. Please try again.');
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy': return '#22c55e';
@@ -460,6 +504,25 @@ export default function SubtopicPracticePage() {
                   <Target size={16} />
                   <span>{problems.length} Total</span>
                 </div>
+                {activeMode === 'quiz' && (
+                  <button 
+                    className="generate-quiz-btn"
+                    onClick={generateNewQuiz}
+                    disabled={isGeneratingQuiz}
+                  >
+                    {isGeneratingQuiz ? (
+                      <>
+                        <div className="spinner"></div>
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={16} />
+                        <span>Generate Quiz</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
