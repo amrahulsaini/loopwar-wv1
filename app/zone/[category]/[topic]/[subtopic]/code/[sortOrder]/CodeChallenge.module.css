@@ -81,6 +81,9 @@
 .problemHeader {
   padding: 1.5rem;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.problemTitleRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -96,6 +99,12 @@
   flex: 1;
 }
 
+.problemActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .difficultyBadge {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
@@ -103,6 +112,33 @@
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.regenerateButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Sora', sans-serif;
+}
+
+.regenerateButton:hover:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.regenerateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Tab Navigation */

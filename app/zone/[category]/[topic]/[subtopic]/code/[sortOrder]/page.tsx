@@ -41,6 +41,8 @@ interface ProblemData {
   category_name: string;
   topic_name: string;
   subtopic_name: string;
+  is_ai_generated?: boolean;
+  needs_generation?: boolean;
 }
 
 interface ExecutionResult {
@@ -201,6 +203,7 @@ export default function CodeChallengePage() {
   const [activeTab, setActiveTab] = useState<'description' | 'constraints' | 'examples' | 'hints'>('description');
   const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
   const [generatingProblemTitle, setGeneratingProblemTitle] = useState('');
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -419,6 +422,61 @@ export default function CodeChallengePage() {
     }
   };
 
+  // Regenerate problem with AI
+  const regenerateProblem = async () => {
+    if (!problem) return;
+    
+    setIsRegenerating(true);
+    try {
+      // Delete existing code problem first
+      await fetch(`/api/code-problems/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category,
+          topic,
+          subtopic,
+          sortOrder: parseInt(sortOrder)
+        }),
+      });
+
+      // Generate new problem
+      const generateResponse = await fetch('/api/code-problems/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category,
+          topic,
+          subtopic,
+          sortOrder: parseInt(sortOrder),
+          baseProblem: {
+            title: problem.title.replace(/Challenge #\d+/, `Challenge #${sortOrder}`),
+            description: `Generate a new coding challenge for ${subtopic.replace(/-/g, ' ')} topic.`,
+            difficulty: problem.difficulty
+          }
+        }),
+      });
+
+      if (generateResponse.ok) {
+        const newProblem = await generateResponse.json();
+        setProblem(newProblem);
+        setExecutionResult(null);
+        resetCode();
+      } else {
+        alert('Failed to regenerate problem. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error regenerating problem:', error);
+      alert('Failed to regenerate problem. Please try again.');
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -479,12 +537,27 @@ export default function CodeChallengePage() {
         {/* Left Panel - Problem Description */}
         <div className={styles.leftPanel}>
           <div className={styles.problemHeader}>
-            <h1 className={styles.problemTitle}>{problem.title}</h1>
-            <div 
-              className={styles.difficultyBadge}
-              style={{ backgroundColor: getDifficultyColor(problem.difficulty) }}
-            >
-              {problem.difficulty}
+            <div className={styles.problemTitleRow}>
+              <h1 className={styles.problemTitle}>{problem.title}</h1>
+              <div className={styles.problemActions}>
+                <div 
+                  className={styles.difficultyBadge}
+                  style={{ backgroundColor: getDifficultyColor(problem.difficulty) }}
+                >
+                  {problem.difficulty}
+                </div>
+                {problem.is_ai_generated && (
+                  <button
+                    className={styles.regenerateButton}
+                    onClick={regenerateProblem}
+                    disabled={isRegenerating}
+                    title="Generate another version of this problem"
+                  >
+                    <RotateCcw size={14} />
+                    {isRegenerating ? 'Generating...' : 'Generate Another'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
