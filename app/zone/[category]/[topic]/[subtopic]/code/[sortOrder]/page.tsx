@@ -200,7 +200,7 @@ export default function CodeChallengePage() {
   const [code, setCode] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
-  const [activeTab, setActiveTab] = useState<'description' | 'constraints' | 'examples' | 'hints'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'constraints' | 'testcases' | 'hints'>('description');
   const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
   const [generatingProblemTitle, setGeneratingProblemTitle] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -663,10 +663,10 @@ export default function CodeChallengePage() {
               Constraints
             </button>
             <button 
-              className={`${styles.tab} ${activeTab === 'examples' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('examples')}
+              className={`${styles.tab} ${activeTab === 'testcases' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('testcases')}
             >
-              Examples
+              Test Cases
             </button>
             <button 
               className={`${styles.tab} ${activeTab === 'hints' ? styles.tabActive : ''}`}
@@ -681,7 +681,13 @@ export default function CodeChallengePage() {
           <div className={styles.tabContent}>
             {activeTab === 'description' && (
               <div className={styles.description}>
-                <p>{problem.description}</p>
+                {problem && problem.description ? (
+                  problem.description.split('\\n').map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))
+                ) : (
+                  <p>Loading problem description...</p>
+                )}
               </div>
             )}
             
@@ -702,35 +708,41 @@ export default function CodeChallengePage() {
               </div>
             )}
             
-            {activeTab === 'examples' && (
+            {activeTab === 'testcases' && (
               <div className={styles.examples}>
-                <h3>Examples</h3>
-                {problem.testCases.map((testCase, index) => (
-                  <div key={index} className={styles.exampleCard}>
-                    <h4>Example {index + 1}</h4>
-                    <div className={styles.exampleInput}>
-                      <strong>Input:</strong>
-                      <pre>{testCase.input || 'No input'}</pre>
-                    </div>
-                    <div className={styles.exampleOutput}>
-                      <strong>Output:</strong>
-                      <pre>{testCase.expected}</pre>
-                    </div>
-                    {testCase.explanation && (
-                      <div className={styles.exampleExplanation}>
-                        <strong>Explanation:</strong>
-                        <p>{testCase.explanation}</p>
+                <h3>Test Cases</h3>
+                {problem && problem.testCases && problem.testCases.length > 0 ? (
+                  problem.testCases.map((testCase, index) => (
+                    <div key={index} className={styles.exampleCard}>
+                      <h4>Test Case {index + 1}</h4>
+                      <div className={styles.exampleInput}>
+                        <strong>Input:</strong>
+                        <pre>{testCase.input || 'No input'}</pre>
                       </div>
-                    )}
+                      <div className={styles.exampleOutput}>
+                        <strong>Expected Output:</strong>
+                        <pre>{testCase.expected}</pre>
+                      </div>
+                      {testCase.explanation && (
+                        <div className={styles.exampleExplanation}>
+                          <strong>Explanation:</strong>
+                          <p>{testCase.explanation}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.loadingExamples}>
+                    <p>Loading test cases...</p>
                   </div>
-                ))}
+                )}
               </div>
             )}
             
             {activeTab === 'hints' && (
               <div className={styles.hints}>
                 <h3>Hints</h3>
-                {problem.hints && problem.hints.length > 0 ? (
+                {problem && problem.hints && problem.hints.length > 0 ? (
                   <div className={styles.hintsList}>
                     {problem.hints.map((hint, index) => (
                       <div key={index} className={styles.hintItem}>

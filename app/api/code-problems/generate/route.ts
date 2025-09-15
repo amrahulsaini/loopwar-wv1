@@ -105,9 +105,12 @@ ALWAYS use concrete, realistic data:
 
 REQUIREMENTS:
 1. **Title**: Clear, specific problem name (e.g., "Two Sum", "Reverse Linked List")
-2. **Description**: Concise problem statement (2-3 sentences max) explaining:
-   - Exactly what the function should do
-   - Include ONE inline example with real data
+2. **Description**: Comprehensive problem statement (200-400 words) explaining:
+   - Problem context and real-world application
+   - Detailed input/output specifications
+   - Multiple examples with step-by-step explanations
+   - Edge cases and special scenarios to consider
+   - Algorithm approach hints and complexity considerations
 3. **Examples**: 2-3 examples for user understanding (shown in UI Examples tab)
 4. **Test Cases**: 6 hidden test cases for code validation (NOT shown to user)
 5. **Constraints**: Realistic technical limits (proper mathematical notation)
@@ -120,7 +123,7 @@ CRITICAL SEPARATION:
 RESPOND WITH VALID JSON ONLY:
 {
   "title": "Two Sum",
-  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. Example: nums = [2,7,11,15], target = 9 → return [0,1].",
+  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\\n\\nThis is a fundamental problem in computer science that appears frequently in technical interviews and real-world applications such as finding complementary pairs in datasets, solving mathematical equations, and optimizing search algorithms.\\n\\nYou may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nFor example, if nums = [2, 7, 11, 15] and target = 9, the function should return [0, 1] because nums[0] + nums[1] = 2 + 7 = 9.\\n\\nConsider various approaches: brute force O(n²) solution checking all pairs, or optimized O(n) solution using hash map to store complements. Think about edge cases like negative numbers, zeros, and duplicate values.",
   "difficulty": "${problemDifficulty}",
   "constraints": "• 2 ≤ nums.length ≤ 10^4\\n• -10^9 ≤ nums[i] ≤ 10^9\\n• -10^9 ≤ target ≤ 10^9\\n• Only one valid answer exists",
   "examples": "Example 1:\\nInput: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 2 + 7 = 9\\n\\nExample 2:\\nInput: nums = [3,2,4], target = 6\\nOutput: [1,2]\\nExplanation: nums[1] + nums[2] = 2 + 4 = 6",
@@ -178,7 +181,7 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
       const fallbackProblems = {
         'arrays': {
           title: "Two Sum",
-          description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+          description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\\n\\nThis is one of the most fundamental problems in computer science and appears frequently in technical interviews at major tech companies. The problem tests your understanding of hash tables, array manipulation, and optimization techniques.\\n\\nYou may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nFor example, if nums = [2, 7, 11, 15] and target = 9, you should return [0, 1] because nums[0] + nums[1] = 2 + 7 = 9.\\n\\nConsider multiple approaches: the brute force O(n²) solution that checks all possible pairs, or the optimized O(n) solution using a hash map to store previously seen values and their indices.",
           testCases: [
             { input: "[2,7,11,15], 9", expected: "[0,1]", explanation: "2 + 7 = 9" },
             { input: "[3,2,4], 6", expected: "[1,2]", explanation: "2 + 4 = 6" },
@@ -190,7 +193,7 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
         },
         'sorting': {
           title: "Merge Sorted Arrays",
-          description: "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order. Merge nums1 and nums2 into a single array sorted in non-decreasing order, storing the result in nums1.",
+          description: "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order. Merge nums1 and nums2 into a single array sorted in non-decreasing order, storing the result in nums1.\\n\\nThis problem is essential for understanding merge operations and is a building block for more complex algorithms like merge sort. It's commonly used in database operations, file merging, and distributed systems.\\n\\nThe key insight is to use a two-pointer approach, comparing elements from both arrays and placing the smaller element in the correct position. Since nums1 has extra space at the end, you should work backwards to avoid overwriting elements.\\n\\nFor example, if nums1 = [1,2,3,0,0,0] with m=3 and nums2 = [2,5,6] with n=3, the result should be [1,2,2,3,5,6].",
           testCases: [
             { input: "[1,2,3,0,0,0], 3, [2,5,6], 3", expected: "[1,2,2,3,5,6]", explanation: "Merge [1,2,3] and [2,5,6]" },
             { input: "[1], 1, [], 0", expected: "[1]", explanation: "nums2 is empty" },
@@ -202,7 +205,7 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
         },
         'binary-search': {
           title: "Search Insert Position",
-          description: "Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.",
+          description: "Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.\\n\\nThis problem is fundamental for understanding binary search algorithms and is widely used in database indexing, search engines, and data structures. The key requirement is to achieve O(log n) runtime complexity.\\n\\nBinary search works by repeatedly dividing the search space in half, comparing the target with the middle element, and eliminating half of the remaining elements. This logarithmic approach is much more efficient than linear search for sorted arrays.\\n\\nFor example, in array [1,3,5,6] searching for target 5 returns index 2, while searching for target 2 returns index 1 (where it should be inserted).",
           testCases: [
             { input: "[1,3,5,6], 5", expected: "2", explanation: "Target found at index 2" },
             { input: "[1,3,5,6], 2", expected: "1", explanation: "Insert at position 1" },
@@ -214,7 +217,7 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
         },
         'dynamic-programming': {
           title: "Climbing Stairs",
-          description: "You are climbing a staircase with n steps. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+          description: "You are climbing a staircase with n steps. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?\\n\\nThis is a classic dynamic programming problem that introduces the concept of overlapping subproblems and optimal substructure. It's mathematically equivalent to the Fibonacci sequence and appears in many real-world optimization scenarios.\\n\\nThe key insight is that the number of ways to reach step n equals the sum of ways to reach step (n-1) and step (n-2), since you can arrive at step n from either of these positions.\\n\\nFor example, for n=3 stairs, there are 3 distinct ways: (1+1+1), (1+2), and (2+1). This problem teaches the foundation of dynamic programming thinking.",
           testCases: [
             { input: "2", expected: "2", explanation: "1+1 or 2" },
             { input: "3", expected: "3", explanation: "1+1+1, 1+2, or 2+1" },
