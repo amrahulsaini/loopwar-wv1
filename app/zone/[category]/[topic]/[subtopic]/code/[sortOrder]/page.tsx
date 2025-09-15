@@ -339,6 +339,12 @@ export default function CodeChallengePage() {
           }
         } else {
           // Use existing complete problem data
+          console.log('Using existing problem data:', {
+            id: problemData.id,
+            title: problemData.title,
+            testCasesCount: problemData.testCases?.length || 0,
+            testCasesData: problemData.testCases
+          });
           setProblem(problemData);
         }
         setIsLoading(false);
@@ -680,13 +686,99 @@ export default function CodeChallengePage() {
           {/* Tab Content */}
           <div className={styles.tabContent}>
             {activeTab === 'description' && (
-              <div className={styles.description}>
+              <div className={styles.descriptionContainer}>
                 {problem && problem.description ? (
-                  problem.description.split('\\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))
+                  <div className={styles.problemDescription}>
+                    <div className={styles.descriptionSection}>
+                      <h3 className={styles.sectionTitle}>Problem Statement</h3>
+                      <div className={styles.descriptionContent}>
+                        {problem.description.split('\\n').filter(line => line.trim()).map((paragraph, index) => {
+                          // Check if this looks like a requirement or constraint
+                          const isRequirement = paragraph.trim().toLowerCase().includes('requirement') || 
+                                               paragraph.trim().toLowerCase().includes('must') ||
+                                               paragraph.trim().toLowerCase().includes('should') ||
+                                               paragraph.trim().toLowerCase().includes('constraint');
+                          
+                          const isExample = paragraph.trim().toLowerCase().includes('example') ||
+                                          paragraph.trim().toLowerCase().includes('for instance') ||
+                                          paragraph.trim().toLowerCase().includes('e.g.');
+                          
+                          if (isRequirement) {
+                            return (
+                              <div key={index} className={styles.requirementBox}>
+                                <span className={styles.requirementIcon}>⚡</span>
+                                <p>{paragraph}</p>
+                              </div>
+                            );
+                          } else if (isExample) {
+                            return (
+                              <div key={index} className={styles.exampleBox}>
+                                <span className={styles.exampleIcon}>💡</span>
+                                <p>{paragraph}</p>
+                              </div>
+                            );
+                          } else {
+                            return <p key={index} className={styles.descriptionParagraph}>{paragraph}</p>;
+                          }
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Problem Context Section */}
+                    <div className={styles.contextSection}>
+                      <h3 className={styles.sectionTitle}>Problem Context</h3>
+                      <div className={styles.contextGrid}>
+                        <div className={styles.contextItem}>
+                          <span className={styles.contextLabel}>Category:</span>
+                          <span className={styles.contextValue}>{problem.category_name}</span>
+                        </div>
+                        <div className={styles.contextItem}>
+                          <span className={styles.contextLabel}>Topic:</span>
+                          <span className={styles.contextValue}>{problem.topic_name}</span>
+                        </div>
+                        <div className={styles.contextItem}>
+                          <span className={styles.contextLabel}>Subtopic:</span>
+                          <span className={styles.contextValue}>{problem.subtopic_name}</span>
+                        </div>
+                        <div className={styles.contextItem}>
+                          <span className={styles.contextLabel}>Difficulty:</span>
+                          <span 
+                            className={styles.contextDifficulty}
+                            style={{ color: getDifficultyColor(problem.difficulty) }}
+                          >
+                            {problem.difficulty}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Quick Reference Section */}
+                    {(problem.timeComplexity || problem.spaceComplexity) && (
+                      <div className={styles.quickRefSection}>
+                        <h3 className={styles.sectionTitle}>Expected Complexity</h3>
+                        <div className={styles.complexityGrid}>
+                          {problem.timeComplexity && (
+                            <div className={styles.complexityItem}>
+                              <span className={styles.complexityIcon}>⏱️</span>
+                              <span className={styles.complexityLabel}>Time:</span>
+                              <code className={styles.complexityValue}>{problem.timeComplexity}</code>
+                            </div>
+                          )}
+                          {problem.spaceComplexity && (
+                            <div className={styles.complexityItem}>
+                              <span className={styles.complexityIcon}>🧠</span>
+                              <span className={styles.complexityLabel}>Space:</span>
+                              <code className={styles.complexityValue}>{problem.spaceComplexity}</code>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <p>Loading problem description...</p>
+                  <div className={styles.loadingDescription}>
+                    <p>Loading problem description...</p>
+                  </div>
                 )}
               </div>
             )}
@@ -712,28 +804,41 @@ export default function CodeChallengePage() {
               <div className={styles.examples}>
                 <h3>Test Cases</h3>
                 {problem && problem.testCases && problem.testCases.length > 0 ? (
-                  problem.testCases.map((testCase, index) => (
-                    <div key={index} className={styles.exampleCard}>
-                      <h4>Test Case {index + 1}</h4>
-                      <div className={styles.exampleInput}>
-                        <strong>Input:</strong>
-                        <pre>{testCase.input || 'No input'}</pre>
-                      </div>
-                      <div className={styles.exampleOutput}>
-                        <strong>Expected Output:</strong>
-                        <pre>{testCase.expected}</pre>
-                      </div>
-                      {testCase.explanation && (
-                        <div className={styles.exampleExplanation}>
-                          <strong>Explanation:</strong>
-                          <p>{testCase.explanation}</p>
+                  <div className={styles.testCasesContainer}>
+                    {problem.testCases.map((testCase, index) => (
+                      <div key={index} className={styles.exampleCard}>
+                        <h4>Test Case {index + 1}</h4>
+                        <div className={styles.exampleInput}>
+                          <strong>Input:</strong>
+                          <pre>{testCase.input || 'No input provided'}</pre>
                         </div>
-                      )}
-                    </div>
-                  ))
+                        <div className={styles.exampleOutput}>
+                          <strong>Expected Output:</strong>
+                          <pre>{testCase.expected || 'No expected output'}</pre>
+                        </div>
+                        {testCase.explanation && (
+                          <div className={styles.exampleExplanation}>
+                            <strong>Explanation:</strong>
+                            <p>{testCase.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                  <div className={styles.loadingExamples}>
-                    <p>Loading test cases...</p>
+                  <div className={styles.testCasesEmpty}>
+                    <div className={styles.emptyIcon}>📝</div>
+                    <h4>No Test Cases Available</h4>
+                    <p>Test cases are being generated or haven't been created yet.</p>
+                    {problem?.is_ai_generated && (
+                      <button
+                        className={styles.regenerateTestCases}
+                        onClick={regenerateProblem}
+                        disabled={isRegenerating}
+                      >
+                        {isRegenerating ? 'Generating...' : 'Generate Test Cases'}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

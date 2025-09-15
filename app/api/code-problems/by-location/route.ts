@@ -98,7 +98,53 @@ export async function GET(request: NextRequest) {
     if (codeProblems && codeProblems.length > 0) {
       const problem = codeProblems[0];
       
-      // Parse JSON fields and return existing code problem
+      console.log('Raw problem data from DB:', {
+        id: problem.id,
+        title: problem.title,
+        test_cases_raw: problem.test_cases,
+        hints_raw: problem.hints
+      });
+      
+      // Parse JSON fields safely with better error handling
+      let parsedTestCases: Array<{ input: string; expected: string; explanation?: string }> = [];
+      let parsedHints: string[] = [];
+      
+      // Parse test_cases
+      if (problem.test_cases) {
+        try {
+          if (typeof problem.test_cases === 'string') {
+            parsedTestCases = JSON.parse(problem.test_cases);
+          } else if (Array.isArray(problem.test_cases)) {
+            parsedTestCases = problem.test_cases;
+          }
+          console.log('Parsed test cases:', parsedTestCases);
+        } catch (e) {
+          console.error('Error parsing test_cases:', e, 'Raw value:', problem.test_cases);
+          parsedTestCases = [
+            { input: "Loading test case...", expected: "Please wait", explanation: "Test cases are being loaded" }
+          ];
+        }
+      } else {
+        console.log('No test_cases field found in problem');
+        parsedTestCases = [
+          { input: "No test cases available", expected: "N/A", explanation: "Test cases not generated yet" }
+        ];
+      }
+      
+      // Parse hints
+      if (problem.hints) {
+        try {
+          if (typeof problem.hints === 'string') {
+            parsedHints = JSON.parse(problem.hints);
+          } else if (Array.isArray(problem.hints)) {
+            parsedHints = problem.hints;
+          }
+        } catch (e) {
+          console.error('Error parsing hints:', e, 'Raw value:', problem.hints);
+          parsedHints = ["Consider the problem requirements", "Think about edge cases"];
+        }
+      }
+      
       const formattedProblem: CodeProblem = {
         id: problem.id,
         title: problem.title,
@@ -110,10 +156,10 @@ export async function GET(request: NextRequest) {
         sort_order: problem.sort_order,
         constraints: problem.constraints,
         examples: problem.examples,
-        hints: problem.hints ? JSON.parse(problem.hints) : [],
+        hints: parsedHints,
         time_complexity: problem.time_complexity,
         space_complexity: problem.space_complexity,
-        test_cases: problem.test_cases ? JSON.parse(problem.test_cases) : [],
+        test_cases: parsedTestCases,
         is_ai_generated: problem.is_ai_generated,
         created_at: problem.created_at,
         updated_at: problem.updated_at,
@@ -121,6 +167,13 @@ export async function GET(request: NextRequest) {
         topic_name: problem.topic.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
         subtopic_name: problem.subtopic.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
       };
+
+      console.log('Formatted problem being returned:', {
+        id: formattedProblem.id,
+        title: formattedProblem.title,
+        testCasesCount: formattedProblem.test_cases.length,
+        hintsCount: formattedProblem.hints?.length || 0
+      });
 
       return NextResponse.json(formattedProblem);
     }

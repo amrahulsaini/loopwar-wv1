@@ -180,6 +180,225 @@
   padding: 1.5rem;
 }
 
+/* Enhanced Description Styles */
+.descriptionContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.problemDescription {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.descriptionSection {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sectionTitle {
+  margin: 0 0 1.5rem 0;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 3px solid #000000;
+  padding-bottom: 0.75rem;
+}
+
+.sectionTitle::before {
+  content: "📝";
+  font-size: 1.3rem;
+}
+
+.descriptionContent {
+  line-height: 1.8;
+  color: #2d3748;
+}
+
+.descriptionParagraph {
+  margin: 0 0 1.25rem 0;
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: justify;
+}
+
+.descriptionParagraph:last-child {
+  margin-bottom: 0;
+}
+
+.requirementBox {
+  background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+.requirementIcon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.requirementBox p {
+  margin: 0;
+  font-weight: 500;
+  color: #92400e;
+  line-height: 1.6;
+}
+
+.exampleBox {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.exampleIcon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.exampleBox p {
+  margin: 0;
+  font-weight: 500;
+  color: #1e40af;
+  line-height: 1.6;
+}
+
+.contextSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.contextSection .sectionTitle::before {
+  content: "🎯";
+}
+
+.contextGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.contextItem {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contextItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.contextLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.contextValue {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.contextDifficulty {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.quickRefSection {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #22c55e;
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.quickRefSection .sectionTitle::before {
+  content: "⚡";
+}
+
+.complexityGrid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.complexityItem {
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 200px;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+}
+
+.complexityIcon {
+  font-size: 1.5rem;
+}
+
+.complexityLabel {
+  font-size: 0.875rem;
+  color: #15803d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.complexityValue {
+  background: #22c55e;
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.loadingDescription {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Legacy description styles for backward compatibility */
 .description {
   font-size: 1rem;
   line-height: 1.8;
@@ -269,6 +488,59 @@
   font-size: 1.1rem;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 0.5rem;
+}
+
+.testCasesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.testCasesEmpty {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #fafafa;
+  border: 2px dashed #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.testCasesEmpty h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+  font-weight: 600;
+}
+
+.testCasesEmpty p {
+  margin: 0 0 1.5rem 0;
+  color: #6b7280;
+}
+
+.regenerateTestCases {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Sora', sans-serif;
+}
+
+.regenerateTestCases:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.regenerateTestCases:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .exampleCard {
