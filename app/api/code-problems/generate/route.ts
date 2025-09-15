@@ -89,11 +89,18 @@ PROBLEM CONTEXT:
 📝 Base Title: "${problemTitle}"
 📝 Base Description: "${problemDescription}"
 📝 Difficulty: ${problemDifficulty}
-📍 Topic: ${subtopic.replace(/-/g, ' ')}
+📍 Category: ${category.replace(/-/g, ' ')}
+📍 Topic: ${topic.replace(/-/g, ' ')}
+📍 Subtopic: ${subtopic.replace(/-/g, ' ')}
 
-Create a SPECIFIC coding problem like LeetCode problems. NOT generic templates.
+CRITICAL INSTRUCTIONS:
+1. USE THE PROVIDED BASE TITLE AND DESCRIPTION as inspiration
+2. Generate a problem specifically related to "${subtopic.replace(/-/g, ' ')}" topic
+3. DO NOT default to "Two Sum" or other generic problems
+4. Create a unique problem that fits the subtopic context
+5. If base title mentions specific algorithm/concept, build upon that
 
-CRITICAL: NEVER use generic placeholders like:
+NEVER use generic placeholders like:
 ❌ "test_input_1", "sample_data", "input_array", "example_value"
 ❌ "arr = [a, b, c]", "nums = [x, y, z]"
 ❌ "n = some_number", "target = some_value"
@@ -104,7 +111,7 @@ ALWAYS use concrete, realistic data:
 ✅ "matrix = [[1,2,3],[4,5,6]]"
 
 REQUIREMENTS:
-1. **Title**: Clear, specific problem name (e.g., "Two Sum", "Reverse Linked List")
+1. **Title**: Create a specific problem title related to ${subtopic.replace(/-/g, ' ')} (NOT "Two Sum" unless it's actually about sum problems)
 2. **Description**: Comprehensive problem statement (200-400 words) explaining:
    - Problem context and real-world application
    - Detailed input/output specifications
@@ -122,21 +129,16 @@ CRITICAL SEPARATION:
 
 RESPOND WITH VALID JSON ONLY:
 {
-  "title": "Two Sum",
-  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\\n\\nThis is a fundamental problem in computer science that appears frequently in technical interviews and real-world applications such as finding complementary pairs in datasets, solving mathematical equations, and optimizing search algorithms.\\n\\nYou may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nFor example, if nums = [2, 7, 11, 15] and target = 9, the function should return [0, 1] because nums[0] + nums[1] = 2 + 7 = 9.\\n\\nConsider various approaches: brute force O(n²) solution checking all pairs, or optimized O(n) solution using hash map to store complements. Think about edge cases like negative numbers, zeros, and duplicate values.",
+  "title": "Generate a specific problem title related to ${subtopic.replace(/-/g, ' ')}",
+  "description": "Create a comprehensive problem description (200-400 words) that specifically addresses ${subtopic.replace(/-/g, ' ')} concepts. Include problem context, real-world applications, detailed input/output specifications, multiple examples with explanations, edge cases, and algorithm approach hints.",
   "difficulty": "${problemDifficulty}",
-  "constraints": "• 2 ≤ nums.length ≤ 10^4\\n• -10^9 ≤ nums[i] ≤ 10^9\\n• -10^9 ≤ target ≤ 10^9\\n• Only one valid answer exists",
-  "examples": "Example 1:\\nInput: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 2 + 7 = 9\\n\\nExample 2:\\nInput: nums = [3,2,4], target = 6\\nOutput: [1,2]\\nExplanation: nums[1] + nums[2] = 2 + 4 = 6",
-  "hints": ["Think about what data structure can help you find complements quickly", "A hash map can store values and their indices", "For each number, check if its complement exists in the hash map", "Remember to handle the case where the same value appears multiple times"],
-  "timeComplexity": "O(n)",
-  "spaceComplexity": "O(n)",
+  "constraints": "Create realistic technical constraints with proper mathematical notation",
+  "examples": "Provide 2-3 concrete examples with step-by-step explanations",
+  "hints": ["Generate 4 helpful hints about the solution approach for ${subtopic.replace(/-/g, ' ')} problems"],
+  "timeComplexity": "Appropriate complexity for ${subtopic.replace(/-/g, ' ')} algorithms",
+  "spaceComplexity": "Appropriate space complexity",
   "testCases": [
-    {"input": "[2,7,11,15], 9", "expected": "[0,1]", "explanation": "Basic case: 2 + 7 = 9"},
-    {"input": "[3,2,4], 6", "expected": "[1,2]", "explanation": "Different order: 2 + 4 = 6"},
-    {"input": "[3,3], 6", "expected": "[0,1]", "explanation": "Duplicate values: 3 + 3 = 6"},
-    {"input": "[1,2,3,4,5], 8", "expected": "[2,4]", "explanation": "Larger array: 3 + 5 = 8"},
-    {"input": "[-1,-2,-3,-4,-5], -8", "expected": "[2,4]", "explanation": "Negative numbers: -3 + (-5) = -8"},
-    {"input": "[0,4,3,0], 0", "expected": "[0,3]", "explanation": "Zero target: 0 + 0 = 0"}
+    {"input": "Generate 6 test cases with real concrete data", "expected": "Expected outputs", "explanation": "Clear explanations"}
   ]
 }
 
@@ -231,9 +233,18 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
 
       // Determine which fallback to use based on subtopic
       let selectedFallback = fallbackProblems['arrays']; // default
-      if (subtopic.includes('sort')) selectedFallback = fallbackProblems['sorting'];
-      else if (subtopic.includes('search') || subtopic.includes('binary')) selectedFallback = fallbackProblems['binary-search'];
-      else if (subtopic.includes('dynamic') || subtopic.includes('dp')) selectedFallback = fallbackProblems['dynamic-programming'];
+      
+      if (subtopic.includes('sort') || subtopic.includes('merge')) {
+        selectedFallback = fallbackProblems['sorting'];
+      } else if (subtopic.includes('search') || subtopic.includes('binary') || subtopic.includes('find')) {
+        selectedFallback = fallbackProblems['binary-search'];
+      } else if (subtopic.includes('dynamic') || subtopic.includes('dp') || subtopic.includes('climbing') || subtopic.includes('fibonacci')) {
+        selectedFallback = fallbackProblems['dynamic-programming'];
+      } else if (subtopic.includes('array') || subtopic.includes('sum') || subtopic.includes('pair') || subtopic.includes('target')) {
+        selectedFallback = fallbackProblems['arrays'];
+      }
+      
+      console.log(`Using fallback problem: ${selectedFallback.title} for subtopic: ${subtopic}`);
       
       // Fallback to structured problem
       generatedProblem = {
