@@ -105,33 +105,35 @@ ALWAYS use concrete, realistic data:
 
 REQUIREMENTS:
 1. **Title**: Clear, specific problem name (e.g., "Two Sum", "Reverse Linked List")
-2. **Description**: Specific problem statement (100-200 words) explaining:
+2. **Description**: Concise problem statement (2-3 sentences max) explaining:
    - Exactly what the function should do
-   - Input format and constraints  
-   - Output format
-   - One clear example in the description with REAL data
-3. **Examples**: 3 concrete examples with actual realistic values
-4. **Constraints**: Realistic technical limits (proper mathematical notation)
-5. **Test Cases**: 6 specific test cases with real inputs/outputs
+   - Include ONE inline example with real data
+3. **Examples**: 2-3 examples for user understanding (shown in UI Examples tab)
+4. **Test Cases**: 6 hidden test cases for code validation (NOT shown to user)
+5. **Constraints**: Realistic technical limits (proper mathematical notation)
 6. **Hints**: 4 helpful hints about the solution approach
+
+CRITICAL SEPARATION:
+- Examples = User sees these for understanding the problem
+- Test Cases = Hidden from user, used only for code execution validation
 
 RESPOND WITH VALID JSON ONLY:
 {
-  "title": "Specific Problem Name",
-  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nExample: Input: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: Because nums[0] + nums[1] == 9, we return [0, 1].",
+  "title": "Two Sum",
+  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. Example: nums = [2,7,11,15], target = 9 → return [0,1].",
   "difficulty": "${problemDifficulty}",
   "constraints": "• 2 ≤ nums.length ≤ 10^4\\n• -10^9 ≤ nums[i] ≤ 10^9\\n• -10^9 ≤ target ≤ 10^9\\n• Only one valid answer exists",
-  "examples": "Example 1:\\nInput: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 2 + 7 = 9\\n\\nExample 2:\\nInput: nums = [3,2,4], target = 6\\nOutput: [1,2]\\nExplanation: nums[1] + nums[2] = 2 + 4 = 6\\n\\nExample 3:\\nInput: nums = [3,3], target = 6\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 3 + 3 = 6",
+  "examples": "Example 1:\\nInput: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 2 + 7 = 9\\n\\nExample 2:\\nInput: nums = [3,2,4], target = 6\\nOutput: [1,2]\\nExplanation: nums[1] + nums[2] = 2 + 4 = 6",
   "hints": ["Think about what data structure can help you find complements quickly", "A hash map can store values and their indices", "For each number, check if its complement exists in the hash map", "Remember to handle the case where the same value appears multiple times"],
   "timeComplexity": "O(n)",
   "spaceComplexity": "O(n)",
   "testCases": [
-    {"input": "[2,7,11,15], 9", "expected": "[0,1]", "explanation": "2 + 7 = 9"},
-    {"input": "[3,2,4], 6", "expected": "[1,2]", "explanation": "2 + 4 = 6"},
-    {"input": "[3,3], 6", "expected": "[0,1]", "explanation": "3 + 3 = 6"},
-    {"input": "[1,2,3,4,5], 8", "expected": "[2,4]", "explanation": "3 + 5 = 8"},
-    {"input": "[-1,-2,-3,-4,-5], -8", "expected": "[2,4]", "explanation": "-3 + (-5) = -8"},
-    {"input": "[0,4,3,0], 0", "expected": "[0,3]", "explanation": "0 + 0 = 0"}
+    {"input": "[2,7,11,15], 9", "expected": "[0,1]", "explanation": "Basic case: 2 + 7 = 9"},
+    {"input": "[3,2,4], 6", "expected": "[1,2]", "explanation": "Different order: 2 + 4 = 6"},
+    {"input": "[3,3], 6", "expected": "[0,1]", "explanation": "Duplicate values: 3 + 3 = 6"},
+    {"input": "[1,2,3,4,5], 8", "expected": "[2,4]", "explanation": "Larger array: 3 + 5 = 8"},
+    {"input": "[-1,-2,-3,-4,-5], -8", "expected": "[2,4]", "explanation": "Negative numbers: -3 + (-5) = -8"},
+    {"input": "[0,4,3,0], 0", "expected": "[0,3]", "explanation": "Zero target: 0 + 0 = 0"}
   ]
 }
 
@@ -176,14 +178,7 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
       const fallbackProblems = {
         'arrays': {
           title: "Two Sum",
-          description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
-
-You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.
-
-Example:
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
+          description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
           testCases: [
             { input: "[2,7,11,15], 9", expected: "[0,1]", explanation: "2 + 7 = 9" },
             { input: "[3,2,4], 6", expected: "[1,2]", explanation: "2 + 4 = 6" },
@@ -195,14 +190,7 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
         },
         'sorting': {
           title: "Merge Sorted Arrays",
-          description: `You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
-
-Merge nums1 and nums2 into a single array sorted in non-decreasing order. The final sorted array should not be returned by the function, but instead be stored inside the array nums1.
-
-Example:
-Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
-Output: [1,2,2,3,5,6]
-Explanation: The arrays we are merging are [1,2,3] and [2,5,6].`,
+          description: "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order. Merge nums1 and nums2 into a single array sorted in non-decreasing order, storing the result in nums1.",
           testCases: [
             { input: "[1,2,3,0,0,0], 3, [2,5,6], 3", expected: "[1,2,2,3,5,6]", explanation: "Merge [1,2,3] and [2,5,6]" },
             { input: "[1], 1, [], 0", expected: "[1]", explanation: "nums2 is empty" },
@@ -214,14 +202,7 @@ Explanation: The arrays we are merging are [1,2,3] and [2,5,6].`,
         },
         'binary-search': {
           title: "Search Insert Position",
-          description: `Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
-
-You must write an algorithm with O(log n) runtime complexity.
-
-Example:
-Input: nums = [1,3,5,6], target = 5
-Output: 2
-Explanation: Target 5 is found at index 2.`,
+          description: "Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.",
           testCases: [
             { input: "[1,3,5,6], 5", expected: "2", explanation: "Target found at index 2" },
             { input: "[1,3,5,6], 2", expected: "1", explanation: "Insert at position 1" },
@@ -233,14 +214,7 @@ Explanation: Target 5 is found at index 2.`,
         },
         'dynamic-programming': {
           title: "Climbing Stairs",
-          description: `You are climbing a staircase. It takes n steps to reach the top.
-
-Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
-
-Example:
-Input: n = 3
-Output: 3
-Explanation: There are three ways to climb to the top: 1+1+1, 1+2, 2+1.`,
+          description: "You are climbing a staircase with n steps. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
           testCases: [
             { input: "2", expected: "2", explanation: "1+1 or 2" },
             { input: "3", expected: "3", explanation: "1+1+1, 1+2, or 2+1" },

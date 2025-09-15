@@ -204,8 +204,27 @@ export default function CodeChallengePage() {
   const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
   const [generatingProblemTitle, setGeneratingProblemTitle] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Error boundary function
+  const handleError = useCallback((error: Error, errorInfo?: string) => {
+    console.error('Component error:', error, errorInfo);
+    setHasError(true);
+    setIsLoading(false);
+    setIsGeneratingProblem(false);
+    setIsRegenerating(false);
+  }, []);
+
+  // Reset error state
+  const resetError = useCallback(() => {
+    setHasError(false);
+    setIsLoading(true);
+    // Retry initialization
+    checkUserSession();
+    fetchOrGenerateProblem();
+  }, []);
 
   // Format display names for breadcrumb
   const formatDisplayName = (urlName: string) => {
@@ -224,7 +243,16 @@ export default function CodeChallengePage() {
   // Check user authentication
   const checkUserSession = useCallback(async () => {
     try {
-      const response = await fetch('/api/user');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch('/api/user', {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const userData = await response.json();
         setUser({
@@ -232,13 +260,18 @@ export default function CodeChallengePage() {
           authenticated: userData.authenticated
         });
       } else {
+        console.warn('User session check failed, using guest mode');
         setUser({
           username: 'Guest',
           authenticated: false
         });
       }
     } catch (error) {
-      console.error('Error checking user session:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('User session check timed out, using guest mode');
+      } else {
+        console.error('Error checking user session:', error);
+      }
       setUser({
         username: 'Guest',
         authenticated: false
@@ -250,7 +283,15 @@ export default function CodeChallengePage() {
   const fetchOrGenerateProblem = useCallback(async () => {
     try {
       // First, try to fetch existing code problem
-      const response = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`, {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const problemData = await response.json();
@@ -321,7 +362,11 @@ export default function CodeChallengePage() {
         subtopic_name: subtopicDisplay
       });
     } catch (error) {
-      console.error('Error fetching/generating problem:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('Problem fetch timed out, using fallback');
+      } else {
+        console.error('Error fetching/generating problem:', error);
+      }
       // Create fallback problem
       setProblem({
         id: parseInt(sortOrder),
@@ -346,9 +391,28 @@ export default function CodeChallengePage() {
 
   // Initialize component
   useEffect(() => {
-    checkUserSession();
-    fetchOrGenerateProblem();
-  }, [checkUserSession, fetchOrGenerateProblem]);
+    let mounted = true;
+    
+    const initializeComponent = async () => {
+      try {
+        await Promise.all([
+          checkUserSession(),
+          fetchOrGenerateProblem()
+        ]);
+      } catch (error) {
+        console.error('Component initialization error:', error);
+        if (mounted) {
+          handleError(error instanceof Error ? error : new Error('Unknown initialization error'));
+        }
+      }
+    };
+
+    initializeComponent();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [checkUserSession, fetchOrGenerateProblem, handleError]);
 
   // Update code when language changes
   useEffect(() => {
@@ -476,6 +540,29 @@ export default function CodeChallengePage() {
       setIsRegenerating(false);
     }
   };
+
+  // Error UI
+  if (hasError) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.errorContainer}>
+          <XCircle size={48} color="#ef4444" />
+          <h2>Something went wrong</h2>
+          <p>There was an error loading the code challenge page.</p>
+          <div className={styles.errorActions}>
+            <button onClick={resetError} className={styles.retryButton}>
+              <RotateCcw size={16} />
+              Try Again
+            </button>
+            <Link href={`/zone/${category}/${topic}/${subtopic}`} className={styles.backButton}>
+              <ArrowLeft size={16} />
+              Go Back
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
