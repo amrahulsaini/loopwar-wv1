@@ -93,15 +93,25 @@ PROBLEM CONTEXT:
 
 Create a SPECIFIC coding problem like LeetCode problems. NOT generic templates.
 
+CRITICAL: NEVER use generic placeholders like:
+❌ "test_input_1", "sample_data", "input_array", "example_value"
+❌ "arr = [a, b, c]", "nums = [x, y, z]"
+❌ "n = some_number", "target = some_value"
+
+ALWAYS use concrete, realistic data:
+✅ "nums = [2,7,11,15]", "target = 9"
+✅ "s = \"hello world\"", "k = 3"
+✅ "matrix = [[1,2,3],[4,5,6]]"
+
 REQUIREMENTS:
 1. **Title**: Clear, specific problem name (e.g., "Two Sum", "Reverse Linked List")
 2. **Description**: Specific problem statement (100-200 words) explaining:
    - Exactly what the function should do
-   - Input format and constraints
+   - Input format and constraints  
    - Output format
-   - One clear example in the description
-3. **Examples**: 3 concrete examples with actual values
-4. **Constraints**: Realistic technical limits
+   - One clear example in the description with REAL data
+3. **Examples**: 3 concrete examples with actual realistic values
+4. **Constraints**: Realistic technical limits (proper mathematical notation)
 5. **Test Cases**: 6 specific test cases with real inputs/outputs
 6. **Hints**: 4 helpful hints about the solution approach
 
@@ -162,36 +172,115 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
     } catch (aiError) {
       console.log('AI generation failed, using fallback:', aiError);
       
-      // Fallback to structured problem
-      generatedProblem = {
-        title: problemTitle || `${subtopic.replace(/-/g, ' ')} Problem`,
-        description: `Given an array of integers, solve this ${subtopic.replace(/-/g, ' ').toLowerCase()} problem efficiently.
+      // Create topic-specific fallback problems with real examples
+      const fallbackProblems = {
+        'arrays': {
+          title: "Two Sum",
+          description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
 
-You need to implement a function that processes the input according to the problem requirements. The function should handle edge cases and return the expected output format.
+You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.
 
 Example:
-Input: [1, 2, 3, 4, 5]
-Output: [Expected result based on problem logic]
-Explanation: Process the input according to the algorithm requirements.`,
+Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
+          testCases: [
+            { input: "[2,7,11,15], 9", expected: "[0,1]", explanation: "2 + 7 = 9" },
+            { input: "[3,2,4], 6", expected: "[1,2]", explanation: "2 + 4 = 6" },
+            { input: "[3,3], 6", expected: "[0,1]", explanation: "3 + 3 = 6" },
+            { input: "[1,2,3,4,5], 8", expected: "[2,4]", explanation: "3 + 5 = 8" },
+            { input: "[-1,-2,-3,-4,-5], -8", expected: "[2,4]", explanation: "-3 + (-5) = -8" },
+            { input: "[0,4,3,0], 0", expected: "[0,3]", explanation: "0 + 0 = 0" }
+          ]
+        },
+        'sorting': {
+          title: "Merge Sorted Arrays",
+          description: `You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
+
+Merge nums1 and nums2 into a single array sorted in non-decreasing order. The final sorted array should not be returned by the function, but instead be stored inside the array nums1.
+
+Example:
+Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+Output: [1,2,2,3,5,6]
+Explanation: The arrays we are merging are [1,2,3] and [2,5,6].`,
+          testCases: [
+            { input: "[1,2,3,0,0,0], 3, [2,5,6], 3", expected: "[1,2,2,3,5,6]", explanation: "Merge [1,2,3] and [2,5,6]" },
+            { input: "[1], 1, [], 0", expected: "[1]", explanation: "nums2 is empty" },
+            { input: "[0], 0, [1], 1", expected: "[1]", explanation: "nums1 is effectively empty" },
+            { input: "[4,5,6,0,0,0], 3, [1,2,3], 3", expected: "[1,2,3,4,5,6]", explanation: "nums2 elements are smaller" },
+            { input: "[1,3,5,0,0,0], 3, [2,4,6], 3", expected: "[1,2,3,4,5,6]", explanation: "Interleaved elements" },
+            { input: "[2,0], 1, [1], 1", expected: "[1,2]", explanation: "Single elements from each" }
+          ]
+        },
+        'binary-search': {
+          title: "Search Insert Position",
+          description: `Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+You must write an algorithm with O(log n) runtime complexity.
+
+Example:
+Input: nums = [1,3,5,6], target = 5
+Output: 2
+Explanation: Target 5 is found at index 2.`,
+          testCases: [
+            { input: "[1,3,5,6], 5", expected: "2", explanation: "Target found at index 2" },
+            { input: "[1,3,5,6], 2", expected: "1", explanation: "Insert at position 1" },
+            { input: "[1,3,5,6], 7", expected: "4", explanation: "Insert at end" },
+            { input: "[1,3,5,6], 0", expected: "0", explanation: "Insert at beginning" },
+            { input: "[1], 1", expected: "0", explanation: "Single element found" },
+            { input: "[1], 2", expected: "1", explanation: "Insert after single element" }
+          ]
+        },
+        'dynamic-programming': {
+          title: "Climbing Stairs",
+          description: `You are climbing a staircase. It takes n steps to reach the top.
+
+Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+
+Example:
+Input: n = 3
+Output: 3
+Explanation: There are three ways to climb to the top: 1+1+1, 1+2, 2+1.`,
+          testCases: [
+            { input: "2", expected: "2", explanation: "1+1 or 2" },
+            { input: "3", expected: "3", explanation: "1+1+1, 1+2, or 2+1" },
+            { input: "4", expected: "5", explanation: "Five distinct combinations" },
+            { input: "5", expected: "8", explanation: "Eight distinct combinations" },
+            { input: "1", expected: "1", explanation: "Only one way for single step" },
+            { input: "6", expected: "13", explanation: "Thirteen distinct combinations" }
+          ]
+        }
+      };
+
+      // Determine which fallback to use based on subtopic
+      let selectedFallback = fallbackProblems['arrays']; // default
+      if (subtopic.includes('sort')) selectedFallback = fallbackProblems['sorting'];
+      else if (subtopic.includes('search') || subtopic.includes('binary')) selectedFallback = fallbackProblems['binary-search'];
+      else if (subtopic.includes('dynamic') || subtopic.includes('dp')) selectedFallback = fallbackProblems['dynamic-programming'];
+      
+      // Fallback to structured problem
+      generatedProblem = {
+        title: selectedFallback.title,
+        description: selectedFallback.description,
         difficulty: problemDifficulty as 'Easy' | 'Medium' | 'Hard',
         constraints: `• 1 ≤ array.length ≤ 10^4
 • -10^9 ≤ array[i] ≤ 10^9
-• Handle empty arrays appropriately
-• Optimize for time complexity`,
+• Follow-up: Can you solve it with O(log n) complexity?
+• Handle all edge cases appropriately`,
         examples: `Example 1:
-Input: [1, 2, 3]
-Output: [Expected output 1]
-Explanation: Processing logic explanation
+Input: ${selectedFallback.testCases[0].input}
+Output: ${selectedFallback.testCases[0].expected}
+Explanation: ${selectedFallback.testCases[0].explanation}
 
 Example 2:
-Input: [4, 5, 6]
-Output: [Expected output 2]
-Explanation: Different case explanation
+Input: ${selectedFallback.testCases[1].input}
+Output: ${selectedFallback.testCases[1].expected}
+Explanation: ${selectedFallback.testCases[1].explanation}
 
 Example 3:
-Input: []
-Output: []
-Explanation: Empty array edge case`,
+Input: ${selectedFallback.testCases[2].input}
+Output: ${selectedFallback.testCases[2].expected}
+Explanation: ${selectedFallback.testCases[2].explanation}`,
         hints: [
           "Consider the most efficient approach for this type of problem",
           "Think about what data structures would help optimize the solution", 
@@ -200,38 +289,7 @@ Explanation: Empty array edge case`,
         ],
         timeComplexity: "O(n)",
         spaceComplexity: "O(1)", 
-        testCases: [
-          {
-            input: "[1, 2, 3]",
-            expected: "[result1]",
-            explanation: "Basic test case"
-          },
-          {
-            input: "[4, 5, 6]",
-            expected: "[result2]",
-            explanation: "Different input scenario"
-          },
-          {
-            input: "[]",
-            expected: "[]",
-            explanation: "Empty array test"
-          },
-          {
-            input: "[1]",
-            expected: "[result3]",
-            explanation: "Single element test"
-          },
-          {
-            input: "[1, 1, 1]",
-            expected: "[result4]",
-            explanation: "Duplicate elements test"
-          },
-          {
-            input: "[-1, -2, -3]",
-            expected: "[result5]",
-            explanation: "Negative numbers test"
-          }
-        ]
+        testCases: selectedFallback.testCases
       };
     }
 
