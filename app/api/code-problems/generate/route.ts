@@ -145,17 +145,22 @@ RESPOND WITH VALID JSON ONLY:
 Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' ')} with concrete examples and test cases.`;
 
     console.log('Generating AI problem for:', { problemTitle, category, topic, subtopic });
+    console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
     
     // Generate with fallback structure
     let generatedProblem: GeneratedProblem;
     
     try {
       // Try AI generation first - using simple fetch for compatibility
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
         body: JSON.stringify({
           contents: [{
             parts: [{
@@ -165,6 +170,8 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
         })
       });
       
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -173,11 +180,17 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
         generatedProblem = JSON.parse(cleanedText);
         console.log('AI generation successful');
       } else {
-        throw new Error('AI API failed');
+        const errorText = await response.text();
+        console.log('AI API failed with status:', response.status, 'Response:', errorText);
+        throw new Error(`AI API failed with status ${response.status}: ${errorText}`);
       }
       
     } catch (aiError) {
-      console.log('AI generation failed, using fallback:', aiError);
+      if (aiError instanceof Error && aiError.name === 'AbortError') {
+        console.log('AI generation timed out, using fallback');
+      } else {
+        console.log('AI generation failed, using fallback:', aiError);
+      }
       
       // Create topic-specific fallback problems with real examples
       const fallbackProblems = {
@@ -191,6 +204,18 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
             { input: "[1,2,3,4,5], 8", expected: "[2,4]", explanation: "3 + 5 = 8" },
             { input: "[-1,-2,-3,-4,-5], -8", expected: "[2,4]", explanation: "-3 + (-5) = -8" },
             { input: "[0,4,3,0], 0", expected: "[0,3]", explanation: "0 + 0 = 0" }
+          ]
+        },
+        'array-fundamentals': {
+          title: "Contains Duplicate",
+          description: "Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.\\n\\nThis problem tests your understanding of array traversal, data structures for tracking seen elements, and optimization techniques. It's a fundamental problem that appears in many coding interviews and real-world applications.\\n\\nYou can solve this using different approaches: sorting the array first, using a hash set to track seen elements, or comparing array length with set length.\\n\\nFor example, if nums = [1,2,3,1], return true because 1 appears twice. If nums = [1,2,3,4], return false because all elements are distinct.",
+          testCases: [
+            { input: "[1,2,3,1]", expected: "true", explanation: "1 appears twice" },
+            { input: "[1,2,3,4]", expected: "false", explanation: "All elements are distinct" },
+            { input: "[1,1,1,3,3,4,3,2,4,2]", expected: "true", explanation: "Multiple duplicates" },
+            { input: "[]", expected: "false", explanation: "Empty array has no duplicates" },
+            { input: "[1]", expected: "false", explanation: "Single element cannot duplicate" },
+            { input: "[1,2,1]", expected: "true", explanation: "1 appears at positions 0 and 2" }
           ]
         },
         'sorting': {
@@ -234,7 +259,9 @@ Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' '
       // Determine which fallback to use based on subtopic
       let selectedFallback = fallbackProblems['arrays']; // default
       
-      if (subtopic.includes('sort') || subtopic.includes('merge')) {
+      if (subtopic.includes('fundamentals') || subtopic.includes('duplicate') || subtopic.includes('basic')) {
+        selectedFallback = fallbackProblems['array-fundamentals'];
+      } else if (subtopic.includes('sort') || subtopic.includes('merge')) {
         selectedFallback = fallbackProblems['sorting'];
       } else if (subtopic.includes('search') || subtopic.includes('binary') || subtopic.includes('find')) {
         selectedFallback = fallbackProblems['binary-search'];
