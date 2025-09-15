@@ -83,54 +83,49 @@ export async function POST(request: NextRequest) {
     }
 
     // Create AI prompt for comprehensive problem generation
-    const systemPrompt = `You are an expert coding problem generator. Create a comprehensive coding challenge.
+    const systemPrompt = `You are a LeetCode-style coding problem generator. Create a specific, well-defined coding problem.
 
-PROBLEM INFO:
-📝 Title: "${problemTitle}"
-📝 Description: "${problemDescription}"
+PROBLEM CONTEXT:
+📝 Base Title: "${problemTitle}"
+📝 Base Description: "${problemDescription}"
 📝 Difficulty: ${problemDifficulty}
-📍 Category: ${category.replace(/-/g, ' ')}
-📍 Topic: ${topic.replace(/-/g, ' ')}
-📍 Subtopic: ${subtopic.replace(/-/g, ' ')}
+📍 Topic: ${subtopic.replace(/-/g, ' ')}
 
-Create a detailed coding challenge with:
+Create a SPECIFIC coding problem like LeetCode problems. NOT generic templates.
 
-1. **Enhanced Description (300+ words)**: Comprehensive explanation including:
-   - What the problem is asking for
-   - Clear input/output format
-   - What code needs to be written
-   - Real-world context
-   - Step-by-step requirements
-
-2. **Technical Constraints**: Realistic limitations and requirements
-
-3. **Detailed Examples**: 2-3 examples with explanations
-
-4. **Progressive Hints**: 5 hints that guide without revealing solution
-
-5. **Test Cases**: 6-8 comprehensive test cases including edge cases
-
-6. **Complexity**: Expected time and space complexity
+REQUIREMENTS:
+1. **Title**: Clear, specific problem name (e.g., "Two Sum", "Reverse Linked List")
+2. **Description**: Specific problem statement (100-200 words) explaining:
+   - Exactly what the function should do
+   - Input format and constraints
+   - Output format
+   - One clear example in the description
+3. **Examples**: 3 concrete examples with actual values
+4. **Constraints**: Realistic technical limits
+5. **Test Cases**: 6 specific test cases with real inputs/outputs
+6. **Hints**: 4 helpful hints about the solution approach
 
 RESPOND WITH VALID JSON ONLY:
 {
-  "title": "Clear, descriptive title",
-  "description": "Comprehensive 300+ word description explaining exactly what to implement, input/output format, requirements, and context",
+  "title": "Specific Problem Name",
+  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nExample: Input: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: Because nums[0] + nums[1] == 9, we return [0, 1].",
   "difficulty": "${problemDifficulty}",
-  "constraints": "• Bullet point constraints\\n• Value ranges and limits\\n• Input size limitations\\n• Performance requirements",
-  "examples": "Example 1:\\nInput: specific input\\nOutput: expected output\\nExplanation: detailed reasoning\\n\\nExample 2:\\nInput: different input\\nOutput: expected output\\nExplanation: step-by-step logic",
-  "hints": ["First hint about approach", "Second hint about data structure", "Third hint about algorithm", "Fourth hint about optimization", "Fifth hint about edge cases"],
-  "timeComplexity": "O(n) notation",
-  "spaceComplexity": "O(n) notation",
+  "constraints": "• 2 ≤ nums.length ≤ 10^4\\n• -10^9 ≤ nums[i] ≤ 10^9\\n• -10^9 ≤ target ≤ 10^9\\n• Only one valid answer exists",
+  "examples": "Example 1:\\nInput: nums = [2,7,11,15], target = 9\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 2 + 7 = 9\\n\\nExample 2:\\nInput: nums = [3,2,4], target = 6\\nOutput: [1,2]\\nExplanation: nums[1] + nums[2] = 2 + 4 = 6\\n\\nExample 3:\\nInput: nums = [3,3], target = 6\\nOutput: [0,1]\\nExplanation: nums[0] + nums[1] = 3 + 3 = 6",
+  "hints": ["Think about what data structure can help you find complements quickly", "A hash map can store values and their indices", "For each number, check if its complement exists in the hash map", "Remember to handle the case where the same value appears multiple times"],
+  "timeComplexity": "O(n)",
+  "spaceComplexity": "O(n)",
   "testCases": [
-    {"input": "test1", "expected": "output1", "explanation": "why this result"},
-    {"input": "test2", "expected": "output2", "explanation": "reasoning"},
-    {"input": "edge1", "expected": "edge_output1", "explanation": "edge case"},
-    {"input": "test3", "expected": "output3", "explanation": "another test"},
-    {"input": "edge2", "expected": "edge_output2", "explanation": "boundary case"},
-    {"input": "test4", "expected": "output4", "explanation": "complex case"}
+    {"input": "[2,7,11,15], 9", "expected": "[0,1]", "explanation": "2 + 7 = 9"},
+    {"input": "[3,2,4], 6", "expected": "[1,2]", "explanation": "2 + 4 = 6"},
+    {"input": "[3,3], 6", "expected": "[0,1]", "explanation": "3 + 3 = 6"},
+    {"input": "[1,2,3,4,5], 8", "expected": "[2,4]", "explanation": "3 + 5 = 8"},
+    {"input": "[-1,-2,-3,-4,-5], -8", "expected": "[2,4]", "explanation": "-3 + (-5) = -8"},
+    {"input": "[0,4,3,0], 0", "expected": "[0,3]", "explanation": "0 + 0 = 0"}
   ]
-}`;
+}
+
+Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' ')} with concrete examples and test cases.`;
 
     console.log('Generating AI problem for:', { problemTitle, category, topic, subtopic });
     
@@ -169,75 +164,72 @@ RESPOND WITH VALID JSON ONLY:
       
       // Fallback to structured problem
       generatedProblem = {
-        title: problemTitle,
-        description: `${problemDescription}
+        title: problemTitle || `${subtopic.replace(/-/g, ' ')} Problem`,
+        description: `Given an array of integers, solve this ${subtopic.replace(/-/g, ' ').toLowerCase()} problem efficiently.
 
-**Problem Statement:**
-You need to implement a solution for this ${subtopic.replace(/-/g, ' ').toLowerCase()} problem. The solution should be efficient, handle edge cases properly, and follow best coding practices.
+You need to implement a function that processes the input according to the problem requirements. The function should handle edge cases and return the expected output format.
 
-**Input Format:**
-- Clearly defined input parameters
-- Input constraints and valid ranges
-- Any special formatting requirements
-
-**Output Format:**
-- Expected output format and type
-- Specific requirements for the return value
-- Handle edge cases appropriately
-
-**Requirements:**
-- Implement an efficient algorithm
-- Consider time and space complexity
-- Handle boundary conditions
-- Write clean, readable code
-- Test your solution thoroughly
-
-**Approach:**
-Think step by step about the problem requirements and choose the most appropriate data structures and algorithms for an optimal solution.`,
+Example:
+Input: [1, 2, 3, 4, 5]
+Output: [Expected result based on problem logic]
+Explanation: Process the input according to the algorithm requirements.`,
         difficulty: problemDifficulty as 'Easy' | 'Medium' | 'Hard',
-        constraints: `• Input will be valid and within reasonable bounds
-• Handle edge cases appropriately  
-• Optimize for the expected complexity
-• Use efficient data structures and algorithms
-• Consider memory usage for large inputs`,
+        constraints: `• 1 ≤ array.length ≤ 10^4
+• -10^9 ≤ array[i] ≤ 10^9
+• Handle empty arrays appropriately
+• Optimize for time complexity`,
         examples: `Example 1:
-Input: sample_input_1
-Output: expected_output_1
-Explanation: Based on the problem requirements, this input produces this output because...
+Input: [1, 2, 3]
+Output: [Expected output 1]
+Explanation: Processing logic explanation
 
 Example 2:
-Input: sample_input_2  
-Output: expected_output_2
-Explanation: Different scenario showing how the algorithm handles this case...`,
+Input: [4, 5, 6]
+Output: [Expected output 2]
+Explanation: Different case explanation
+
+Example 3:
+Input: []
+Output: []
+Explanation: Empty array edge case`,
         hints: [
-          "Start by understanding the problem requirements and constraints clearly",
-          "Consider what data structures would be most efficient for this type of problem",
-          "Think about the algorithm approach and its time complexity",
-          "Don't forget to handle edge cases and boundary conditions",
-          "Test your solution with the provided examples before submitting"
+          "Consider the most efficient approach for this type of problem",
+          "Think about what data structures would help optimize the solution", 
+          "Look for patterns in the input that can guide your algorithm",
+          "Don't forget to handle edge cases like empty inputs"
         ],
         timeComplexity: "O(n)",
-        spaceComplexity: "O(1)",
+        spaceComplexity: "O(1)", 
         testCases: [
           {
-            input: "test_input_1",
-            expected: "expected_output_1", 
+            input: "[1, 2, 3]",
+            expected: "[result1]",
             explanation: "Basic test case"
           },
           {
-            input: "test_input_2",
-            expected: "expected_output_2",
-            explanation: "Different scenario"
+            input: "[4, 5, 6]",
+            expected: "[result2]",
+            explanation: "Different input scenario"
           },
           {
-            input: "edge_case_input",
-            expected: "edge_case_output",
-            explanation: "Edge case handling"
+            input: "[]",
+            expected: "[]",
+            explanation: "Empty array test"
           },
           {
-            input: "boundary_input",
-            expected: "boundary_output", 
-            explanation: "Boundary condition test"
+            input: "[1]",
+            expected: "[result3]",
+            explanation: "Single element test"
+          },
+          {
+            input: "[1, 1, 1]",
+            expected: "[result4]",
+            explanation: "Duplicate elements test"
+          },
+          {
+            input: "[-1, -2, -3]",
+            expected: "[result5]",
+            explanation: "Negative numbers test"
           }
         ]
       };
