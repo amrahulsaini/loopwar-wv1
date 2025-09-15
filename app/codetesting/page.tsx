@@ -53,7 +53,7 @@ const CodeTesting: React.FC = () => {
   ];
 
   // Language configurations with starter code
-  const LANGUAGES = {
+  const LANGUAGES = React.useMemo(() => ({
     javascript: {
       name: 'JavaScript',
       starterCode: `function twoSum(nums, target) {
@@ -179,7 +179,7 @@ int main() {
     return 0;
 }`
     }
-  };
+  }), []);
 
   // Set starter code when language changes
   React.useEffect(() => {

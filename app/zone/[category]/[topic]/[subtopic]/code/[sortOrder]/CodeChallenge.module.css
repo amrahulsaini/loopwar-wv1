@@ -1,0 +1,651 @@
+/* Code Challenge Page Styles - Sora Font & Black/White Theme */
+
+.container {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: 'Sora', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.header {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #666666;
+}
+
+.breadcrumbActive {
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Main Content Layout */
+.mainContent {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 80px);
+}
+
+/* Left Panel - Problem Description */
+.leftPanel {
+  width: 40%;
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.problemHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.problemTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.difficultyBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Tab Navigation */
+.tabNav {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f9f9f9;
+}
+
+.tab {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: #666666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Sora', sans-serif;
+}
+
+.tab:hover {
+  color: #000000;
+  background: #f0f0f0;
+}
+
+.tabActive {
+  color: #000000;
+  background: #ffffff;
+  border-bottom: 2px solid #000000;
+}
+
+/* Tab Content */
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333333;
+}
+
+.constraints {
+  color: #333333;
+}
+
+.constraints h3 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.complexity {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.examples {
+  color: #333333;
+}
+
+.examples h3 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.exampleCard {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.exampleCard h4 {
+  margin: 0 0 0.75rem 0;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.exampleInput,
+.exampleOutput,
+.exampleExplanation {
+  margin: 0.5rem 0;
+}
+
+.exampleInput pre,
+.exampleOutput pre {
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.25rem 0 0 0;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+
+.exampleExplanation p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.hints {
+  color: #333333;
+}
+
+.hints h3 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.hintsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hintItem {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.hintNumber {
+  width: 24px;
+  height: 24px;
+  background: #000000;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.hintText {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Right Panel - Code Editor */
+.rightPanel {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.editorHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.languageSelect {
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+}
+
+.editorHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconButton {
+  padding: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #666666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  color: #000000;
+  border-color: #000000;
+}
+
+.runButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Sora', sans-serif;
+}
+
+.runButton:hover:not(:disabled) {
+  background: #333333;
+  transform: translateY(-1px);
+}
+
+.runButton:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Code Editor */
+.codeEditor {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+.codeTextarea {
+  flex: 1;
+  background: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  padding: 1.5rem;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.codeTextarea::placeholder {
+  color: #666666;
+}
+
+/* Results Panel */
+.resultsPanel {
+  background: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+  max-height: 40%;
+  overflow-y: auto;
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #ffffff;
+}
+
+.resultsHeader h3 {
+  margin: 0;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.overallStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.statusSuccess {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.statusError {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.testCases {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.testCase {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.testCasePassed {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.testCaseFailed {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.testCaseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.testCaseIcon {
+  color: inherit;
+}
+
+.testCasePassed .testCaseIcon {
+  color: #22c55e;
+}
+
+.testCaseFailed .testCaseIcon {
+  color: #ef4444;
+}
+
+.testCaseInput,
+.testCaseExpected,
+.testCaseActual,
+.testCaseError {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.testCaseInput pre,
+.testCaseExpected pre,
+.testCaseActual pre,
+.testCaseError pre {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin: 0.25rem 0 0 0;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.testCaseError pre {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.testCaseStats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #666666;
+}
+
+.testCaseStats > * {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Loading & Error States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1rem;
+  color: #666666;
+}
+
+.generatingMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #000000;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.generatingIcon {
+  color: #f59e0b;
+  animation: pulse 2s infinite;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1rem;
+  text-align: center;
+}
+
+.errorIcon {
+  color: #ef4444;
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #000000;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.backLink:hover {
+  background: #333333;
+  transform: translateY(-1px);
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .leftPanel,
+  .rightPanel {
+    width: 100%;
+  }
+  
+  .leftPanel {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .tabContent {
+    max-height: 300px;
+  }
+  
+  .codeEditor {
+    min-height: 400px;
+  }
+  
+  .resultsPanel {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .headerLeft {
+    gap: 0.5rem;
+  }
+  
+  .breadcrumb {
+    display: none;
+  }
+  
+  .problemHeader {
+    padding: 1rem;
+  }
+  
+  .problemTitle {
+    font-size: 1.25rem;
+  }
+  
+  .editorHeader {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .editorHeaderRight {
+    justify-content: flex-end;
+  }
+}
