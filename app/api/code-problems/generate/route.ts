@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
 import Database from '../../../../lib/database';
 import { SecurityService } from '../../../../lib/security';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';

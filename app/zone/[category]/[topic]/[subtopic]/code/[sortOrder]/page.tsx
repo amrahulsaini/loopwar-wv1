@@ -829,7 +829,7 @@ export default function CodeChallengePage() {
                   <div className={styles.testCasesEmpty}>
                     <div className={styles.emptyIcon}>📝</div>
                     <h4>No Test Cases Available</h4>
-                    <p>Test cases are being generated or haven't been created yet.</p>
+                    <p>Test cases are being generated or haven&apos;t been created yet.</p>
                     {problem?.is_ai_generated && (
                       <button
                         className={styles.regenerateTestCases}
