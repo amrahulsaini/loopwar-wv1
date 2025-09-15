@@ -42,6 +42,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { category, topic, subtopic, sortOrder, baseProblem } = await request.json();
+    
+    console.log('Request data received:', { category, topic, subtopic, sortOrder, baseProblem });
 
     if (!category || !topic || !subtopic || typeof sortOrder !== 'number') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -94,16 +96,14 @@ PROBLEM CONTEXT:
 📍 Subtopic: ${subtopic.replace(/-/g, ' ')}
 
 CRITICAL INSTRUCTIONS:
-1. USE THE PROVIDED BASE TITLE AND DESCRIPTION as inspiration
-2. Generate a problem specifically related to "${subtopic.replace(/-/g, ' ')}" topic
-3. DO NOT default to "Two Sum" or other generic problems
-4. Create a unique problem that fits the subtopic context
-5. If base title mentions specific algorithm/concept, build upon that
+1. USE THE PROVIDED BASE TITLE "${problemTitle}" as the foundation for your problem
+2. Expand on the BASE DESCRIPTION "${problemDescription}" to create a comprehensive problem
+3. Generate a problem specifically related to "${subtopic.replace(/-/g, ' ')}" topic
+4. If the base title suggests a specific algorithm/concept, build upon that exact concept
+5. Make the problem title similar or related to "${problemTitle}"
 
 NEVER use generic placeholders like:
 ❌ "test_input_1", "sample_data", "input_array", "example_value"
-❌ "arr = [a, b, c]", "nums = [x, y, z]"
-❌ "n = some_number", "target = some_value"
 
 ALWAYS use concrete, realistic data:
 ✅ "nums = [2,7,11,15]", "target = 9"
@@ -111,38 +111,34 @@ ALWAYS use concrete, realistic data:
 ✅ "matrix = [[1,2,3],[4,5,6]]"
 
 REQUIREMENTS:
-1. **Title**: Create a specific problem title related to ${subtopic.replace(/-/g, ' ')} (NOT "Two Sum" unless it's actually about sum problems)
-2. **Description**: Comprehensive problem statement (200-400 words) explaining:
+1. **Title**: Use or adapt "${problemTitle}" (make it closely related to this title)
+2. **Description**: Comprehensive problem statement (200-400 words) based on "${problemDescription}" explaining:
    - Problem context and real-world application
    - Detailed input/output specifications
    - Multiple examples with step-by-step explanations
    - Edge cases and special scenarios to consider
    - Algorithm approach hints and complexity considerations
-3. **Examples**: 2-3 examples for user understanding (shown in UI Examples tab)
-4. **Test Cases**: 6 hidden test cases for code validation (NOT shown to user)
-5. **Constraints**: Realistic technical limits (proper mathematical notation)
+3. **Examples**: 2-3 examples for user understanding
+4. **Test Cases**: 6 hidden test cases for code validation
+5. **Constraints**: Realistic technical limits
 6. **Hints**: 4 helpful hints about the solution approach
 
-CRITICAL SEPARATION:
-- Examples = User sees these for understanding the problem
-- Test Cases = Hidden from user, used only for code execution validation
-
-RESPOND WITH VALID JSON ONLY:
+RESPOND WITH VALID JSON ONLY - no markdown formatting:
 {
-  "title": "Generate a specific problem title related to ${subtopic.replace(/-/g, ' ')}",
-  "description": "Create a comprehensive problem description (200-400 words) that specifically addresses ${subtopic.replace(/-/g, ' ')} concepts. Include problem context, real-world applications, detailed input/output specifications, multiple examples with explanations, edge cases, and algorithm approach hints.",
+  "title": "Use or adapt the provided title: ${problemTitle}",
+  "description": "Expand on: ${problemDescription}. Create comprehensive 200-400 word description with context, examples, and approach hints.",
   "difficulty": "${problemDifficulty}",
-  "constraints": "Create realistic technical constraints with proper mathematical notation",
+  "constraints": "Create realistic technical constraints with mathematical notation",
   "examples": "Provide 2-3 concrete examples with step-by-step explanations",
-  "hints": ["Generate 4 helpful hints about the solution approach for ${subtopic.replace(/-/g, ' ')} problems"],
-  "timeComplexity": "Appropriate complexity for ${subtopic.replace(/-/g, ' ')} algorithms",
+  "hints": ["Generate 4 helpful hints for ${subtopic.replace(/-/g, ' ')} related to ${problemTitle}"],
+  "timeComplexity": "Appropriate complexity for this algorithm",
   "spaceComplexity": "Appropriate space complexity",
   "testCases": [
     {"input": "Generate 6 test cases with real concrete data", "expected": "Expected outputs", "explanation": "Clear explanations"}
   ]
 }
 
-Generate a REAL, SPECIFIC coding problem related to ${subtopic.replace(/-/g, ' ')} with concrete examples and test cases.`;
+Generate a problem specifically based on "${problemTitle}" and "${problemDescription}" for ${subtopic.replace(/-/g, ' ')} topic.`;
 
     console.log('Generating AI problem for:', { problemTitle, category, topic, subtopic });
     console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
@@ -308,29 +304,58 @@ Explanation: ${selectedFallback.testCases[2].explanation}`,
       };
     }
 
+    // Validate generated problem data
+    if (!generatedProblem.title || typeof generatedProblem.title !== 'string') {
+      throw new Error('Generated problem missing valid title');
+    }
+    if (!generatedProblem.description || typeof generatedProblem.description !== 'string') {
+      throw new Error('Generated problem missing valid description');
+    }
+    if (!generatedProblem.difficulty || !['Easy', 'Medium', 'Hard'].includes(generatedProblem.difficulty)) {
+      generatedProblem.difficulty = 'Medium'; // Default fallback
+    }
+    if (!Array.isArray(generatedProblem.hints)) {
+      generatedProblem.hints = ["Consider the problem requirements", "Think about edge cases", "Optimize your solution", "Test with different inputs"];
+    }
+    if (!Array.isArray(generatedProblem.testCases)) {
+      generatedProblem.testCases = [
+        { input: "sample input", expected: "sample output", explanation: "sample explanation" }
+      ];
+    }
+
     // Validate and save to database
     console.log('Saving problem to database...');
+    
+    // Prepare the data for insertion
+    const insertData = [
+      String(generatedProblem.title).trim(),
+      String(generatedProblem.description).trim(),
+      String(generatedProblem.difficulty),
+      String(category),
+      String(topic),
+      String(subtopic),
+      Number(sortOrder),
+      String(generatedProblem.constraints || '').trim(),
+      String(generatedProblem.examples || '').trim(),
+      JSON.stringify(generatedProblem.hints || []),
+      String(generatedProblem.timeComplexity || 'O(n)').trim(),
+      String(generatedProblem.spaceComplexity || 'O(1)').trim(),
+      JSON.stringify(generatedProblem.testCases || []),
+      Boolean(true)
+    ];
+    
+    console.log('Insert data types and values:', insertData.map((val, idx) => ({
+      index: idx,
+      type: typeof val,
+      value: typeof val === 'string' ? val.substring(0, 100) + (val.length > 100 ? '...' : '') : val
+    })));
+    
     const insertResult = await Database.query(
       `INSERT INTO code_problems (
         title, description, difficulty, category, topic, subtopic, sort_order,
         constraints, examples, hints, time_complexity, space_complexity, test_cases, is_ai_generated
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        generatedProblem.title,
-        generatedProblem.description,
-        generatedProblem.difficulty,
-        category,
-        topic,
-        subtopic,
-        sortOrder,
-        generatedProblem.constraints,
-        generatedProblem.examples,
-        JSON.stringify(generatedProblem.hints),
-        generatedProblem.timeComplexity,
-        generatedProblem.spaceComplexity,
-        JSON.stringify(generatedProblem.testCases),
-        true
-      ]
+      insertData
     ) as ResultSetHeader;
 
     console.log('Problem saved with ID:', insertResult.insertId);
