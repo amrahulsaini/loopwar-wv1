@@ -1019,8 +1019,8 @@
 
 .codeTextarea {
   flex: 1;
-  background: #1a1a1a;
-  color: #ffffff;
+  background: #1a1a1a !important;
+  color: #ffffff !important;
   border: none;
   padding: 1.5rem;
   font-family: 'Monaco', 'Consolas', monospace;

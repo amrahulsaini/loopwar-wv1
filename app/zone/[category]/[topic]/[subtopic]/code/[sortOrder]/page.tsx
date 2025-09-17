@@ -217,7 +217,7 @@ export default function CodeChallengePage() {
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Parse description with proper markdown-style formatting
+  // Parse description with proper markdown-style formatting (strip emojis)
   const parseDescription = (description: string) => {
     if (!description) return null;
 
@@ -229,8 +229,11 @@ export default function CodeChallengePage() {
       icon: React.ComponentType<{ size?: number; className?: string }>;
     }> = [];
 
-    // Clean up the description and split into parts
-    const cleanDesc = description.replace(/\\n/g, '\n').trim();
+    // Clean up the description, remove emojis, and split into parts
+    const cleanDesc = description
+      .replace(/\\n/g, '\n')
+      .replace(/[🎯💡🔍🔥⚠️💭🚀🛠️📚✨🔧⭐💻📝😀🚀💡⚡🎯📝💻🔧⭐✨🔥]/g, '') // Remove all emojis
+      .trim();
     const parts = cleanDesc.split(/(?=\*\*[A-Z][^*]*\*\*:?)|(?=Examples?:)|(?=Edge Cases?:)|(?=Algorithm|Hint)/i);
     
     let mainStatement = '';
@@ -324,9 +327,11 @@ export default function CodeChallengePage() {
     }).filter(Boolean);
   };
 
-  // Format inline text with bold, code, etc.
+  // Format inline text with bold, code, etc. (strip emojis)
   const formatInlineText = (text: string) => {
     return text
+      // Remove all emojis first
+      .replace(/[🎯💡🔍🔥⚠️💭🚀🛠️📚✨🔧⭐💻📝😀🚀💡⚡🎯📝💻🔧⭐✨🔥]/g, '')
       // Bold text **text** or **text:**
       .replace(/\*\*([^*]+)\*\*:?/g, '<strong class="' + styles.boldText + '">$1</strong>')
       // Code snippets `code`

@@ -87,12 +87,12 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `You are a LeetCode-style coding problem generator. Create a specific, well-defined coding problem.
 
 PROBLEM CONTEXT:
-📝 Base Title: "${problemTitle}"
-📝 Base Description: "${problemDescription}"
-📝 Difficulty: ${problemDifficulty}
-📍 Category: ${category.replace(/-/g, ' ')}
-📍 Topic: ${topic.replace(/-/g, ' ')}
-📍 Subtopic: ${subtopic.replace(/-/g, ' ')}
+- Base Title: "${problemTitle}"
+- Base Description: "${problemDescription}"
+- Difficulty: ${problemDifficulty}
+- Category: ${category.replace(/-/g, ' ')}
+- Topic: ${topic.replace(/-/g, ' ')}
+- Subtopic: ${subtopic.replace(/-/g, ' ')}
 
 CRITICAL INSTRUCTIONS:
 1. USE THE PROVIDED BASE TITLE "${problemTitle}" as the foundation for your problem

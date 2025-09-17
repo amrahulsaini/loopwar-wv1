@@ -167,14 +167,16 @@ export default function LearnModePage() {
       .join(' ');
   };
 
-  // Format AI response to handle new structured format with emojis (not Lucide icons)
+  // Format AI response to handle new structured format with Lucide icons (no emojis)
   const formatAIResponse = (text: string) => {
     if (!text) return '';
     
     const hasCodeShell = text.includes('Code Shell') || text.includes('code shell');
     
-    // Keep text as-is with emojis, no need to replace with Lucide icons
-    let formattedText = text;
+    // Remove all emojis and use professional Lucide icons instead
+    let formattedText = text
+      // Remove all common emojis
+      .replace(/[🎯💡🔍🔥⚠️💭🚀🛠️📚✨🔧⭐💻📝]/g, '');
     
     // First, handle multi-line code blocks (```code```)
     const codeBlockRegex = /```([\s\S]*?)```/g;
@@ -243,8 +245,8 @@ export default function LearnModePage() {
         // Better formatting: Convert asterisks to proper HTML
         let formattedLine = line;
         
-        // Handle section headers with emojis (keep them bold)
-        if (line.match(/^[🎯💡🔍🔥⚠️💭🚀📚]\s*\*\*(.*?)\*\*/) || line.match(/^[🎯💡🔍🔥⚠️💭🚀📚]/)) {
+        // Handle section headers with Lucide icons (no emojis, keep them bold)
+        if (line.match(/^\*\*(.*?)\*\*/) && line.includes('**')) {
           formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
         // Convert bullet points with asterisks to proper HTML bullets
@@ -319,8 +321,8 @@ export default function LearnModePage() {
 
   // Smooth progressive display with cool animations (no cursor, eye-catching transitions)
   const displayResponseSmoothly = useCallback((text: string) => {
-    // Split response into sections for smooth display
-    const sections = text.split(/(?=🎯|💡|🔍|🔥|⚠️|💭|🚀|🛠️|📚)/);
+    // Split response into sections for smooth display (no emoji-based splitting)
+    const sections = text.split(/(?=\*\*[A-Z][^*]*\*\*:)|(?=\n\n)/);
     
     setIsTyping(true);
     setTypingText('');

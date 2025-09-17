@@ -346,11 +346,11 @@
 }
 
 .quiz-blank-input {
-  background: #ffffff;
+  background: #ffffff !important;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   padding: 8px 16px;
-  color: #1a1a1a;
+  color: #1a1a1a !important;
   font-family: 'Sora', sans-serif;
   font-size: 16px;
   margin: 0 8px;
