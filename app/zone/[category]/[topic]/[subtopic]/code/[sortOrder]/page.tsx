@@ -16,7 +16,6 @@ import {
   RotateCcw,
   Zap,
   FileText,
-  BookOpen,
   Code,
   AlertTriangle,
   Info,
@@ -218,39 +217,124 @@ export default function CodeChallengePage() {
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Parse description into structured sections
+  // Parse description with proper markdown-style formatting
   const parseDescription = (description: string) => {
-    const sections = {
-      problemStatement: '',
-      inputOutput: '',
-      examples: '',
-      edgeCases: '',
-      algorithmHints: ''
-    };
+    if (!description) return null;
 
-    // Split by common section markers and keywords
-    const lines = description.split(/[.\n]/).filter(line => line.trim());
-    let currentSection: keyof typeof sections = 'problemStatement';
+    // Split into logical sections based on common patterns
+    const sections: Array<{
+      type: 'statement' | 'input-output' | 'examples' | 'edge-cases' | 'hints';
+      title: string;
+      content: string;
+      icon: React.ComponentType<{ size?: number; className?: string }>;
+    }> = [];
+
+    // Clean up the description and split into parts
+    const cleanDesc = description.replace(/\\n/g, '\n').trim();
+    const parts = cleanDesc.split(/(?=\*\*[A-Z][^*]*\*\*:?)|(?=Examples?:)|(?=Edge Cases?:)|(?=Algorithm|Hint)/i);
     
-    for (const line of lines) {
-      const lowerLine = line.toLowerCase().trim();
+    let mainStatement = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i].trim();
+      if (!part) continue;
+
+      const lowerPart = part.toLowerCase();
       
-      if (lowerLine.includes('input:') || lowerLine.includes('output:') || lowerLine.includes('**input:**') || lowerLine.includes('**output:**')) {
-        currentSection = 'inputOutput';
-      } else if (lowerLine.includes('example') || lowerLine.includes('**examples:**')) {
-        currentSection = 'examples';
-      } else if (lowerLine.includes('edge case') || lowerLine.includes('**edge cases:**')) {
-        currentSection = 'edgeCases';
-      } else if (lowerLine.includes('algorithm') || lowerLine.includes('hint') || lowerLine.includes('**algorithm hint:**')) {
-        currentSection = 'algorithmHints';
-      }
-      
-      if (line.trim()) {
-        sections[currentSection] += (sections[currentSection] ? ' ' : '') + line.trim() + '.';
+      if (lowerPart.includes('**input:**') || lowerPart.includes('**output:**') || 
+          lowerPart.includes('input:') || lowerPart.includes('output:')) {
+        sections.push({
+          type: 'input-output',
+          title: 'Input & Output Specification',
+          content: part,
+          icon: Code
+        });
+      } else if (lowerPart.includes('example') || lowerPart.includes('**example')) {
+        sections.push({
+          type: 'examples',
+          title: 'Examples & Test Cases',
+          content: part,
+          icon: Eye
+        });
+      } else if (lowerPart.includes('edge case') || lowerPart.includes('**edge case')) {
+        sections.push({
+          type: 'edge-cases',
+          title: 'Edge Cases & Special Scenarios',
+          content: part,
+          icon: AlertTriangle
+        });
+      } else if (lowerPart.includes('algorithm') || lowerPart.includes('hint')) {
+        sections.push({
+          type: 'hints',
+          title: 'Algorithm Hints & Approach',
+          content: part,
+          icon: Lightbulb
+        });
+      } else if (i === 0 || (!lowerPart.includes('**') && mainStatement.length < 500)) {
+        // This is likely the main problem statement
+        mainStatement += (mainStatement ? ' ' : '') + part;
       }
     }
 
+    // If we have a main statement, add it as the first section
+    if (mainStatement) {
+      sections.unshift({
+        type: 'statement',
+        title: 'Problem Statement',
+        content: mainStatement,
+        icon: FileText
+      });
+    }
+
     return sections;
+  };
+
+  // Format content with markdown-style parsing
+  const formatContent = (content: string) => {
+    if (!content) return null;
+
+    // Split into paragraphs and format each one
+    const paragraphs = content.split(/\n\s*\n|\. (?=[A-Z])/);
+    
+    return paragraphs.map((paragraph, index) => {
+      if (!paragraph.trim()) return null;
+      
+      // Handle bullet points
+      if (paragraph.includes(' - ') || paragraph.includes('* ')) {
+        const items = paragraph.split(/\s*[-*]\s+/).filter(item => item.trim());
+        if (items.length > 1) {
+          return (
+            <div key={index} className={styles.bulletList}>
+              {items.slice(1).map((item, itemIndex) => (
+                <div key={itemIndex} className={styles.bulletItem}>
+                  <List size={14} className={styles.bulletIcon} />
+                  <span dangerouslySetInnerHTML={{ __html: formatInlineText(item.trim()) }} />
+                </div>
+              ))}
+            </div>
+          );
+        }
+      }
+      
+      // Regular paragraph with inline formatting
+      return (
+        <p key={index} className={styles.formattedParagraph} 
+           dangerouslySetInnerHTML={{ __html: formatInlineText(paragraph.trim()) }} />
+      );
+    }).filter(Boolean);
+  };
+
+  // Format inline text with bold, code, etc.
+  const formatInlineText = (text: string) => {
+    return text
+      // Bold text **text** or **text:**
+      .replace(/\*\*([^*]+)\*\*:?/g, '<strong class="' + styles.boldText + '">$1</strong>')
+      // Code snippets `code`
+      .replace(/`([^`]+)`/g, '<code class="' + styles.inlineCode + '">$1</code>')
+      // Numbers and arrays [1,2,3]
+      .replace(/(\[[\d,\s-]+\])/g, '<code class="' + styles.arrayCode + '">$1</code>')
+      // Function calls and variables
+      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="' + styles.functionCode + '">$1</code>');
   };
 
   // Error boundary function
@@ -269,7 +353,7 @@ export default function CodeChallengePage() {
     // Retry initialization
     checkUserSession();
     fetchOrGenerateProblem();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Format display names for breadcrumb
   const formatDisplayName = (urlName: string) => {
@@ -737,77 +821,32 @@ export default function CodeChallengePage() {
                     {(() => {
                       const sections = parseDescription(problem.description);
                       
-                      return (
-                        <>
-                          {/* Problem Statement Section */}
-                          {sections.problemStatement && (
-                            <div className={styles.descriptionSection}>
-                              <h3 className={styles.sectionTitle}>
-                                <FileText size={20} />
-                                Problem Statement
-                              </h3>
-                              <div className={styles.descriptionContent}>
-                                <p className={styles.descriptionParagraph}>{sections.problemStatement}</p>
-                              </div>
+                      if (!sections || sections.length === 0) {
+                        // Fallback for simple descriptions
+                        return (
+                          <div className={styles.descriptionSection}>
+                            <h3 className={styles.sectionTitle}>
+                              <FileText size={20} />
+                              Problem Description
+                            </h3>
+                            <div className={styles.descriptionContent}>
+                              {formatContent(problem.description)}
                             </div>
-                          )}
-
-                          {/* Input/Output Section */}
-                          {sections.inputOutput && (
-                            <div className={styles.descriptionSection}>
-                              <h3 className={styles.sectionTitle}>
-                                <Code size={20} />
-                                Input & Output
-                              </h3>
-                              <div className={styles.inputOutputBox}>
-                                <p>{sections.inputOutput}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Examples Section */}
-                          {sections.examples && (
-                            <div className={styles.descriptionSection}>
-                              <h3 className={styles.sectionTitle}>
-                                <Eye size={20} />
-                                Examples
-                              </h3>
-                              <div className={styles.exampleBox}>
-                                <BookOpen size={16} className={styles.exampleIcon} />
-                                <p>{sections.examples}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Edge Cases Section */}
-                          {sections.edgeCases && (
-                            <div className={styles.descriptionSection}>
-                              <h3 className={styles.sectionTitle}>
-                                <AlertTriangle size={20} />
-                                Edge Cases
-                              </h3>
-                              <div className={styles.requirementBox}>
-                                <AlertTriangle size={16} className={styles.requirementIcon} />
-                                <p>{sections.edgeCases}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Algorithm Hints Section */}
-                          {sections.algorithmHints && (
-                            <div className={styles.descriptionSection}>
-                              <h3 className={styles.sectionTitle}>
-                                <Lightbulb size={20} />
-                                Algorithm Hints
-                              </h3>
-                              <div className={styles.hintBox}>
-                                <Info size={16} className={styles.hintIcon} />
-                                <p>{sections.algorithmHints}</p>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      );
+                          </div>
+                        );
+                      }
+                      
+                      return sections.map((section, index) => (
+                        <div key={index} className={styles.descriptionSection}>
+                          <h3 className={styles.sectionTitle}>
+                            <section.icon size={20} />
+                            {section.title}
+                          </h3>
+                          <div className={styles.descriptionContent}>
+                            {formatContent(section.content)}
+                          </div>
+                        </div>
+                      ));
                     })()}
                     
                     {/* Problem Context Section */}

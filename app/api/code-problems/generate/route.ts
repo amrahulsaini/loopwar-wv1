@@ -101,13 +101,24 @@ CRITICAL INSTRUCTIONS:
 4. If the base title suggests a specific algorithm/concept, build upon that exact concept
 5. Make the problem title similar or related to "${problemTitle}"
 
-NEVER use generic placeholders like:
-❌ "test_input_1", "sample_data", "input_array", "example_value"
+CRITICAL: TEST CASES MUST BE REALISTIC AND SPECIFIC
+- Never use empty strings, blank inputs, or generic placeholders
+- Always include proper variable names: "nums = [1,2,3]", "target = 5", "s = \"example\""
+- Generate 6 diverse test cases covering:
+  * Basic functionality (2-3 cases)
+  * Edge cases (empty arrays, single elements, boundaries)
+  * Complex scenarios (large inputs, special patterns)
+- Each test case requires: concrete input, expected output, clear explanation
+- Use realistic data that developers would actually test with
 
-ALWAYS use concrete, realistic data:
-✅ "nums = [2,7,11,15]", "target = 9"
-✅ "s = \"hello world\"", "k = 3"
-✅ "matrix = [[1,2,3],[4,5,6]]"
+Example GOOD test cases for array problems:
+{"input": "nums = [2,7,11,15], target = 9", "expected": "[0,1]", "explanation": "nums[0] + nums[1] = 2 + 7 = 9"}
+{"input": "nums = [3,2,4], target = 6", "expected": "[1,2]", "explanation": "nums[1] + nums[2] = 2 + 4 = 6"}
+{"input": "nums = [], target = 0", "expected": "[]", "explanation": "Empty array returns empty result"}
+
+Example GOOD test cases for string problems:
+{"input": "s = \"racecar\"", "expected": "true", "explanation": "String reads same forwards and backwards"}
+{"input": "s = \"hello\"", "expected": "false", "explanation": "String is not a palindrome"}
 
 REQUIREMENTS:
 1. **Title**: Use or adapt "${problemTitle}" (make it closely related to this title)
@@ -133,7 +144,12 @@ RESPOND WITH VALID JSON ONLY - no markdown formatting:
   "timeComplexity": "Appropriate complexity for this algorithm",
   "spaceComplexity": "Appropriate space complexity",
   "testCases": [
-    {"input": "Generate 6 test cases with real concrete data", "expected": "Expected outputs", "explanation": "Clear explanations"}
+    {"input": "nums = [actual array], target = actual_number", "expected": "[actual result]", "explanation": "Clear step-by-step explanation"},
+    {"input": "nums = [different array], target = different_number", "expected": "[different result]", "explanation": "Another clear explanation"},
+    {"input": "nums = [edge case like empty or single element]", "expected": "[appropriate result]", "explanation": "Edge case explanation"},
+    {"input": "nums = [complex case]", "expected": "[complex result]", "explanation": "Complex scenario explanation"},
+    {"input": "nums = [boundary case]", "expected": "[boundary result]", "explanation": "Boundary condition explanation"},
+    {"input": "nums = [stress test case]", "expected": "[stress result]", "explanation": "Performance test explanation"}
   ]
 }
 

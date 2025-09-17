@@ -266,6 +266,88 @@
   color: #2d3748;
 }
 
+.formattedParagraph {
+  margin: 0 0 1.25rem 0;
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: justify;
+  line-height: 1.7;
+}
+
+.formattedParagraph:last-child {
+  margin-bottom: 0;
+}
+
+.boldText {
+  font-weight: 700;
+  color: #1a202c;
+  background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #f59e0b;
+}
+
+.inlineCode {
+  background: #f7fafc;
+  color: #2d3748;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+}
+
+.arrayCode {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  border: 1px solid #bee3f8;
+  font-weight: 600;
+}
+
+.functionCode {
+  background: #f0fff4;
+  color: #22543d;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  border: 1px solid #9ae6b4;
+  font-weight: 500;
+}
+
+.bulletList {
+  margin: 1.5rem 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid #4299e1;
+}
+
+.bulletItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.bulletItem:last-child {
+  margin-bottom: 0;
+}
+
+.bulletIcon {
+  color: #4299e1;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
 .descriptionParagraph {
   margin: 0 0 1.25rem 0;
   font-size: 1rem;
