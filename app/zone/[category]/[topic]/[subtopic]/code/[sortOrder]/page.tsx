@@ -14,7 +14,17 @@ import {
   XCircle,
   AlertCircle,
   RotateCcw,
-  Zap
+  Zap,
+  FileText,
+  BookOpen,
+  Code,
+  AlertTriangle,
+  Info,
+  CheckCircle,
+  TestTube,
+  FileCode,
+  Eye,
+  List
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -207,6 +217,41 @@ export default function CodeChallengePage() {
   const [hasError, setHasError] = useState(false);
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Parse description into structured sections
+  const parseDescription = (description: string) => {
+    const sections = {
+      problemStatement: '',
+      inputOutput: '',
+      examples: '',
+      edgeCases: '',
+      algorithmHints: ''
+    };
+
+    // Split by common section markers and keywords
+    const lines = description.split(/[.\n]/).filter(line => line.trim());
+    let currentSection: keyof typeof sections = 'problemStatement';
+    
+    for (const line of lines) {
+      const lowerLine = line.toLowerCase().trim();
+      
+      if (lowerLine.includes('input:') || lowerLine.includes('output:') || lowerLine.includes('**input:**') || lowerLine.includes('**output:**')) {
+        currentSection = 'inputOutput';
+      } else if (lowerLine.includes('example') || lowerLine.includes('**examples:**')) {
+        currentSection = 'examples';
+      } else if (lowerLine.includes('edge case') || lowerLine.includes('**edge cases:**')) {
+        currentSection = 'edgeCases';
+      } else if (lowerLine.includes('algorithm') || lowerLine.includes('hint') || lowerLine.includes('**algorithm hint:**')) {
+        currentSection = 'algorithmHints';
+      }
+      
+      if (line.trim()) {
+        sections[currentSection] += (sections[currentSection] ? ' ' : '') + line.trim() + '.';
+      }
+    }
+
+    return sections;
+  };
 
   // Error boundary function
   const handleError = useCallback((error: Error, errorInfo?: string) => {
@@ -689,44 +734,88 @@ export default function CodeChallengePage() {
               <div className={styles.descriptionContainer}>
                 {problem && problem.description ? (
                   <div className={styles.problemDescription}>
-                    <div className={styles.descriptionSection}>
-                      <h3 className={styles.sectionTitle}>Problem Statement</h3>
-                      <div className={styles.descriptionContent}>
-                        {problem.description.split('\\n').filter(line => line.trim()).map((paragraph, index) => {
-                          // Check if this looks like a requirement or constraint
-                          const isRequirement = paragraph.trim().toLowerCase().includes('requirement') || 
-                                               paragraph.trim().toLowerCase().includes('must') ||
-                                               paragraph.trim().toLowerCase().includes('should') ||
-                                               paragraph.trim().toLowerCase().includes('constraint');
-                          
-                          const isExample = paragraph.trim().toLowerCase().includes('example') ||
-                                          paragraph.trim().toLowerCase().includes('for instance') ||
-                                          paragraph.trim().toLowerCase().includes('e.g.');
-                          
-                          if (isRequirement) {
-                            return (
-                              <div key={index} className={styles.requirementBox}>
-                                <span className={styles.requirementIcon}>⚡</span>
-                                <p>{paragraph}</p>
+                    {(() => {
+                      const sections = parseDescription(problem.description);
+                      
+                      return (
+                        <>
+                          {/* Problem Statement Section */}
+                          {sections.problemStatement && (
+                            <div className={styles.descriptionSection}>
+                              <h3 className={styles.sectionTitle}>
+                                <FileText size={20} />
+                                Problem Statement
+                              </h3>
+                              <div className={styles.descriptionContent}>
+                                <p className={styles.descriptionParagraph}>{sections.problemStatement}</p>
                               </div>
-                            );
-                          } else if (isExample) {
-                            return (
-                              <div key={index} className={styles.exampleBox}>
-                                <span className={styles.exampleIcon}>💡</span>
-                                <p>{paragraph}</p>
+                            </div>
+                          )}
+
+                          {/* Input/Output Section */}
+                          {sections.inputOutput && (
+                            <div className={styles.descriptionSection}>
+                              <h3 className={styles.sectionTitle}>
+                                <Code size={20} />
+                                Input & Output
+                              </h3>
+                              <div className={styles.inputOutputBox}>
+                                <p>{sections.inputOutput}</p>
                               </div>
-                            );
-                          } else {
-                            return <p key={index} className={styles.descriptionParagraph}>{paragraph}</p>;
-                          }
-                        })}
-                      </div>
-                    </div>
+                            </div>
+                          )}
+
+                          {/* Examples Section */}
+                          {sections.examples && (
+                            <div className={styles.descriptionSection}>
+                              <h3 className={styles.sectionTitle}>
+                                <Eye size={20} />
+                                Examples
+                              </h3>
+                              <div className={styles.exampleBox}>
+                                <BookOpen size={16} className={styles.exampleIcon} />
+                                <p>{sections.examples}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Edge Cases Section */}
+                          {sections.edgeCases && (
+                            <div className={styles.descriptionSection}>
+                              <h3 className={styles.sectionTitle}>
+                                <AlertTriangle size={20} />
+                                Edge Cases
+                              </h3>
+                              <div className={styles.requirementBox}>
+                                <AlertTriangle size={16} className={styles.requirementIcon} />
+                                <p>{sections.edgeCases}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Algorithm Hints Section */}
+                          {sections.algorithmHints && (
+                            <div className={styles.descriptionSection}>
+                              <h3 className={styles.sectionTitle}>
+                                <Lightbulb size={20} />
+                                Algorithm Hints
+                              </h3>
+                              <div className={styles.hintBox}>
+                                <Info size={16} className={styles.hintIcon} />
+                                <p>{sections.algorithmHints}</p>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                     
                     {/* Problem Context Section */}
                     <div className={styles.contextSection}>
-                      <h3 className={styles.sectionTitle}>Problem Context</h3>
+                      <h3 className={styles.sectionTitle}>
+                        <Target size={20} />
+                        Problem Context
+                      </h3>
                       <div className={styles.contextGrid}>
                         <div className={styles.contextItem}>
                           <span className={styles.contextLabel}>Category:</span>
@@ -755,18 +844,21 @@ export default function CodeChallengePage() {
                     {/* Quick Reference Section */}
                     {(problem.timeComplexity || problem.spaceComplexity) && (
                       <div className={styles.quickRefSection}>
-                        <h3 className={styles.sectionTitle}>Expected Complexity</h3>
+                        <h3 className={styles.sectionTitle}>
+                          <Zap size={20} />
+                          Expected Complexity
+                        </h3>
                         <div className={styles.complexityGrid}>
                           {problem.timeComplexity && (
                             <div className={styles.complexityItem}>
-                              <span className={styles.complexityIcon}>⏱️</span>
+                              <Clock size={20} className={styles.complexityIcon} />
                               <span className={styles.complexityLabel}>Time:</span>
                               <code className={styles.complexityValue}>{problem.timeComplexity}</code>
                             </div>
                           )}
                           {problem.spaceComplexity && (
                             <div className={styles.complexityItem}>
-                              <span className={styles.complexityIcon}>🧠</span>
+                              <Target size={20} className={styles.complexityIcon} />
                               <span className={styles.complexityLabel}>Space:</span>
                               <code className={styles.complexityValue}>{problem.spaceComplexity}</code>
                             </div>
@@ -802,32 +894,55 @@ export default function CodeChallengePage() {
             
             {activeTab === 'testcases' && (
               <div className={styles.examples}>
-                <h3>Test Cases</h3>
+                <div className={styles.testCasesHeader}>
+                  <h3>
+                    <TestTube size={20} />
+                    Test Cases
+                  </h3>
+                </div>
                 {problem && problem.testCases && problem.testCases.length > 0 ? (
                   <div className={styles.testCasesContainer}>
                     {problem.testCases.map((testCase, index) => (
-                      <div key={index} className={styles.exampleCard}>
-                        <h4>Test Case {index + 1}</h4>
-                        <div className={styles.exampleInput}>
-                          <strong>Input:</strong>
-                          <pre>{testCase.input || 'No input provided'}</pre>
+                      <div key={index} className={styles.testCaseCard}>
+                        <div className={styles.testCaseHeader}>
+                          <h4>
+                            <FileCode size={18} />
+                            Test Case {index + 1}
+                          </h4>
                         </div>
-                        <div className={styles.exampleOutput}>
-                          <strong>Expected Output:</strong>
-                          <pre>{testCase.expected || 'No expected output'}</pre>
-                        </div>
-                        {testCase.explanation && (
-                          <div className={styles.exampleExplanation}>
-                            <strong>Explanation:</strong>
-                            <p>{testCase.explanation}</p>
+                        <div className={styles.testCaseContent}>
+                          <div className={styles.testCaseInput}>
+                            <div className={styles.testCaseLabel}>
+                              <Code size={14} />
+                              <strong>Input:</strong>
+                            </div>
+                            <pre className={styles.testCaseCode}>{testCase.input || 'No input provided'}</pre>
                           </div>
-                        )}
+                          <div className={styles.testCaseOutput}>
+                            <div className={styles.testCaseLabel}>
+                              <CheckCircle size={14} />
+                              <strong>Expected Output:</strong>
+                            </div>
+                            <pre className={styles.testCaseCode}>{testCase.expected || 'No expected output'}</pre>
+                          </div>
+                          {testCase.explanation && (
+                            <div className={styles.testCaseExplanation}>
+                              <div className={styles.testCaseLabel}>
+                                <Info size={14} />
+                                <strong>Explanation:</strong>
+                              </div>
+                              <p className={styles.testCaseExplanationText}>{testCase.explanation}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className={styles.testCasesEmpty}>
-                    <div className={styles.emptyIcon}>📝</div>
+                    <div className={styles.emptyIconContainer}>
+                      <TestTube size={48} className={styles.emptyIcon} />
+                    </div>
                     <h4>No Test Cases Available</h4>
                     <p>Test cases are being generated or haven&apos;t been created yet.</p>
                     {problem?.is_ai_generated && (
@@ -836,6 +951,7 @@ export default function CodeChallengePage() {
                         onClick={regenerateProblem}
                         disabled={isRegenerating}
                       >
+                        <Zap size={16} />
                         {isRegenerating ? 'Generating...' : 'Generate Test Cases'}
                       </button>
                     )}

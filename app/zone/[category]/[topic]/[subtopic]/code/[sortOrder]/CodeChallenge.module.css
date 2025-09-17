@@ -212,6 +212,50 @@
   padding-bottom: 0.75rem;
 }
 
+.inputOutputBox {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+}
+
+.inputOutputBox p {
+  margin: 0;
+  font-weight: 500;
+  color: #0c4a6e;
+  line-height: 1.6;
+}
+
+.hintBox {
+  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+  border: 1px solid #eab308;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
+}
+
+.hintIcon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: #a16207;
+}
+
+.hintBox p {
+  margin: 0;
+  font-weight: 500;
+  color: #a16207;
+  line-height: 1.6;
+}
+
 .sectionTitle::before {
   content: "📝";
   font-size: 1.3rem;
@@ -246,9 +290,9 @@
 }
 
 .requirementIcon {
-  font-size: 1.2rem;
   flex-shrink: 0;
   margin-top: 0.1rem;
+  color: #d97706;
 }
 
 .requirementBox p {
@@ -271,9 +315,9 @@
 }
 
 .exampleIcon {
-  font-size: 1.2rem;
   flex-shrink: 0;
   margin-top: 0.1rem;
+  color: #1d4ed8;
 }
 
 .exampleBox p {
@@ -368,7 +412,8 @@
 }
 
 .complexityIcon {
-  font-size: 1.5rem;
+  flex-shrink: 0;
+  color: #15803d;
 }
 
 .complexityLabel {
@@ -490,6 +535,115 @@
   padding-bottom: 0.5rem;
 }
 
+.testCasesHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 2rem 0;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 1.3rem;
+  border-bottom: 3px solid #3b82f6;
+  padding-bottom: 0.75rem;
+}
+
+.testCaseCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.testCaseCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.testCaseHeader {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+.testCaseHeader h4 {
+  margin: 0;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.testCaseContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.testCaseInput,
+.testCaseOutput,
+.testCaseExplanation {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.testCaseInput {
+  border-left: 4px solid #3b82f6;
+}
+
+.testCaseOutput {
+  border-left: 4px solid #10b981;
+}
+
+.testCaseExplanation {
+  border-left: 4px solid #f59e0b;
+}
+
+.testCaseLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.testCaseCode {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: auto;
+  border: 1px solid #374151;
+}
+
+.testCaseExplanationText {
+  margin: 0;
+  color: #374151;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.emptyIconContainer {
+  margin-bottom: 1.5rem;
+}
+
+.emptyIcon {
+  color: #9ca3af;
+}
+
 .testCasesContainer {
   display: flex;
   flex-direction: column;
@@ -503,11 +657,6 @@
   border: 2px dashed #e5e7eb;
   border-radius: 12px;
   color: #6b7280;
-}
-
-.emptyIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
 }
 
 .testCasesEmpty h4 {
@@ -531,6 +680,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Sora', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .regenerateTestCases:hover:not(:disabled) {
