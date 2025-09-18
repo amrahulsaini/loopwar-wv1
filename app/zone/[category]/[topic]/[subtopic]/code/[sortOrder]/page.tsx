@@ -52,6 +52,18 @@ interface ProblemData {
   subtopic_name: string;
   is_ai_generated?: boolean;
   needs_generation?: boolean;
+  functionTemplates?: {
+    javascript: string;
+    python: string;
+    java: string;
+    cpp: string;
+    c: string;
+    csharp: string;
+    go: string;
+    rust: string;
+    php: string;
+    ruby: string;
+  };
 }
 
 interface ExecutionResult {
@@ -216,6 +228,17 @@ export default function CodeChallengePage() {
   const [hasError, setHasError] = useState(false);
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Function to get the appropriate code template for a language
+  const getCodeTemplate = (language: string): string => {
+    // First try to use function template from the problem (if available)
+    if (problem?.functionTemplates && problem.functionTemplates[language as keyof typeof problem.functionTemplates]) {
+      return problem.functionTemplates[language as keyof typeof problem.functionTemplates];
+    }
+    
+    // Fallback to hardcoded boilerplates
+    return languageBoilerplates[language] || '// Start coding here...';
+  };
 
   // Parse description with proper markdown-style formatting (strip emojis)
   const parseDescription = (description: string) => {
@@ -556,8 +579,8 @@ export default function CodeChallengePage() {
 
   // Update code when language changes
   useEffect(() => {
-    setCode(languageBoilerplates[selectedLanguage] || '// Start coding here...');
-  }, [selectedLanguage]);
+    setCode(getCodeTemplate(selectedLanguage));
+  }, [selectedLanguage, problem]); // Keep problem as dependency
 
   // Handle code execution
   const runCode = async () => {
@@ -612,7 +635,7 @@ export default function CodeChallengePage() {
 
   // Handle code reset
   const resetCode = () => {
-    setCode(languageBoilerplates[selectedLanguage] || '// Start coding here...');
+    setCode(getCodeTemplate(selectedLanguage));
     setExecutionResult(null);
   };
 

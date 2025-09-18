@@ -17,6 +17,7 @@ interface CodeProblemRow extends RowDataPacket {
   time_complexity?: string;
   space_complexity?: string;
   test_cases?: string;
+  function_templates?: string;
   is_ai_generated: boolean;
   created_at: string;
   updated_at: string;
@@ -66,6 +67,7 @@ interface CodeProblem {
     expected: string;
     explanation?: string;
   }>;
+  function_templates?: Record<string, string>;
   is_ai_generated: boolean;
   created_at: string;
   updated_at: string;
@@ -108,6 +110,7 @@ export async function GET(request: NextRequest) {
       // Parse JSON fields safely with better error handling
       let parsedTestCases: Array<{ input: string; expected: string; explanation?: string }> = [];
       let parsedHints: string[] = [];
+      let parsedFunctionTemplates: Record<string, string> = {};
       
       // Parse test_cases
       if (problem.test_cases) {
@@ -144,6 +147,20 @@ export async function GET(request: NextRequest) {
           parsedHints = ["Consider the problem requirements", "Think about edge cases"];
         }
       }
+
+      // Parse function_templates
+      if (problem.function_templates) {
+        try {
+          if (typeof problem.function_templates === 'string') {
+            parsedFunctionTemplates = JSON.parse(problem.function_templates);
+          } else if (typeof problem.function_templates === 'object') {
+            parsedFunctionTemplates = problem.function_templates;
+          }
+        } catch (e) {
+          console.error('Error parsing function_templates:', e, 'Raw value:', problem.function_templates);
+          parsedFunctionTemplates = {};
+        }
+      }
       
       const formattedProblem: CodeProblem = {
         id: problem.id,
@@ -160,6 +177,7 @@ export async function GET(request: NextRequest) {
         time_complexity: problem.time_complexity,
         space_complexity: problem.space_complexity,
         test_cases: parsedTestCases,
+        function_templates: parsedFunctionTemplates,
         is_ai_generated: problem.is_ai_generated,
         created_at: problem.created_at,
         updated_at: problem.updated_at,

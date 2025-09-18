@@ -25,6 +25,18 @@ interface GeneratedProblem {
   timeComplexity: string;
   spaceComplexity: string;
   testCases: TestCase[];
+  functionTemplates: {
+    javascript: string;
+    python: string;
+    java: string;
+    cpp: string;
+    c: string;
+    csharp: string;
+    go: string;
+    rust: string;
+    php: string;
+    ruby: string;
+  };
 }
 
 interface CodeProblemExistsRow extends RowDataPacket {
@@ -132,6 +144,14 @@ REQUIREMENTS:
 4. **Test Cases**: 6 hidden test cases for code validation
 5. **Constraints**: Realistic technical limits
 6. **Hints**: 4 helpful hints about the solution approach
+7. **Function Templates**: Generate function-only templates for each language (NO main/print/input statements)
+
+FUNCTION TEMPLATE REQUIREMENTS:
+- Only include the function signature and stub
+- Use appropriate parameter names and return types based on the problem
+- Body should contain "// TODO: implement" or language equivalent
+- NO main(), input(), print(), console.log(), or test code
+- The hidden test runner will call these functions directly
 
 RESPOND WITH VALID JSON ONLY - no markdown formatting:
 {
@@ -150,7 +170,19 @@ RESPOND WITH VALID JSON ONLY - no markdown formatting:
     {"input": "nums = [complex case]", "expected": "[complex result]", "explanation": "Complex scenario explanation"},
     {"input": "nums = [boundary case]", "expected": "[boundary result]", "explanation": "Boundary condition explanation"},
     {"input": "nums = [stress test case]", "expected": "[stress result]", "explanation": "Performance test explanation"}
-  ]
+  ],
+  "functionTemplates": {
+    "javascript": "function solutionName(param1, param2) {\n    // TODO: implement\n    return null;\n}",
+    "python": "def solution_name(param1, param2):\n    # TODO: implement\n    pass",
+    "java": "public class Solution {\n    public ReturnType solutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return null;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    ReturnType solutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return ReturnType();\n    }\n};",
+    "c": "ReturnType solution_name(ParamType param1, ParamType param2) {\n    // TODO: implement\n    return 0;\n}",
+    "csharp": "public class Solution {\n    public ReturnType SolutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return default(ReturnType);\n    }\n}",
+    "go": "func solutionName(param1 ParamType, param2 ParamType) ReturnType {\n    // TODO: implement\n    return ReturnType{}\n}",
+    "rust": "impl Solution {\n    pub fn solution_name(param1: ParamType, param2: ParamType) -> ReturnType {\n        // TODO: implement\n        ReturnType::new()\n    }\n}",
+    "php": "function solutionName($param1, $param2) {\n    // TODO: implement\n    return null;\n}",
+    "ruby": "def solution_name(param1, param2)\n    # TODO: implement\n    nil\nend"
+  }
 }
 
 Generate a problem specifically based on "${problemTitle}" and "${problemDescription}" for ${subtopic.replace(/-/g, ' ')} topic.`;
@@ -315,7 +347,19 @@ Explanation: ${selectedFallback.testCases[2].explanation}`,
         ],
         timeComplexity: "O(n)",
         spaceComplexity: "O(1)", 
-        testCases: selectedFallback.testCases
+        testCases: selectedFallback.testCases,
+        functionTemplates: {
+          javascript: `function solution(arr, target) {\n    // TODO: implement\n    return null;\n}`,
+          python: `def solution(arr, target):\n    # TODO: implement\n    pass`,
+          java: `public class Solution {\n    public int[] solution(int[] arr, int target) {\n        // TODO: implement\n        return new int[]{};\n    }\n}`,
+          cpp: `class Solution {\npublic:\n    vector<int> solution(vector<int>& arr, int target) {\n        // TODO: implement\n        return {};\n    }\n};`,
+          c: `int* solution(int* arr, int arrSize, int target, int* returnSize) {\n    // TODO: implement\n    *returnSize = 0;\n    return NULL;\n}`,
+          csharp: `public class Solution {\n    public int[] Solution(int[] arr, int target) {\n        // TODO: implement\n        return new int[]{};\n    }\n}`,
+          go: `func solution(arr []int, target int) []int {\n    // TODO: implement\n    return []int{}\n}`,
+          rust: `impl Solution {\n    pub fn solution(arr: Vec<i32>, target: i32) -> Vec<i32> {\n        // TODO: implement\n        vec![]\n    }\n}`,
+          php: `function solution($arr, $target) {\n    // TODO: implement\n    return array();\n}`,
+          ruby: `def solution(arr, target)\n    # TODO: implement\n    []\nend`
+        }
       };
     }
 
@@ -337,6 +381,20 @@ Explanation: ${selectedFallback.testCases[2].explanation}`,
         { input: "sample input", expected: "sample output", explanation: "sample explanation" }
       ];
     }
+    if (!generatedProblem.functionTemplates || typeof generatedProblem.functionTemplates !== 'object') {
+      generatedProblem.functionTemplates = {
+        javascript: `function solution() {\n    // TODO: implement\n    return null;\n}`,
+        python: `def solution():\n    # TODO: implement\n    pass`,
+        java: `public class Solution {\n    public String solution() {\n        // TODO: implement\n        return "";\n    }\n}`,
+        cpp: `class Solution {\npublic:\n    string solution() {\n        // TODO: implement\n        return "";\n    }\n};`,
+        c: `char* solution() {\n    // TODO: implement\n    return "";\n}`,
+        csharp: `public class Solution {\n    public string Solution() {\n        // TODO: implement\n        return "";\n    }\n}`,
+        go: `func solution() string {\n    // TODO: implement\n    return ""\n}`,
+        rust: `impl Solution {\n    pub fn solution() -> String {\n        // TODO: implement\n        String::new()\n    }\n}`,
+        php: `function solution() {\n    // TODO: implement\n    return "";\n}`,
+        ruby: `def solution\n    # TODO: implement\n    ""\nend`
+      };
+    }
 
     // Validate and save to database
     console.log('Saving problem to database...');
@@ -356,6 +414,7 @@ Explanation: ${selectedFallback.testCases[2].explanation}`,
       String(generatedProblem.timeComplexity || 'O(n)').trim(),
       String(generatedProblem.spaceComplexity || 'O(1)').trim(),
       JSON.stringify(generatedProblem.testCases || []),
+      JSON.stringify(generatedProblem.functionTemplates || {}),
       Boolean(true)
     ];
     
@@ -368,8 +427,8 @@ Explanation: ${selectedFallback.testCases[2].explanation}`,
     const insertResult = await Database.query(
       `INSERT INTO code_problems (
         title, description, difficulty, category, topic, subtopic, sort_order,
-        constraints, examples, hints, time_complexity, space_complexity, test_cases, is_ai_generated
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       insertData
     ) as ResultSetHeader;
 
