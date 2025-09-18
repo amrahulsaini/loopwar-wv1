@@ -218,10 +218,35 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       if (response.ok) {
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        const cleanedText = aiText.replace(/```json\s*/, '').replace(/```\s*$/, '').trim();
         
-        generatedProblem = JSON.parse(cleanedText);
-        console.log('AI generation successful');
+        // Clean the text more thoroughly
+        let cleanedText = aiText
+          .replace(/```json\s*/, '')
+          .replace(/```\s*$/, '')
+          .trim();
+        
+        // Fix common JSON issues
+        cleanedText = cleanedText
+          // Fix control characters in strings
+          .replace(/[\x00-\x1F\x7F]/g, '')
+          // Fix unescaped newlines in strings
+          .replace(/\\n/g, '\\\\n')
+          // Fix unescaped quotes
+          .replace(/(?<!\\)"/g, '\\"')
+          .replace(/\\\\"(?=\s*[,}])/g, '"')
+          // Fix escaped quotes that are actually supposed to be quotes
+          .replace(/\\\\"/g, '\\"');
+        
+        console.log('Cleaned AI text (first 500 chars):', cleanedText.substring(0, 500));
+        
+        try {
+          generatedProblem = JSON.parse(cleanedText);
+          console.log('AI generation successful');
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Problematic JSON (first 1000 chars):', cleanedText.substring(0, 1000));
+          throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+        }
       } else {
         const errorText = await response.text();
         console.log('AI API failed with status:', response.status, 'Response:', errorText);
@@ -229,138 +254,24 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       }
       
     } catch (aiError) {
-      if (aiError instanceof Error && aiError.name === 'AbortError') {
-        console.log('AI generation timed out, using fallback');
-      } else {
-        console.log('AI generation failed, using fallback:', aiError);
-      }
+      console.error('AI generation failed:', aiError);
       
-      // Create topic-specific fallback problems with real examples
-      const fallbackProblems = {
-        'arrays': {
-          title: "Two Sum",
-          description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\\n\\nThis is one of the most fundamental problems in computer science and appears frequently in technical interviews at major tech companies. The problem tests your understanding of hash tables, array manipulation, and optimization techniques.\\n\\nYou may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.\\n\\nFor example, if nums = [2, 7, 11, 15] and target = 9, you should return [0, 1] because nums[0] + nums[1] = 2 + 7 = 9.\\n\\nConsider multiple approaches: the brute force O(n²) solution that checks all possible pairs, or the optimized O(n) solution using a hash map to store previously seen values and their indices.",
-          testCases: [
-            { input: "[2,7,11,15], 9", expected: "[0,1]", explanation: "2 + 7 = 9" },
-            { input: "[3,2,4], 6", expected: "[1,2]", explanation: "2 + 4 = 6" },
-            { input: "[3,3], 6", expected: "[0,1]", explanation: "3 + 3 = 6" },
-            { input: "[1,2,3,4,5], 8", expected: "[2,4]", explanation: "3 + 5 = 8" },
-            { input: "[-1,-2,-3,-4,-5], -8", expected: "[2,4]", explanation: "-3 + (-5) = -8" },
-            { input: "[0,4,3,0], 0", expected: "[0,3]", explanation: "0 + 0 = 0" }
-          ]
+      // Return error with details instead of using fallback
+      return NextResponse.json(
+        { 
+          error: `AI generation failed: ${aiError instanceof Error ? aiError.message : 'Unknown error'}`,
+          details: {
+            problemTitle,
+            problemDescription,
+            category,
+            topic,
+            subtopic,
+            sortOrder,
+            errorType: aiError instanceof Error ? aiError.name : 'Unknown'
+          }
         },
-        'array-fundamentals': {
-          title: "Contains Duplicate",
-          description: "Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.\\n\\nThis problem tests your understanding of array traversal, data structures for tracking seen elements, and optimization techniques. It's a fundamental problem that appears in many coding interviews and real-world applications.\\n\\nYou can solve this using different approaches: sorting the array first, using a hash set to track seen elements, or comparing array length with set length.\\n\\nFor example, if nums = [1,2,3,1], return true because 1 appears twice. If nums = [1,2,3,4], return false because all elements are distinct.",
-          testCases: [
-            { input: "[1,2,3,1]", expected: "true", explanation: "1 appears twice" },
-            { input: "[1,2,3,4]", expected: "false", explanation: "All elements are distinct" },
-            { input: "[1,1,1,3,3,4,3,2,4,2]", expected: "true", explanation: "Multiple duplicates" },
-            { input: "[]", expected: "false", explanation: "Empty array has no duplicates" },
-            { input: "[1]", expected: "false", explanation: "Single element cannot duplicate" },
-            { input: "[1,2,1]", expected: "true", explanation: "1 appears at positions 0 and 2" }
-          ]
-        },
-        'sorting': {
-          title: "Merge Sorted Arrays",
-          description: "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order. Merge nums1 and nums2 into a single array sorted in non-decreasing order, storing the result in nums1.\\n\\nThis problem is essential for understanding merge operations and is a building block for more complex algorithms like merge sort. It's commonly used in database operations, file merging, and distributed systems.\\n\\nThe key insight is to use a two-pointer approach, comparing elements from both arrays and placing the smaller element in the correct position. Since nums1 has extra space at the end, you should work backwards to avoid overwriting elements.\\n\\nFor example, if nums1 = [1,2,3,0,0,0] with m=3 and nums2 = [2,5,6] with n=3, the result should be [1,2,2,3,5,6].",
-          testCases: [
-            { input: "[1,2,3,0,0,0], 3, [2,5,6], 3", expected: "[1,2,2,3,5,6]", explanation: "Merge [1,2,3] and [2,5,6]" },
-            { input: "[1], 1, [], 0", expected: "[1]", explanation: "nums2 is empty" },
-            { input: "[0], 0, [1], 1", expected: "[1]", explanation: "nums1 is effectively empty" },
-            { input: "[4,5,6,0,0,0], 3, [1,2,3], 3", expected: "[1,2,3,4,5,6]", explanation: "nums2 elements are smaller" },
-            { input: "[1,3,5,0,0,0], 3, [2,4,6], 3", expected: "[1,2,3,4,5,6]", explanation: "Interleaved elements" },
-            { input: "[2,0], 1, [1], 1", expected: "[1,2]", explanation: "Single elements from each" }
-          ]
-        },
-        'binary-search': {
-          title: "Search Insert Position",
-          description: "Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.\\n\\nThis problem is fundamental for understanding binary search algorithms and is widely used in database indexing, search engines, and data structures. The key requirement is to achieve O(log n) runtime complexity.\\n\\nBinary search works by repeatedly dividing the search space in half, comparing the target with the middle element, and eliminating half of the remaining elements. This logarithmic approach is much more efficient than linear search for sorted arrays.\\n\\nFor example, in array [1,3,5,6] searching for target 5 returns index 2, while searching for target 2 returns index 1 (where it should be inserted).",
-          testCases: [
-            { input: "[1,3,5,6], 5", expected: "2", explanation: "Target found at index 2" },
-            { input: "[1,3,5,6], 2", expected: "1", explanation: "Insert at position 1" },
-            { input: "[1,3,5,6], 7", expected: "4", explanation: "Insert at end" },
-            { input: "[1,3,5,6], 0", expected: "0", explanation: "Insert at beginning" },
-            { input: "[1], 1", expected: "0", explanation: "Single element found" },
-            { input: "[1], 2", expected: "1", explanation: "Insert after single element" }
-          ]
-        },
-        'dynamic-programming': {
-          title: "Climbing Stairs",
-          description: "You are climbing a staircase with n steps. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?\\n\\nThis is a classic dynamic programming problem that introduces the concept of overlapping subproblems and optimal substructure. It's mathematically equivalent to the Fibonacci sequence and appears in many real-world optimization scenarios.\\n\\nThe key insight is that the number of ways to reach step n equals the sum of ways to reach step (n-1) and step (n-2), since you can arrive at step n from either of these positions.\\n\\nFor example, for n=3 stairs, there are 3 distinct ways: (1+1+1), (1+2), and (2+1). This problem teaches the foundation of dynamic programming thinking.",
-          testCases: [
-            { input: "2", expected: "2", explanation: "1+1 or 2" },
-            { input: "3", expected: "3", explanation: "1+1+1, 1+2, or 2+1" },
-            { input: "4", expected: "5", explanation: "Five distinct combinations" },
-            { input: "5", expected: "8", explanation: "Eight distinct combinations" },
-            { input: "1", expected: "1", explanation: "Only one way for single step" },
-            { input: "6", expected: "13", explanation: "Thirteen distinct combinations" }
-          ]
-        }
-      };
-
-      // Determine which fallback to use based on subtopic
-      let selectedFallback = fallbackProblems['arrays']; // default
-      
-      if (subtopic.includes('fundamentals') || subtopic.includes('duplicate') || subtopic.includes('basic')) {
-        selectedFallback = fallbackProblems['array-fundamentals'];
-      } else if (subtopic.includes('sort') || subtopic.includes('merge')) {
-        selectedFallback = fallbackProblems['sorting'];
-      } else if (subtopic.includes('search') || subtopic.includes('binary') || subtopic.includes('find')) {
-        selectedFallback = fallbackProblems['binary-search'];
-      } else if (subtopic.includes('dynamic') || subtopic.includes('dp') || subtopic.includes('climbing') || subtopic.includes('fibonacci')) {
-        selectedFallback = fallbackProblems['dynamic-programming'];
-      } else if (subtopic.includes('array') || subtopic.includes('sum') || subtopic.includes('pair') || subtopic.includes('target')) {
-        selectedFallback = fallbackProblems['arrays'];
-      }
-      
-      console.log(`Using fallback problem: ${selectedFallback.title} for subtopic: ${subtopic}`);
-      
-      // Fallback to structured problem
-      generatedProblem = {
-        title: selectedFallback.title,
-        description: selectedFallback.description,
-        difficulty: problemDifficulty as 'Easy' | 'Medium' | 'Hard',
-        constraints: `• 1 ≤ array.length ≤ 10^4
-• -10^9 ≤ array[i] ≤ 10^9
-• Follow-up: Can you solve it with O(log n) complexity?
-• Handle all edge cases appropriately`,
-        examples: `Example 1:
-Input: ${selectedFallback.testCases[0].input}
-Output: ${selectedFallback.testCases[0].expected}
-Explanation: ${selectedFallback.testCases[0].explanation}
-
-Example 2:
-Input: ${selectedFallback.testCases[1].input}
-Output: ${selectedFallback.testCases[1].expected}
-Explanation: ${selectedFallback.testCases[1].explanation}
-
-Example 3:
-Input: ${selectedFallback.testCases[2].input}
-Output: ${selectedFallback.testCases[2].expected}
-Explanation: ${selectedFallback.testCases[2].explanation}`,
-        hints: [
-          "Consider the most efficient approach for this type of problem",
-          "Think about what data structures would help optimize the solution", 
-          "Look for patterns in the input that can guide your algorithm",
-          "Don't forget to handle edge cases like empty inputs"
-        ],
-        timeComplexity: "O(n)",
-        spaceComplexity: "O(1)", 
-        testCases: selectedFallback.testCases,
-        functionTemplates: {
-          javascript: `function solution(arr, target) {\n    // TODO: implement\n    return null;\n}`,
-          python: `def solution(arr, target):\n    # TODO: implement\n    pass`,
-          java: `public class Solution {\n    public int[] solution(int[] arr, int target) {\n        // TODO: implement\n        return new int[]{};\n    }\n}`,
-          cpp: `class Solution {\npublic:\n    vector<int> solution(vector<int>& arr, int target) {\n        // TODO: implement\n        return {};\n    }\n};`,
-          c: `int* solution(int* arr, int arrSize, int target, int* returnSize) {\n    // TODO: implement\n    *returnSize = 0;\n    return NULL;\n}`,
-          csharp: `public class Solution {\n    public int[] Solution(int[] arr, int target) {\n        // TODO: implement\n        return new int[]{};\n    }\n}`,
-          go: `func solution(arr []int, target int) []int {\n    // TODO: implement\n    return []int{}\n}`,
-          rust: `impl Solution {\n    pub fn solution(arr: Vec<i32>, target: i32) -> Vec<i32> {\n        // TODO: implement\n        vec![]\n    }\n}`,
-          php: `function solution($arr, $target) {\n    // TODO: implement\n    return array();\n}`,
-          ruby: `def solution(arr, target)\n    # TODO: implement\n    []\nend`
-        }
-      };
+        { status: 500 }
+      );
     }
 
     // Validate generated problem data
