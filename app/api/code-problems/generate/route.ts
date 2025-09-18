@@ -219,23 +219,14 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Clean the text more thoroughly
+        // Clean the text more conservatively
         let cleanedText = aiText
           .replace(/```json\s*/, '')
           .replace(/```\s*$/, '')
           .trim();
         
-        // Fix common JSON issues
-        cleanedText = cleanedText
-          // Fix control characters in strings
-          .replace(/[\x00-\x1F\x7F]/g, '')
-          // Fix unescaped newlines in strings
-          .replace(/\\n/g, '\\\\n')
-          // Fix unescaped quotes
-          .replace(/(?<!\\)"/g, '\\"')
-          .replace(/\\\\"(?=\s*[,}])/g, '"')
-          // Fix escaped quotes that are actually supposed to be quotes
-          .replace(/\\\\"/g, '\\"');
+        // Only remove actual control characters, not escape sequences
+        cleanedText = cleanedText.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
         
         console.log('Cleaned AI text (first 500 chars):', cleanedText.substring(0, 500));
         
