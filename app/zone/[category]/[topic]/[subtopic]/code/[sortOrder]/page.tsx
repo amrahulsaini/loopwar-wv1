@@ -29,7 +29,8 @@ import {
   Bot,
   Database,
   Shield,
-  Loader
+  Loader,
+  Brain
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -1384,7 +1385,7 @@ export default function CodeChallengePage() {
           {/* AI Analysis Content Wrapper */}
           <div className={styles.aiContent}>
             {/* AI Analysis Results Panel */}
-            {executionResult && (
+            {executionResult ? (
             <div className={styles.resultsPanel}>
               <div className={styles.resultsHeader}>
                 <h3>AI Code Analysis</h3>
@@ -1497,6 +1498,30 @@ export default function CodeChallengePage() {
                   </ul>
                 </div>
               )}
+            </div>
+          ) : (
+            <div className={styles.placeholderContent}>
+              <div className={styles.placeholderHeader}>
+                <h3>AI Code Analysis</h3>
+                <div className={styles.placeholderIcon}>
+                  <Brain size={24} />
+                </div>
+              </div>
+              <div className={styles.placeholderBody}>
+                <h4>Ready to Analyze Your Code</h4>
+                <p>Write your solution and click &quot;Run Code&quot; to get:</p>
+                <ul className={styles.featureList}>
+                  <li><CheckCircle2 size={16} /> Detailed feedback on your logic</li>
+                  <li><Zap size={16} /> Time & space complexity analysis</li>
+                  <li><Lightbulb size={16} /> Optimization suggestions</li>
+                  <li><AlertTriangle size={16} /> Syntax error detection</li>
+                  <li><FileText size={16} /> Learning points and hints</li>
+                </ul>
+                <div className={styles.tipSection}>
+                  <h5><Info size={16} /> Pro Tip</h5>
+                  <p>The AI analyzes your code structure, logic flow, and efficiency to provide personalized feedback that helps you improve as a programmer.</p>
+                </div>
+              </div>
             </div>
           )}
           </div>
