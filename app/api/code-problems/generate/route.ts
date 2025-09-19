@@ -60,6 +60,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Get user ID from database using username
+    let userId: number | null = null;
+    if (auth.username) {
+      try {
+        const userRows = await Database.query(
+          'SELECT id FROM users WHERE username = ?',
+          [auth.username]
+        ) as Array<{ id: number }>;
+        
+        if (userRows.length > 0) {
+          userId = userRows[0].id;
+          console.log('Found user ID:', userId, 'for username:', auth.username);
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    }
+
     // Check if code problem already exists
     const existingProblem = await Database.query(
       `SELECT id FROM code_problems 
@@ -352,7 +370,8 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       String(generatedProblem.spaceComplexity || 'O(1)').trim(),
       JSON.stringify(generatedProblem.testCases || []),
       JSON.stringify(generatedProblem.functionTemplates || {}),
-      Boolean(true)
+      Boolean(true),
+      userId // Add user ID to track who created the problem
     ];
     
     console.log('Insert data types and values:', insertData.map((val, idx) => ({
@@ -364,8 +383,8 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
     const insertResult = await Database.query(
       `INSERT INTO code_problems (
         title, description, difficulty, category, topic, subtopic, sort_order,
-        constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       insertData
     ) as ResultSetHeader;
 

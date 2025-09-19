@@ -19,6 +19,7 @@ interface CodeProblemRow extends RowDataPacket {
   test_cases?: string;
   function_templates?: string;
   is_ai_generated: boolean;
+  user_id?: number;
   created_at: string;
   updated_at: string;
 }
@@ -69,6 +70,7 @@ interface CodeProblem {
   }>;
   function_templates?: Record<string, string>;
   is_ai_generated: boolean;
+  user_id?: number;
   created_at: string;
   updated_at: string;
   category_name: string;
@@ -92,7 +94,10 @@ export async function GET(request: NextRequest) {
 
     // First, try to fetch existing code problem
     const codeProblems = await Database.query(
-      `SELECT * FROM code_problems 
+      `SELECT id, title, description, difficulty, category, topic, subtopic, sort_order,
+              constraints, examples, hints, time_complexity, space_complexity, 
+              test_cases, function_templates, is_ai_generated, user_id, created_at, updated_at
+       FROM code_problems 
        WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
       [category, topic, subtopic, parseInt(sortOrder)]
     ) as CodeProblemRow[];
@@ -112,19 +117,54 @@ export async function GET(request: NextRequest) {
       let parsedHints: string[] = [];
       let parsedFunctionTemplates: Record<string, string> = {};
       
-      // Parse test_cases
+      // Parse test_cases with enhanced error handling and validation
       if (problem.test_cases) {
         try {
-          if (typeof problem.test_cases === 'string') {
-            parsedTestCases = JSON.parse(problem.test_cases);
-          } else if (Array.isArray(problem.test_cases)) {
-            parsedTestCases = problem.test_cases;
+          let testCasesData = problem.test_cases;
+          
+          if (typeof testCasesData === 'string') {
+            // Ensure the JSON string is properly formatted
+            testCasesData = testCasesData.trim();
+            if (testCasesData.startsWith('[') || testCasesData.startsWith('{')) {
+              parsedTestCases = JSON.parse(testCasesData);
+            } else {
+              console.log('Invalid test_cases format, creating default');
+              parsedTestCases = [
+                { input: "Test case not available", expected: "Please regenerate", explanation: "Invalid test case format" }
+              ];
+            }
+          } else if (Array.isArray(testCasesData)) {
+            parsedTestCases = testCasesData;
+          } else if (typeof testCasesData === 'object') {
+            // If it's already an object, convert to array format
+            parsedTestCases = Array.isArray(testCasesData) ? testCasesData : [testCasesData];
+          } else {
+            console.log('Unexpected test_cases type:', typeof testCasesData);
+            parsedTestCases = [
+              { input: "Test case format error", expected: "Please regenerate", explanation: "Unexpected test case format" }
+            ];
           }
-          console.log('Parsed test cases:', parsedTestCases);
+          
+          // Validate test case structure
+          if (Array.isArray(parsedTestCases) && parsedTestCases.length > 0) {
+            // Ensure each test case has required properties
+            parsedTestCases = parsedTestCases.map((tc, index) => ({
+              input: tc.input || `Test case ${index + 1} input`,
+              expected: tc.expected || `Test case ${index + 1} expected`,
+              explanation: tc.explanation || `Test case ${index + 1} explanation`
+            }));
+          } else {
+            console.log('No valid test cases found, creating default');
+            parsedTestCases = [
+              { input: "Default test case", expected: "Default result", explanation: "Please regenerate test cases" }
+            ];
+          }
+          
+          console.log('Successfully parsed test cases:', parsedTestCases.length, 'test cases');
         } catch (e) {
           console.error('Error parsing test_cases:', e, 'Raw value:', problem.test_cases);
           parsedTestCases = [
-            { input: "Loading test case...", expected: "Please wait", explanation: "Test cases are being loaded" }
+            { input: "JSON parsing error", expected: "Please regenerate", explanation: "Failed to parse test cases from database" }
           ];
         }
       } else {
@@ -179,6 +219,7 @@ export async function GET(request: NextRequest) {
         test_cases: parsedTestCases,
         function_templates: parsedFunctionTemplates,
         is_ai_generated: problem.is_ai_generated,
+        user_id: problem.user_id,
         created_at: problem.created_at,
         updated_at: problem.updated_at,
         category_name: problem.category.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),

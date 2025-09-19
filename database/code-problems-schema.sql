@@ -17,9 +17,13 @@ CREATE TABLE IF NOT EXISTS code_problems (
     space_complexity VARCHAR(100),
     test_cases JSON NOT NULL,
     is_ai_generated BOOLEAN DEFAULT TRUE,
+    user_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_location (category, topic, subtopic, sort_order)
+    UNIQUE KEY unique_location (category, topic, subtopic, sort_order),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_user_problems (user_id, created_at),
+    INDEX idx_location_user (category, topic, subtopic, sort_order, user_id)
 );
 
 -- Code Submissions Table

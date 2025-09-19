@@ -53,6 +53,7 @@ interface ProblemData {
   topic_name: string;
   subtopic_name: string;
   is_ai_generated?: boolean;
+  user_id?: number;
   needs_generation?: boolean;
   functionTemplates?: {
     javascript: string;
