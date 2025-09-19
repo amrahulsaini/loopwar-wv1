@@ -97,6 +97,30 @@ class Judge0Service {
       const result = await response.json();
       console.log('Judge0 response:', result);
 
+      // Validate the response structure
+      if (!result || typeof result !== 'object') {
+        console.error('Invalid Judge0 response format:', result);
+        throw new Error('Invalid response format from Judge0');
+      }
+
+      // Ensure status object exists with required properties
+      if (!result.status || typeof result.status !== 'object') {
+        console.error('Missing or invalid status in Judge0 response:', result);
+        // Create a default error status
+        result.status = {
+          id: 6, // Compilation Error
+          description: 'Invalid response format'
+        };
+      }
+
+      // Ensure status has id and description
+      if (typeof result.status.id !== 'number') {
+        result.status.id = 6; // Default to compilation error
+      }
+      if (typeof result.status.description !== 'string') {
+        result.status.description = result.status.description || 'Unknown status';
+      }
+
       return result as SubmissionResult;
     } catch (error) {
       console.error('Error submitting code:', error);
@@ -256,6 +280,10 @@ int main() {
 }`;
 
       case 'c':
+        // Extract function name from user code
+        const cFuncMatch = userCode.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{/);
+        const cFuncName = cFuncMatch ? cFuncMatch[1] : 'solution';
+        
         return `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -265,10 +293,15 @@ ${userCode}
 int main() {
     char input[] = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
     
-    // Call the main function (dynamically detect or assume common names)
-    // For now, assume it's called 'solution'
-    int result = solution();
-    printf("%d\\n", result);
+    // Try to parse input as integer for function parameter
+    int param = 5; // Default value
+    if (strlen(input) > 0) {
+        param = atoi(input);
+    }
+    
+    // Call the detected function
+    double result = ${cFuncName}(param);
+    printf("%.1f\\n", result);
     return 0;
 }`;
 
@@ -414,10 +447,23 @@ end`;
         
         const submission = await this.submitCode(wrappedCode, languageId);
         
+        // Add defensive checks for submission response
+        if (!submission) {
+          throw new Error('No submission response received');
+        }
+        
+        if (!submission.status) {
+          console.error('Invalid submission response - missing status:', submission);
+          throw new Error('Invalid submission response - missing status');
+        }
+        
+        console.log('Submission status:', submission.status);
+        
         let passed = false;
         let actual = '';
         let error = '';
 
+        // Check if submission was accepted (status id 3)
         if (submission.status.id === 3) { // Accepted
           actual = (submission.stdout || '').trim();
           const expected = testCase.expected.trim();
