@@ -348,11 +348,13 @@ int main() {
         // Check if this looks like an array-based function (has array parameters)
         const hasArrayParam = cFuncParams.includes('*') || cFuncParams.includes('[]');
         const hasReturnSize = cFuncParams.includes('returnSize');
+        const isArrayFunction = hasArrayParam; // Any function with array params needs special handling
         
         // Create universal C wrapper that handles AI test case inputs
-        if (hasArrayParam && hasReturnSize) {
-          // Handle array-based functions that return arrays
-          return `#include <stdio.h>
+        if (isArrayFunction) {
+          if (hasReturnSize) {
+            // Handle array-based functions that return arrays (like getAverages)
+            return `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -498,6 +500,119 @@ int main() {
     
     return 0;
 }`;
+          } else {
+            // Handle array-based functions that return simple values (like calculate_memory_usage)
+            return `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+${userCode}
+
+// Universal input parser for AI test cases
+typedef struct {
+    int* nums;
+    int numsSize;
+    int target;
+    int k;
+} ParsedInput;
+
+ParsedInput parseInput(const char* input) {
+    ParsedInput result = {0};
+    
+    // Try to parse as JSON object: {"nums":[1,2,3],"target":9}
+    if (input[0] == '{') {
+        char* inputCopy = strdup(input);
+        char* ptr = inputCopy;
+        
+        // Extract nums array
+        char* numsStart = strstr(ptr, "\\"nums\\":");
+        if (numsStart) {
+            numsStart = strchr(numsStart, '[');
+            if (numsStart) {
+                numsStart++;
+                char* numsEnd = strchr(numsStart, ']');
+                if (numsEnd) {
+                    *numsEnd = '\\0';
+                    
+                    // Count numbers
+                    int count = 1;
+                    char* countPtr = numsStart;
+                    while (*countPtr) {
+                        if (*countPtr == ',') count++;
+                        countPtr++;
+                    }
+                    
+                    result.nums = (int*)malloc(count * sizeof(int));
+                    result.numsSize = count;
+                    
+                    // Parse numbers
+                    char* token = strtok(numsStart, ",");
+                    int i = 0;
+                    while (token && i < count) {
+                        result.nums[i++] = atoi(token);
+                        token = strtok(NULL, ",");
+                    }
+                }
+            }
+        }
+        
+        free(inputCopy);
+    }
+    // Try to parse as simple array: [1,2,3,4,5]
+    else if (input[0] == '[') {
+        char* inputCopy = strdup(input);
+        char* ptr = inputCopy + 1; // Skip opening bracket
+        char* end = strrchr(ptr, ']');
+        if (end) *end = '\\0';
+        
+        // Count numbers
+        int count = 1;
+        char* countPtr = ptr;
+        while (*countPtr) {
+            if (*countPtr == ',') count++;
+            countPtr++;
+        }
+        
+        result.nums = (int*)malloc(count * sizeof(int));
+        result.numsSize = count;
+        
+        // Parse numbers
+        char* token = strtok(ptr, ",");
+        int i = 0;
+        while (token && i < count) {
+            result.nums[i++] = atoi(token);
+            token = strtok(NULL, ",");
+        }
+        
+        free(inputCopy);
+    }
+    // Default test data if no input
+    else {
+        static int defaultNums[] = {7, 4, 3, 9, 1, 8, 5, 2, 6};
+        result.nums = defaultNums;
+        result.numsSize = 9;
+    }
+    
+    return result;
+}
+
+int main() {
+    char input[] = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+    ParsedInput parsed = parseInput(input);
+    
+    // Call function with array parameters
+    int result = ${cFuncName}(parsed.nums, parsed.numsSize);
+    printf("%d\\n", result);
+    
+    // Cleanup if we allocated memory
+    if (parsed.nums != (int[]){7, 4, 3, 9, 1, 8, 5, 2, 6}) {
+        free(parsed.nums);
+    }
+    
+    return 0;
+}`;
+          }
         } else {
           // Handle simple functions
           return `#include <stdio.h>
