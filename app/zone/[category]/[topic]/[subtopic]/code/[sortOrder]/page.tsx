@@ -650,7 +650,7 @@ export default function CodeChallengePage() {
         throw new Error(result.error || 'AI code checking failed');
       }
 
-      setExecutionResult(result);
+      setExecutionResult(result.result); // Use result.result to get the actual AI analysis data
       
       // Save submission to database
       if (user?.authenticated) {

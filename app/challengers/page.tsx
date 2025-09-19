@@ -222,7 +222,7 @@ const ChallengersPage: React.FC = () => {
         throw new Error(result.error || 'AI code checking failed');
       }
       
-      setResults(result);
+      setResults(result.result); // Use result.result to get the actual AI analysis data
       setShowResults(true);
     } catch (error) {
       console.error('Error running code:', error);

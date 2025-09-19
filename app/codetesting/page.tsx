@@ -263,7 +263,7 @@ int main() {
       }
 
       if (result.success) {
-        setResults(result);
+        setResults(result.result); // Use result.result to get the actual AI analysis data
         setShowResults(true);
       } else {
         alert(`Error: ${result.error || 'Unknown error'}`);
