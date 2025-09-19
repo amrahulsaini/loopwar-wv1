@@ -219,15 +219,35 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Clean the text more conservatively
-        let cleanedText = aiText
-          .replace(/```json\s*/, '')
-          .replace(/```\s*$/, '')
-          .trim();
+        // Enhanced JSON cleaning function
+        function cleanJsonString(jsonStr: string): string {
+          // Remove code block markers
+          let cleaned = jsonStr
+            .replace(/```json\s*/g, '')
+            .replace(/```\s*$/g, '')
+            .trim();
+          
+          // Replace problematic characters and sequences
+          cleaned = cleaned
+            // Remove all control characters
+            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
+            // Remove unicode control chars
+            .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+            // Convert actual newlines/tabs to escaped versions
+            .replace(/\r\n/g, '\\n')
+            .replace(/\r/g, '\\n')   
+            .replace(/\n/g, '\\n')   
+            .replace(/\t/g, '\\t')   
+            // Remove any trailing commas before closing braces/brackets
+            .replace(/,(\s*[}\]])/g, '$1')
+            // Remove any extra whitespace
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          return cleaned;
+        }
         
-        // Only remove actual control characters, not escape sequences
-        cleanedText = cleanedText.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
-        
+        const cleanedText = cleanJsonString(aiText);
         console.log('Cleaned AI text (first 500 chars):', cleanedText.substring(0, 500));
         
         try {
@@ -236,7 +256,22 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
           console.error('Problematic JSON (first 1000 chars):', cleanedText.substring(0, 1000));
-          throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+          
+          // Try one more aggressive cleaning attempt
+          try {
+            const superCleanedText = cleanedText
+              .replace(/\\n/g, ' ')  // Replace escaped newlines with spaces
+              .replace(/\\t/g, ' ')  // Replace escaped tabs with spaces
+              .replace(/\s+/g, ' ')  // Collapse multiple spaces
+              .trim();
+            
+            console.log('Attempting super-cleaned version...');
+            generatedProblem = JSON.parse(superCleanedText);
+            console.log('Super-cleaned parsing successful');
+          } catch (secondParseError) {
+            console.error('Second parse attempt also failed:', secondParseError);
+            throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+          }
         }
       } else {
         const errorText = await response.text();
