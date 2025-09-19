@@ -1106,30 +1106,11 @@
   font-style: italic;
 }
 
-/* Enhanced Code Highlighting - Syntax Colors */
-.syntaxHighlighter {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 1.5rem;
-  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #d4d4d4;
-  white-space: pre;
-  overflow: auto;
-  pointer-events: none;
-  background: transparent;
-  z-index: 1;
-}
-
+/* Enhanced Code Textarea */
 .codeTextarea {
   flex: 1;
-  background: transparent !important;
-  color: transparent !important;
-  caret-color: #d4d4d4;
+  background: #2d2d30;
+  color: #d4d4d4;
   border: none;
   padding: 1.5rem;
   font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
@@ -1141,55 +1122,10 @@
   overflow-wrap: normal;
   overflow: auto;
   tab-size: 2;
-  position: relative;
-  z-index: 2;
   
   /* Scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: #555555 #2d2d30;
-}
-
-/* Syntax Highlighting Classes - Global styles for highlighted code */
-.syntaxHighlighter :global(.keyword) {
-  color: #569cd6; /* Blue for keywords */
-  font-weight: 600;
-}
-
-.syntaxHighlighter :global(.string) {
-  color: #ce9178; /* Orange for strings */
-}
-
-.syntaxHighlighter :global(.comment) {
-  color: #6a9955; /* Green for comments */
-  font-style: italic;
-}
-
-.syntaxHighlighter :global(.number) {
-  color: #b5cea8; /* Light green for numbers */
-}
-
-.syntaxHighlighter :global(.function) {
-  color: #dcdcaa; /* Yellow for functions */
-}
-
-.syntaxHighlighter :global(.operator) {
-  color: #d4d4d4; /* White for operators */
-}
-
-.syntaxHighlighter :global(.punctuation) {
-  color: #cccccc; /* Light gray for punctuation */
-}
-
-.syntaxHighlighter :global(.variable) {
-  color: #9cdcfe; /* Light blue for variables */
-}
-
-.syntaxHighlighter :global(.type) {
-  color: #4ec9b0; /* Teal for types */
-}
-
-.syntaxHighlighter :global(.property) {
-  color: #9cdcfe; /* Light blue for properties */
 }
 
 /* Console Section */

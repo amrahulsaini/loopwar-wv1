@@ -272,74 +272,8 @@ export default function CodeChallengePage() {
   
   // Console state
   const [consoleExpanded, setConsoleExpanded] = useState(false);
-  const [highlightedCode, setHighlightedCode] = useState('');
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Syntax highlighting function
-  const highlightSyntax = (code: string, language: string): string => {
-    if (!code) return '';
-
-    let highlighted = code;
-
-    // Define syntax patterns for different languages
-    const patterns = {
-      javascript: {
-        keywords: /\b(function|const|let|var|if|else|for|while|return|class|extends|import|export|from|async|await|try|catch|finally|throw|new|this|super|static|get|set|true|false|null|undefined)\b/g,
-        strings: /(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g,
-        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
-        numbers: /\b\d+(\.\d+)?\b/g,
-        functions: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
-        operators: /(\+|\-|\*|\/|%|=|==|===|!=|!==|<|>|<=|>=|&&|\|\||!|\?|:)/g,
-      },
-      python: {
-        keywords: /\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|raise|with|lambda|and|or|not|in|is|True|False|None|pass|break|continue|global|nonlocal)\b/g,
-        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
-        comments: /(#.*$)/gm,
-        numbers: /\b\d+(\.\d+)?\b/g,
-        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
-        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|and|or|not|\+=|\-=|\*=|\/=)/g,
-      },
-      java: {
-        keywords: /\b(public|private|protected|static|final|abstract|class|interface|extends|implements|if|else|for|while|do|return|new|this|super|try|catch|finally|throw|throws|import|package|true|false|null|void|int|double|float|long|short|byte|char|boolean|String)\b/g,
-        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
-        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
-        numbers: /\b\d+(\.\d+)?\b/g,
-        functions: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
-        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|&&|\|\||!|\?|:)/g,
-      },
-      cpp: {
-        keywords: /\b(int|double|float|char|bool|void|string|if|else|for|while|do|return|class|struct|public|private|protected|static|const|new|delete|this|namespace|using|include|true|false|null|nullptr)\b/g,
-        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
-        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
-        numbers: /\b\d+(\.\d+)?\b/g,
-        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
-        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|&&|\|\||!|\?|:)/g,
-      }
-    };
-
-    const langPatterns = patterns[language as keyof typeof patterns] || patterns.javascript;
-
-    // Apply syntax highlighting
-    highlighted = highlighted
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(langPatterns.strings, '<span class="string">$&</span>')
-      .replace(langPatterns.comments, '<span class="comment">$&</span>')
-      .replace(langPatterns.keywords, '<span class="keyword">$&</span>')
-      .replace(langPatterns.numbers, '<span class="number">$&</span>')
-      .replace(langPatterns.functions, '<span class="function">$1</span>(')
-      .replace(langPatterns.operators, '<span class="operator">$&</span>');
-
-    return highlighted;
-  };
-
-  // Update highlighted code when code or language changes
-  useEffect(() => {
-    const highlighted = highlightSyntax(code, selectedLanguage);
-    setHighlightedCode(highlighted);
-  }, [code, selectedLanguage]);
 
   // Function to get the appropriate code template for a language
   const getCodeTemplate = (language: string): string => {
@@ -1307,12 +1241,6 @@ export default function CodeChallengePage() {
                 </div>
               ))}
             </div>
-            
-            {/* Syntax Highlighter Overlay */}
-            <div 
-              className={styles.syntaxHighlighter}
-              dangerouslySetInnerHTML={{ __html: highlightedCode }}
-            />
             
             {/* Code Textarea */}
             <textarea
