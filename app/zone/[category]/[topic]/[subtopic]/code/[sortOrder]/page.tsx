@@ -1311,8 +1311,8 @@ export default function CodeChallengePage() {
                     color: executionResult.isCorrect ? '#22c55e' : '#ef4444',
                     fontSize: '0.75rem'
                   }}>
-                    {executionResult.results?.filter(r => r.passed).length || 0}/
-                    {executionResult.results?.length || 0} tests passed
+                    {executionResult.detailedAnalysis?.testCases?.passed || 0}/
+                    {executionResult.detailedAnalysis?.testCases?.total || 0} tests passed
                   </span>
                 )}
               </div>
@@ -1325,7 +1325,7 @@ export default function CodeChallengePage() {
               {executionResult ? (
                 <div className={styles.consoleOutput}>
                   {/* Test Results */}
-                  {executionResult.results && executionResult.results.map((result, index) => (
+                  {executionResult.detailedAnalysis?.testCases?.results && executionResult.detailedAnalysis.testCases.results.map((result, index) => (
                     <div key={index} className={`${styles.testCaseResult} ${result.passed ? 'passed' : 'failed'}`}>
                       <div className={styles.testCaseHeader}>
                         <span>Test Case {index + 1}</span>
@@ -1338,14 +1338,14 @@ export default function CodeChallengePage() {
                         <strong>Input:</strong> {result.input || 'N/A'}
                       </div>
                       <div>
-                        <strong>Expected:</strong> {result.expected}
+                        <strong>Expected:</strong> {result.expectedOutput || 'N/A'}
                       </div>
                       <div>
-                        <strong>Output:</strong> {result.actual || 'N/A'}
+                        <strong>Output:</strong> {result.actualOutput || 'N/A'}
                       </div>
-                      {result.error && (
+                      {!result.passed && result.explanation && (
                         <div style={{ color: '#ef4444' }}>
-                          <strong>Error:</strong> {result.error}
+                          <strong>Issue:</strong> {result.explanation}
                         </div>
                       )}
                     </div>
@@ -1355,7 +1355,7 @@ export default function CodeChallengePage() {
                   <div style={{ marginTop: '1rem', padding: '0.5rem', background: 'rgba(0, 122, 204, 0.1)', borderRadius: '4px' }}>
                     <div><strong>Score:</strong> {executionResult.score}/100</div>
                     <div><strong>Status:</strong> {executionResult.isCorrect ? 'Accepted' : 'Wrong Answer'}</div>
-                    <div><strong>Tests Passed:</strong> {executionResult.results?.filter(r => r.passed).length || 0}/{executionResult.results?.length || 0}</div>
+                    <div><strong>Tests Passed:</strong> {executionResult.detailedAnalysis?.testCases?.passed || 0}/{executionResult.detailedAnalysis?.testCases?.total || 0}</div>
                   </div>
                 </div>
               ) : (
