@@ -165,10 +165,11 @@ class Judge0Service {
       case 'javascript':
         return `${userCode}
 
-// Enhanced test execution with dynamic function detection
+// Universal test execution for AI-generated test cases
 const input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+
 try {
-  // Parse input if it's JSON
+  // Parse input - handle both JSON objects and simple values
   let parsedInput;
   try {
     parsedInput = JSON.parse(input);
@@ -182,18 +183,29 @@ try {
     const funcName = funcMatches[1];
     let result;
     
-    // Handle different input types
-    if (Array.isArray(parsedInput)) {
-      result = eval(\`\${funcName}(...parsedInput)\`);
-    } else if (typeof parsedInput === 'object' && parsedInput !== null) {
-      // If input is an object, try to spread its values
-      const values = Object.values(parsedInput);
-      result = eval(\`\${funcName}(...values)\`);
+    // Handle different input types for AI test cases
+    if (typeof parsedInput === 'object' && parsedInput !== null) {
+      // Handle JSON object inputs like {"nums": [2,7,11,15], "target": 9}
+      if (Array.isArray(parsedInput)) {
+        // Direct array input: [2,7,11,15,9]
+        result = eval(\`\${funcName}(...parsedInput)\`);
+      } else if (parsedInput.nums && parsedInput.target !== undefined) {
+        // Two Sum style: {"nums": [2,7,11,15], "target": 9}
+        result = eval(\`\${funcName}(parsedInput.nums, parsedInput.target)\`);
+      } else if (parsedInput.nums && parsedInput.k !== undefined) {
+        // Array with k parameter: {"nums": [1,2,3], "k": 2}
+        result = eval(\`\${funcName}(parsedInput.nums, parsedInput.k)\`);
+      } else {
+        // Generic object - try to spread values
+        const values = Object.values(parsedInput);
+        result = eval(\`\${funcName}(...values)\`);
+      }
     } else {
+      // Simple string/number input
       result = eval(\`\${funcName}(parsedInput)\`);
     }
     
-    // Output result
+    // Output result in consistent format
     if (typeof result === 'object') {
       console.log(JSON.stringify(result));
     } else {
@@ -209,39 +221,58 @@ try {
       case 'python':
         return `${userCode}
 
-# Enhanced test execution
+# Universal test execution for AI-generated test cases
 import json
 import sys
 import re
 
 input_data = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+
 try:
-    # Parse input
+    # Parse input - handle both JSON objects and simple values
     try:
         parsed_input = json.loads(input_data)
     except:
         parsed_input = input_data
     
-    # Extract function name
+    # Extract function name from user code
     function_matches = re.findall(r'def\\s+([a-zA-Z_][a-zA-Z0-9_]*)', '''${userCode}''')
     if function_matches:
         function_name = function_matches[0]
         
-        # Handle different input types
-        if isinstance(parsed_input, list):
-            result = eval(f"{function_name}(*parsed_input)")
-        elif isinstance(parsed_input, dict):
-            result = eval(f"{function_name}(**parsed_input)")
+        # Handle different input types for AI test cases
+        if isinstance(parsed_input, dict):
+            # Handle JSON object inputs like {"nums": [2,7,11,15], "target": 9}
+            if "nums" in parsed_input and "target" in parsed_input:
+                # Two Sum style
+                result = eval(f"{function_name}(parsed_input['nums'], parsed_input['target'])")
+            elif "nums" in parsed_input and "k" in parsed_input:
+                # Array with k parameter
+                result = eval(f"{function_name}(parsed_input['nums'], parsed_input['k'])")
+            else:
+                # Generic object - try to spread values
+                values = list(parsed_input.values())
+                if len(values) == 1:
+                    result = eval(f"{function_name}({repr(values[0])})")
+                else:
+                    args_str = ", ".join(repr(v) for v in values)
+                    result = eval(f"{function_name}({args_str})")
+        elif isinstance(parsed_input, list):
+            # Direct array input: [2,7,11,15,9]
+            args_str = ", ".join(repr(x) for x in parsed_input)
+            result = eval(f"{function_name}({args_str})")
         else:
-            result = eval(f"{function_name}(parsed_input)")
+            # Simple string/number input
+            result = eval(f"{function_name}({repr(parsed_input)})")
         
-        # Output result
-        if isinstance(result, (dict, list)):
+        # Output result in consistent format
+        if isinstance(result, (list, dict)):
             print(json.dumps(result))
         else:
             print(result)
     else:
         print("Error: No function found in code")
+        
 except Exception as error:
     print(f"Error: {error}")`;
 
@@ -309,13 +340,170 @@ int main() {
 }`;
 
       case 'c':
-        // Extract function name from user code
-        const cFuncMatch = userCode.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{/);
+        // Extract function name and signature from user code
+        const cFuncMatch = userCode.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{/);
         const cFuncName = cFuncMatch ? cFuncMatch[1] : 'solution';
+        const cFuncParams = cFuncMatch ? cFuncMatch[2] : '';
         
-        return `#include <stdio.h>
+        // Check if this looks like an array-based function (has array parameters)
+        const hasArrayParam = cFuncParams.includes('*') || cFuncParams.includes('[]');
+        const hasReturnSize = cFuncParams.includes('returnSize');
+        
+        // Create universal C wrapper that handles AI test case inputs
+        if (hasArrayParam && hasReturnSize) {
+          // Handle array-based functions that return arrays
+          return `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+${userCode}
+
+// Universal input parser for AI test cases
+typedef struct {
+    int* nums;
+    int numsSize;
+    int target;
+    int k;
+} ParsedInput;
+
+ParsedInput parseInput(const char* input) {
+    ParsedInput result = {0};
+    
+    // Try to parse as JSON object: {"nums":[1,2,3],"target":9}
+    if (input[0] == '{') {
+        char* inputCopy = strdup(input);
+        char* ptr = inputCopy;
+        
+        // Extract nums array
+        char* numsStart = strstr(ptr, "\\"nums\\":");
+        if (numsStart) {
+            numsStart = strchr(numsStart, '[');
+            if (numsStart) {
+                numsStart++;
+                char* numsEnd = strchr(numsStart, ']');
+                if (numsEnd) {
+                    *numsEnd = '\\0';
+                    
+                    // Count numbers
+                    int count = 1;
+                    char* countPtr = numsStart;
+                    while (*countPtr) {
+                        if (*countPtr == ',') count++;
+                        countPtr++;
+                    }
+                    
+                    result.nums = (int*)malloc(count * sizeof(int));
+                    result.numsSize = count;
+                    
+                    // Parse numbers
+                    char* token = strtok(numsStart, ",");
+                    int i = 0;
+                    while (token && i < count) {
+                        result.nums[i++] = atoi(token);
+                        token = strtok(NULL, ",");
+                    }
+                }
+            }
+        }
+        
+        // Extract target
+        char* targetStart = strstr(ptr, "\\"target\\":");
+        if (targetStart) {
+            targetStart += 9; // Skip "target":
+            while (*targetStart && !isdigit(*targetStart) && *targetStart != '-') targetStart++;
+            result.target = atoi(targetStart);
+        }
+        
+        // Extract k value
+        char* kStart = strstr(ptr, "\\"k\\":");
+        if (kStart) {
+            kStart += 4; // Skip "k":
+            while (*kStart && !isdigit(*kStart) && *kStart != '-') kStart++;
+            result.k = atoi(kStart);
+        }
+        
+        free(inputCopy);
+    }
+    // Try to parse as simple array: [1,2,3,4,5]
+    else if (input[0] == '[') {
+        char* inputCopy = strdup(input);
+        char* ptr = inputCopy + 1; // Skip opening bracket
+        char* end = strrchr(ptr, ']');
+        if (end) *end = '\\0';
+        
+        // Count numbers
+        int count = 1;
+        char* countPtr = ptr;
+        while (*countPtr) {
+            if (*countPtr == ',') count++;
+            countPtr++;
+        }
+        
+        result.nums = (int*)malloc(count * sizeof(int));
+        result.numsSize = count;
+        
+        // Parse numbers
+        char* token = strtok(ptr, ",");
+        int i = 0;
+        while (token && i < count) {
+            result.nums[i++] = atoi(token);
+            token = strtok(NULL, ",");
+        }
+        
+        free(inputCopy);
+    }
+    // Try to parse as simple number
+    else {
+        result.k = atoi(input);
+        result.target = atoi(input);
+    }
+    
+    return result;
+}
+
+void printArray(int* arr, int size) {
+    printf("[");
+    for (int i = 0; i < size; i++) {
+        printf("%d", arr[i]);
+        if (i < size - 1) printf(",");
+    }
+    printf("]");
+}
+
+int main() {
+    char input[] = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+    ParsedInput parsed = parseInput(input);
+    
+    // Default test data if parsing fails
+    if (!parsed.nums) {
+        static int defaultNums[] = {7, 4, 3, 9, 1, 8, 5, 2, 6};
+        parsed.nums = defaultNums;
+        parsed.numsSize = 9;
+        parsed.k = 3;
+        parsed.target = 9;
+    }
+    
+    // Call function and handle result
+    int returnSize;
+    int* result = ${cFuncName}(parsed.nums, parsed.numsSize, parsed.k, &returnSize);
+    
+    if (result != NULL) {
+        printArray(result, returnSize);
+        printf("\\n");
+        free(result);
+    } else {
+        printf("null\\n");
+    }
+    
+    return 0;
+}`;
+        } else {
+          // Handle simple functions
+          return `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 ${userCode}
 
@@ -333,6 +521,7 @@ int main() {
     printf("%.1f\\n", result);
     return 0;
 }`;
+        }
 
       case 'csharp':
         return `using System;
