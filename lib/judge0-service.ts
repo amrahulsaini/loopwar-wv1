@@ -104,6 +104,285 @@ class Judge0Service {
     }
   }
 
+  // Enhanced function to parse and call user functions with proper input handling
+  private generateAdvancedWrapper(userCode: string, language: string, testCase: TestCase): string {
+    const input = testCase.input;
+    
+    switch (language) {
+      case 'javascript':
+        return `${userCode}
+
+// Enhanced test execution with dynamic function detection
+const input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+try {
+  // Parse input if it's JSON
+  let parsedInput;
+  try {
+    parsedInput = JSON.parse(input);
+  } catch {
+    parsedInput = input;
+  }
+  
+  // Extract function name from user code
+  const funcMatches = userCode.match(/function\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/);
+  if (funcMatches) {
+    const funcName = funcMatches[1];
+    let result;
+    
+    // Handle different input types
+    if (Array.isArray(parsedInput)) {
+      result = eval(\`\${funcName}(...parsedInput)\`);
+    } else if (typeof parsedInput === 'object' && parsedInput !== null) {
+      // If input is an object, try to spread its values
+      const values = Object.values(parsedInput);
+      result = eval(\`\${funcName}(...values)\`);
+    } else {
+      result = eval(\`\${funcName}(parsedInput)\`);
+    }
+    
+    // Output result
+    if (typeof result === 'object') {
+      console.log(JSON.stringify(result));
+    } else {
+      console.log(result);
+    }
+  } else {
+    console.log("Error: No function found in code");
+  }
+} catch (error) {
+  console.log("Error: " + error.message);
+}`;
+
+      case 'python':
+        return `${userCode}
+
+# Enhanced test execution
+import json
+import sys
+import re
+
+input_data = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+try:
+    # Parse input
+    try:
+        parsed_input = json.loads(input_data)
+    except:
+        parsed_input = input_data
+    
+    # Extract function name
+    function_matches = re.findall(r'def\\s+([a-zA-Z_][a-zA-Z0-9_]*)', '''${userCode}''')
+    if function_matches:
+        function_name = function_matches[0]
+        
+        # Handle different input types
+        if isinstance(parsed_input, list):
+            result = eval(f"{function_name}(*parsed_input)")
+        elif isinstance(parsed_input, dict):
+            result = eval(f"{function_name}(**parsed_input)")
+        else:
+            result = eval(f"{function_name}(parsed_input)")
+        
+        # Output result
+        if isinstance(result, (dict, list)):
+            print(json.dumps(result))
+        else:
+            print(result)
+    else:
+        print("Error: No function found in code")
+except Exception as error:
+    print(f"Error: {error}")`;
+
+      case 'java':
+        return `import java.util.*;
+import java.lang.reflect.*;
+
+${userCode}
+
+public class Main {
+    public static void main(String[] args) {
+        String input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+        try {
+            Solution solution = new Solution();
+            
+            // Use reflection to find the first public method
+            Method[] methods = Solution.class.getDeclaredMethods();
+            Method targetMethod = null;
+            for (Method method : methods) {
+                if (Modifier.isPublic(method.getModifiers()) && !method.getName().equals("main")) {
+                    targetMethod = method;
+                    break;
+                }
+            }
+            
+            if (targetMethod != null) {
+                Object result;
+                // Simple approach: call with no parameters first, then try with input
+                try {
+                    result = targetMethod.invoke(solution);
+                } catch (Exception e) {
+                    // If no-args fails, try with input (simplified)
+                    result = targetMethod.invoke(solution, input);
+                }
+                System.out.println(result);
+            } else {
+                System.out.println("Error: No public method found");
+            }
+        } catch (Exception error) {
+            System.out.println("Error: " + error.getMessage());
+        }
+    }
+}`;
+
+      case 'cpp':
+        return `#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+using namespace std;
+
+${userCode}
+
+int main() {
+    string input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+    try {
+        Solution sol;
+        // Assume the main method is called 'solution'
+        auto result = sol.solution();
+        cout << result << endl;
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+    return 0;
+}`;
+
+      case 'c':
+        return `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+${userCode}
+
+int main() {
+    char input[] = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+    
+    // Call the main function (dynamically detect or assume common names)
+    // For now, assume it's called 'solution'
+    int result = solution();
+    printf("%d\\n", result);
+    return 0;
+}`;
+
+      case 'csharp':
+        return `using System;
+using System.Collections.Generic;
+using System.Reflection;
+
+${userCode}
+
+public class Program {
+    public static void Main(string[] args) {
+        string input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+        try {
+            Solution solution = new Solution();
+            
+            // Use reflection to find the first public method
+            Type type = typeof(Solution);
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            
+            MethodInfo targetMethod = null;
+            foreach (MethodInfo method in methods) {
+                if (method.DeclaringType == type && method.Name != "GetType" && 
+                    method.Name != "ToString" && method.Name != "Equals" && 
+                    method.Name != "GetHashCode") {
+                    targetMethod = method;
+                    break;
+                }
+            }
+            
+            if (targetMethod != null) {
+                object result = targetMethod.Invoke(solution, null);
+                Console.WriteLine(result);
+            } else {
+                Console.WriteLine("Error: No suitable method found");
+            }
+        } catch (Exception error) {
+            Console.WriteLine("Error: " + error.Message);
+        }
+    }
+}`;
+
+      case 'go':
+        return `package main
+
+import "fmt"
+
+${userCode}
+
+func main() {
+    input := "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+    _ = input // Use input if needed
+    
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Printf("Error: %v\\n", r)
+        }
+    }()
+    
+    result := solution()
+    fmt.Println(result)
+}`;
+
+      case 'rust':
+        return `${userCode}
+
+fn main() {
+    let input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+    let _ = input; // Use input if needed
+    
+    match std::panic::catch_unwind(|| {
+        let result = solution();
+        println!("{}", result);
+    }) {
+        Err(_) => println!("Error: Panic occurred"),
+        Ok(_) => {}
+    }
+}`;
+
+      case 'php':
+        return `<?php
+${userCode}
+
+$input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}";
+try {
+    $result = solution();
+    echo $result;
+} catch (Exception $error) {
+    echo "Error: " . $error->getMessage();
+}
+?>`;
+
+      case 'ruby':
+        return `${userCode}
+
+input = "${input.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+begin
+    result = solution()
+    puts result
+rescue => error
+    puts "Error: #{error.message}"
+end`;
+
+      default:
+        return userCode;
+    }
+  }
+
+  // Generate executable wrapper for function-only code
+  private generateWrapper(userCode: string, language: string, testCase: TestCase): string {
+    // Use the advanced wrapper for better function detection and input handling
+    return this.generateAdvancedWrapper(userCode, language, testCase);
+  }
+
   async executeWithTestCases(
     code: string, 
     language: string, 
@@ -129,7 +408,11 @@ class Judge0Service {
       try {
         console.log(`Running test case ${i + 1}:`, testCase);
         
-        const submission = await this.submitCode(code, languageId, testCase.input);
+        // Generate wrapped executable code
+        const wrappedCode = this.generateWrapper(code, language, testCase);
+        console.log(`Wrapped code for ${language}:`, wrappedCode.substring(0, 200) + '...');
+        
+        const submission = await this.submitCode(wrappedCode, languageId);
         
         let passed = false;
         let actual = '';
