@@ -267,9 +267,8 @@ export default function CodeChallengePage() {
   const [hasError, setHasError] = useState(false);
   
   // Resizable panel state
-  const [leftWidth, setLeftWidth] = useState(30); // Problem section %
-  const [rightWidth, setRightWidth] = useState(35); // AI section %
-  const middleWidth = 100 - leftWidth - rightWidth; // Code section %
+  const [leftWidth, setLeftWidth] = useState('30%'); // Problem section (30%)
+  const [rightWidth, setRightWidth] = useState('30%'); // AI section (30%)
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -712,15 +711,16 @@ export default function CodeChallengePage() {
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
+    e.preventDefault();
     const startX = e.clientX;
-    const startLeftWidth = leftWidth;
+    const startLeftWidth = parseFloat(leftWidth);
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;
       const containerWidth = window.innerWidth;
       const deltaPercent = (deltaX / containerWidth) * 100;
       const newLeftWidth = Math.max(20, Math.min(50, startLeftWidth + deltaPercent));
-      setLeftWidth(newLeftWidth);
+      setLeftWidth(`${newLeftWidth}%`);
     };
 
     const handleMouseUp = () => {
@@ -733,15 +733,16 @@ export default function CodeChallengePage() {
   };
 
   const handleRightResize = (e: React.MouseEvent) => {
+    e.preventDefault();
     const startX = e.clientX;
-    const startRightWidth = rightWidth;
+    const startRightWidth = parseFloat(rightWidth);
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = startX - e.clientX; // Reversed for right panel
       const containerWidth = window.innerWidth;
       const deltaPercent = (deltaX / containerWidth) * 100;
       const newRightWidth = Math.max(20, Math.min(50, startRightWidth + deltaPercent));
-      setRightWidth(newRightWidth);
+      setRightWidth(`${newRightWidth}%`);
     };
 
     const handleMouseUp = () => {
