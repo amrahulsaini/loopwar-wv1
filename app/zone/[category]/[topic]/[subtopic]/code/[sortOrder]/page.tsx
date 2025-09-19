@@ -269,8 +269,77 @@ export default function CodeChallengePage() {
   // Resizable panel state
   const [leftWidth, setLeftWidth] = useState('30%'); // Problem section (30%)
   const [rightWidth, setRightWidth] = useState('30%'); // AI section (30%)
+  
+  // Console state
+  const [consoleExpanded, setConsoleExpanded] = useState(false);
+  const [highlightedCode, setHighlightedCode] = useState('');
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Syntax highlighting function
+  const highlightSyntax = (code: string, language: string): string => {
+    if (!code) return '';
+
+    let highlighted = code;
+
+    // Define syntax patterns for different languages
+    const patterns = {
+      javascript: {
+        keywords: /\b(function|const|let|var|if|else|for|while|return|class|extends|import|export|from|async|await|try|catch|finally|throw|new|this|super|static|get|set|true|false|null|undefined)\b/g,
+        strings: /(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g,
+        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
+        numbers: /\b\d+(\.\d+)?\b/g,
+        functions: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
+        operators: /(\+|\-|\*|\/|%|=|==|===|!=|!==|<|>|<=|>=|&&|\|\||!|\?|:)/g,
+      },
+      python: {
+        keywords: /\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|raise|with|lambda|and|or|not|in|is|True|False|None|pass|break|continue|global|nonlocal)\b/g,
+        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
+        comments: /(#.*$)/gm,
+        numbers: /\b\d+(\.\d+)?\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|and|or|not|\+=|\-=|\*=|\/=)/g,
+      },
+      java: {
+        keywords: /\b(public|private|protected|static|final|abstract|class|interface|extends|implements|if|else|for|while|do|return|new|this|super|try|catch|finally|throw|throws|import|package|true|false|null|void|int|double|float|long|short|byte|char|boolean|String)\b/g,
+        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
+        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
+        numbers: /\b\d+(\.\d+)?\b/g,
+        functions: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
+        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|&&|\|\||!|\?|:)/g,
+      },
+      cpp: {
+        keywords: /\b(int|double|float|char|bool|void|string|if|else|for|while|do|return|class|struct|public|private|protected|static|const|new|delete|this|namespace|using|include|true|false|null|nullptr)\b/g,
+        strings: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g,
+        comments: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
+        numbers: /\b\d+(\.\d+)?\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /(\+|\-|\*|\/|%|=|==|!=|<|>|<=|>=|&&|\|\||!|\?|:)/g,
+      }
+    };
+
+    const langPatterns = patterns[language as keyof typeof patterns] || patterns.javascript;
+
+    // Apply syntax highlighting
+    highlighted = highlighted
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(langPatterns.strings, '<span class="string">$&</span>')
+      .replace(langPatterns.comments, '<span class="comment">$&</span>')
+      .replace(langPatterns.keywords, '<span class="keyword">$&</span>')
+      .replace(langPatterns.numbers, '<span class="number">$&</span>')
+      .replace(langPatterns.functions, '<span class="function">$1</span>(')
+      .replace(langPatterns.operators, '<span class="operator">$&</span>');
+
+    return highlighted;
+  };
+
+  // Update highlighted code when code or language changes
+  useEffect(() => {
+    const highlighted = highlightSyntax(code, selectedLanguage);
+    setHighlightedCode(highlighted);
+  }, [code, selectedLanguage]);
 
   // Function to get the appropriate code template for a language
   const getCodeTemplate = (language: string): string => {
@@ -931,8 +1000,10 @@ export default function CodeChallengePage() {
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <div className={styles.tabNav}>
+          {/* Problem Content Wrapper */}
+          <div className={styles.problemContent}>
+            {/* Tab Navigation */}
+            <div className={styles.tabNav}>
             <button 
               className={`${styles.tab} ${activeTab === 'description' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('description')}
@@ -1165,6 +1236,7 @@ export default function CodeChallengePage() {
               </div>
             )}
           </div>
+          </div>
         </div>
 
         {/* First Resizer */}
@@ -1223,8 +1295,10 @@ export default function CodeChallengePage() {
             </div>
           </div>
 
-          {/* Code Editor with Line Numbers */}
-          <div className={styles.codeEditor}>
+          {/* Code Editor Content Wrapper */}
+          <div className={styles.codeEditorArea}>
+            {/* Code Editor with Syntax Highlighting */}
+            <div className={styles.codeEditor}>
             {/* Line Numbers */}
             <div className={styles.lineNumbers}>
               {code.split('\n').map((_, index) => (
@@ -1234,6 +1308,12 @@ export default function CodeChallengePage() {
               ))}
             </div>
             
+            {/* Syntax Highlighter Overlay */}
+            <div 
+              className={styles.syntaxHighlighter}
+              dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            />
+            
             {/* Code Textarea */}
             <textarea
               ref={codeTextareaRef}
@@ -1242,15 +1322,121 @@ export default function CodeChallengePage() {
               className={styles.codeTextarea}
               placeholder="Write your solution here..."
               spellCheck={false}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               onScroll={(e) => {
-                // Sync line numbers scroll with textarea scroll
+                // Sync line numbers and syntax highlighting scroll
                 const target = e.target as HTMLTextAreaElement;
                 const lineNumbers = target.parentElement?.querySelector(`.${styles.lineNumbers}`) as HTMLElement;
+                const syntaxHighlighter = target.parentElement?.querySelector(`.${styles.syntaxHighlighter}`) as HTMLElement;
                 if (lineNumbers) {
                   lineNumbers.scrollTop = target.scrollTop;
                 }
+                if (syntaxHighlighter) {
+                  syntaxHighlighter.scrollTop = target.scrollTop;
+                  syntaxHighlighter.scrollLeft = target.scrollLeft;
+                }
+              }}
+              onKeyDown={(e) => {
+                // Auto-indentation and bracket completion
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  const target = e.target as HTMLTextAreaElement;
+                  const start = target.selectionStart;
+                  const end = target.selectionEnd;
+                  const newValue = code.substring(0, start) + '  ' + code.substring(end);
+                  setCode(newValue);
+                  setTimeout(() => {
+                    target.selectionStart = target.selectionEnd = start + 2;
+                  }, 0);
+                } else if (e.key === 'Enter') {
+                  // Auto-indentation on new line
+                  const target = e.target as HTMLTextAreaElement;
+                  const start = target.selectionStart;
+                  const lines = code.substring(0, start).split('\n');
+                  const currentLine = lines[lines.length - 1];
+                  const indent = currentLine.match(/^(\s*)/)?.[1] || '';
+                  const newValue = code.substring(0, start) + '\n' + indent + code.substring(start);
+                  setCode(newValue);
+                  e.preventDefault();
+                  setTimeout(() => {
+                    target.selectionStart = target.selectionEnd = start + 1 + indent.length;
+                  }, 0);
+                }
               }}
             />
+          </div>
+          </div>
+
+          {/* Console Section */}
+          <div className={styles.consoleSection}>
+            <div 
+              className={styles.consoleHeader}
+              onClick={() => setConsoleExpanded(!consoleExpanded)}
+            >
+              <div className={styles.consoleTitle}>
+                <span>Console</span>
+                {executionResult && (
+                  <span style={{ 
+                    color: executionResult.isCorrect ? '#22c55e' : '#ef4444',
+                    fontSize: '0.75rem'
+                  }}>
+                    {executionResult.results?.filter(r => r.passed).length || 0}/
+                    {executionResult.results?.length || 0} tests passed
+                  </span>
+                )}
+              </div>
+              <div className={`${styles.consoleToggle} ${consoleExpanded ? styles.expanded : ''}`}>
+                <ChevronRight size={16} />
+              </div>
+            </div>
+            
+            <div className={`${styles.consoleContent} ${!consoleExpanded ? styles.consoleCollapsed : ''}`}>
+              {executionResult ? (
+                <div className={styles.consoleOutput}>
+                  {/* Test Results */}
+                  {executionResult.results && executionResult.results.map((result, index) => (
+                    <div key={index} className={`${styles.testCaseResult} ${result.passed ? 'passed' : 'failed'}`}>
+                      <div className={styles.testCaseHeader}>
+                        <span>Test Case {index + 1}</span>
+                        <div className={styles.testCaseStatus}>
+                          {result.passed ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                          {result.passed ? 'PASSED' : 'FAILED'}
+                        </div>
+                      </div>
+                      <div>
+                        <strong>Input:</strong> {result.input || 'N/A'}
+                      </div>
+                      <div>
+                        <strong>Expected:</strong> {result.expected}
+                      </div>
+                      <div>
+                        <strong>Output:</strong> {result.actual || 'N/A'}
+                      </div>
+                      {result.error && (
+                        <div style={{ color: '#ef4444' }}>
+                          <strong>Error:</strong> {result.error}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {/* Execution Info */}
+                  <div style={{ marginTop: '1rem', padding: '0.5rem', background: 'rgba(0, 122, 204, 0.1)', borderRadius: '4px' }}>
+                    <div><strong>Score:</strong> {executionResult.score}/100</div>
+                    <div><strong>Status:</strong> {executionResult.isCorrect ? 'Accepted' : 'Wrong Answer'}</div>
+                    <div><strong>Tests Passed:</strong> {executionResult.results?.filter(r => r.passed).length || 0}/{executionResult.results?.length || 0}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.consoleOutput}>
+                  <div style={{ color: '#858585', fontStyle: 'italic' }}>
+                    Run your code to see test results and output here...
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1267,8 +1453,10 @@ export default function CodeChallengePage() {
           className={styles.aiPanel}
           style={{ width: rightWidth }}
         >
-          {/* AI Analysis Results Panel */}
-          {executionResult && (
+          {/* AI Analysis Content Wrapper */}
+          <div className={styles.aiContent}>
+            {/* AI Analysis Results Panel */}
+            {executionResult && (
             <div className={styles.resultsPanel}>
               <div className={styles.resultsHeader}>
                 <h3>AI Code Analysis</h3>
@@ -1427,6 +1615,7 @@ export default function CodeChallengePage() {
               )}
             </div>
           )}
+          </div>
         </div>
         </div>
       </main>
