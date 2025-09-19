@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
       const progress = progressResult[0];
       const newAttempts = progress.attempts_count + 1;
       const shouldUpdateBest = isSolved && (!progress.is_solved || !progress.best_submission_id);
-      const firstSolvedAt = isSolved && !progress.is_solved ? new Date().toISOString() : null;
+      const firstSolvedAt = isSolved && !progress.is_solved ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null;
 
       await Database.query(
         `UPDATE user_code_progress SET 
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
           isSolved,
           isSolved ? submissionId : null,
           1,
-          isSolved ? new Date().toISOString() : null
+          isSolved ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null
         ]
       );
     }
