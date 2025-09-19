@@ -9,7 +9,75 @@
   --color-primary: #000000;
   --color-border: #e0e0e0;
   --color-card-bg: #f9f9f9;
-  --color-card-border: #e5e5e5;
+.resultsList::-webkit-scrollbar-thumb,
+.codeEditor::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.resultsList::-webkit-scrollbar-thumb:hover,
+.codeEditor::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* AI Analysis Styles */
+.aiSummary {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.aiSummary h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.aiSummary div {
+  margin: 0.5rem 0;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.aiSummary strong {
+  color: var(--color-primary);
+  margin-right: 0.5rem;
+}
+
+.hintsSection,
+.learningSection {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hintsSection h4,
+.learningSection h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.hintsSection ul,
+.learningSection ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.hintsSection li,
+.learningSection li {
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
   --color-success: #000000;
   --color-error: #666666;
   --border-radius: 12px;

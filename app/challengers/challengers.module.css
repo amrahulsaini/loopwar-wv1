@@ -858,3 +858,170 @@
     display: none;
   }
 }
+
+/* AI Analysis Styles */
+.aiSummary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.light .aiSummary {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.aiSummary h3 {
+  margin: 0 0 1rem 0;
+  color: #ff6b6b;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summaryGrid div {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.light .summaryGrid div {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.summaryGrid strong {
+  color: #ff6b6b;
+  margin-right: 0.5rem;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 4px solid #ff6b6b;
+}
+
+.light .feedback {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.feedback strong {
+  color: #ff6b6b;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.hintsSection,
+.learningSection,
+.efficiencySection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.light .hintsSection,
+.light .learningSection,
+.light .efficiencySection {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.hintsSection h4,
+.learningSection h4,
+.efficiencySection h4 {
+  margin: 0 0 1rem 0;
+  color: #ff6b6b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hintsSection ul,
+.learningSection ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.hintsSection li,
+.learningSection li {
+  margin-bottom: 0.75rem;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.efficiencyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.efficiencyGrid div {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.light .efficiencyGrid div {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.efficiencyGrid strong {
+  color: #ff6b6b;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.efficiencySection ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.efficiencySection li {
+  margin-bottom: 0.75rem;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* Responsive adjustments for AI analysis */
+@media (max-width: 768px) {
+  .summaryGrid,
+  .efficiencyGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .aiSummary,
+  .hintsSection,
+  .learningSection,
+  .efficiencySection {
+    padding: 1rem;
+  }
+  
+  .aiSummary h3,
+  .hintsSection h4,
+  .learningSection h4,
+  .efficiencySection h4 {
+    font-size: 1rem;
+  }
+}

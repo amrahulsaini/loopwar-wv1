@@ -9,7 +9,41 @@ interface SubmissionData {
   language: string;
   result: {
     success: boolean;
-    results: Array<{
+    isCorrect?: boolean;
+    score?: number;
+    feedback?: string;
+    detailedAnalysis?: {
+      syntax?: {
+        isValid: boolean;
+        issues: string[];
+      };
+      logic?: {
+        isCorrect: boolean;
+        issues: string[];
+        suggestions: string[];
+      };
+      efficiency?: {
+        timeComplexity: string;
+        spaceComplexity: string;
+        rating: number;
+        improvements: string[];
+      };
+      testCases?: {
+        passed: number;
+        total: number;
+        results: Array<{
+          input: string;
+          expectedOutput: string;
+          actualOutput: string;
+          passed: boolean;
+          explanation: string;
+        }>;
+      };
+    };
+    hints?: string[];
+    learningPoints?: string[];
+    // Legacy format for backward compatibility
+    results?: Array<{
       testCase: number;
       passed: boolean;
       input: string;
@@ -19,7 +53,7 @@ interface SubmissionData {
       executionTime?: string;
       memory?: number;
     }>;
-    overallStatus: string;
+    overallStatus?: string;
     error?: string;
   };
   category: string;
@@ -80,7 +114,19 @@ export async function POST(request: NextRequest) {
 
     // Determine submission status based on results
     let status = 'Wrong Answer';
-    if (submissionData.result.error) {
+    
+    // Handle AI format
+    if (submissionData.result.isCorrect !== undefined) {
+      if (submissionData.result.isCorrect) {
+        status = 'Accepted';
+      } else if (submissionData.result.detailedAnalysis?.syntax && !submissionData.result.detailedAnalysis.syntax.isValid) {
+        status = 'Compilation Error';
+      } else {
+        status = 'Wrong Answer';
+      }
+    } 
+    // Handle legacy format
+    else if (submissionData.result.error) {
       if (submissionData.result.error.includes('compilation') || submissionData.result.error.includes('compile')) {
         status = 'Compilation Error';
       } else if (submissionData.result.error.includes('timeout') || submissionData.result.error.includes('time')) {
@@ -94,23 +140,35 @@ export async function POST(request: NextRequest) {
       status = 'Accepted';
     }
 
-    // Calculate execution statistics
-    const totalTestCases = submissionData.result.results.length;
-    const passedTestCases = submissionData.result.results.filter(r => r.passed).length;
-    
-    // Get average execution time
-    const executionTimes = submissionData.result.results
-      .filter(r => r.executionTime)
-      .map(r => parseFloat(r.executionTime || '0'));
-    const avgExecutionTime = executionTimes.length > 0 
-      ? executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length 
-      : null;
+    // Calculate execution statistics - handle both AI and legacy formats
+    let totalTestCases = 0;
+    let passedTestCases = 0;
+    let avgExecutionTime = null;
+    let maxMemoryUsed = null;
 
-    // Get max memory usage
-    const memoryUsages = submissionData.result.results
-      .filter(r => r.memory)
-      .map(r => r.memory || 0);
-    const maxMemoryUsed = memoryUsages.length > 0 ? Math.max(...memoryUsages) : null;
+    if (submissionData.result.detailedAnalysis?.testCases) {
+      // New AI format
+      totalTestCases = submissionData.result.detailedAnalysis.testCases.total;
+      passedTestCases = submissionData.result.detailedAnalysis.testCases.passed;
+    } else if (submissionData.result.results) {
+      // Legacy format
+      totalTestCases = submissionData.result.results.length;
+      passedTestCases = submissionData.result.results.filter(r => r.passed).length;
+      
+      // Get average execution time
+      const executionTimes = submissionData.result.results
+        .filter(r => r.executionTime)
+        .map(r => parseFloat(r.executionTime || '0'));
+      avgExecutionTime = executionTimes.length > 0 
+        ? executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length 
+        : null;
+
+      // Get max memory usage
+      const memoryUsages = submissionData.result.results
+        .filter(r => r.memory)
+        .map(r => r.memory || 0);
+      maxMemoryUsed = memoryUsages.length > 0 ? Math.max(...memoryUsages) : null;
+    }
 
     // Insert submission record
     const submissionResult = await Database.query(

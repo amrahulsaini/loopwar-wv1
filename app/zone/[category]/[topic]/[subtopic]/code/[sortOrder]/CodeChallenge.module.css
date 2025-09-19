@@ -1394,3 +1394,180 @@
   background: #e0e0e0;
   border-color: #d0d0d0;
 }
+
+/* AI Analysis Styles */
+.feedbackSection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.feedbackSection h4 {
+  margin: 0 0 0.75rem 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feedbackSection p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.testCasesSection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.testCasesSection h4 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.testCaseExplanation {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.testCaseExplanation strong {
+  color: #374151;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.testCaseExplanation p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.analysisSection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.analysisSection h4 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subSection {
+  margin-bottom: 1rem;
+}
+
+.subSection:last-child {
+  margin-bottom: 0;
+}
+
+.subSection strong {
+  color: #374151;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.issuesList,
+.suggestionsList,
+.improvementsList,
+.hintsList,
+.learningPointsList {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.issuesList li,
+.suggestionsList li,
+.improvementsList li,
+.hintsList li,
+.learningPointsList li {
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.syntaxIssue {
+  color: #dc2626 !important;
+}
+
+.logicIssue {
+  color: #d97706 !important;
+}
+
+.suggestion {
+  color: #059669 !important;
+}
+
+.improvement {
+  color: #2563eb !important;
+}
+
+.hint {
+  color: #7c3aed !important;
+}
+
+.learningPoint {
+  color: #1f2937 !important;
+}
+
+.efficiencyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.efficiencyItem {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.efficiencyItem strong {
+  color: #374151;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive adjustments for AI analysis */
+@media (max-width: 768px) {
+  .efficiencyGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .analysisSection,
+  .feedbackSection,
+  .testCasesSection {
+    padding: 0.75rem;
+  }
+  
+  .analysisSection h4,
+  .feedbackSection h4,
+  .testCasesSection h4 {
+    font-size: 0.9rem;
+  }
+}
