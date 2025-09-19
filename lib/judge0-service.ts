@@ -63,15 +63,19 @@ class Judge0Service {
         hasStdin: !!stdin
       });
 
-      const response = await fetch(`${this.baseUrl}/submissions?base64_encoded=false&wait=true`, {
+      // Encode source code and stdin to base64 to handle UTF-8 issues
+      const encodedSourceCode = Buffer.from(code, 'utf8').toString('base64');
+      const encodedStdin = Buffer.from(stdin || '', 'utf8').toString('base64');
+
+      const response = await fetch(`${this.baseUrl}/submissions?base64_encoded=true&wait=true`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          source_code: code,
+          source_code: encodedSourceCode,
           language_id: languageId,
-          stdin: stdin || '',
+          stdin: encodedStdin,
           expected_output: null,
           cpu_time_limit: 10,
           memory_limit: 128000,
@@ -101,6 +105,31 @@ class Judge0Service {
       if (!result || typeof result !== 'object') {
         console.error('Invalid Judge0 response format:', result);
         throw new Error('Invalid response format from Judge0');
+      }
+
+      // Decode base64 encoded response fields
+      if (result.stdout) {
+        try {
+          result.stdout = Buffer.from(result.stdout, 'base64').toString('utf8');
+        } catch (decodeError) {
+          console.warn('Failed to decode stdout from base64:', decodeError);
+        }
+      }
+      
+      if (result.stderr) {
+        try {
+          result.stderr = Buffer.from(result.stderr, 'base64').toString('utf8');
+        } catch (decodeError) {
+          console.warn('Failed to decode stderr from base64:', decodeError);
+        }
+      }
+      
+      if (result.compile_output) {
+        try {
+          result.compile_output = Buffer.from(result.compile_output, 'base64').toString('utf8');
+        } catch (decodeError) {
+          console.warn('Failed to decode compile_output from base64:', decodeError);
+        }
       }
 
       // Ensure status object exists with required properties
