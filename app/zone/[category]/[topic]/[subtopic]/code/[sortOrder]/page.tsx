@@ -898,8 +898,13 @@ export default function CodeChallengePage() {
 
       {/* Main Content */}
       <main className={styles.mainContent}>
-        {/* Left Panel - Problem Description */}
-        <div className={styles.leftPanel}>
+        {/* Resizable 3-Panel Layout */}
+        <div className={styles.resizableContainer}>
+          {/* Left Panel - Problem Description */}
+          <div 
+            className={styles.problemPanel}
+            style={{ width: leftWidth }}
+          >
           <div className={styles.problemHeader}>
             <div className={styles.problemTitleRow}>
               <h1 className={styles.problemTitle}>{problem.title}</h1>
@@ -1161,8 +1166,19 @@ export default function CodeChallengePage() {
           </div>
         </div>
 
-        {/* Right Panel - Code Editor */}
-        <div className={styles.rightPanel}>
+        {/* First Resizer */}
+        <div 
+          className={styles.resizer}
+          onMouseDown={(e) => handleLeftResize(e)}
+        >
+          <GripVertical size={16} />
+        </div>
+
+        {/* Middle Panel - Code Editor */}
+        <div 
+          className={styles.codePanel}
+          style={{ width: `calc(100% - ${leftWidth} - ${rightWidth} - 20px)` }}
+        >
           {/* Code Editor Header */}
           <div className={styles.editorHeader}>
             <div className={styles.editorHeaderLeft}>
@@ -1217,7 +1233,21 @@ export default function CodeChallengePage() {
               spellCheck={false}
             />
           </div>
+        </div>
 
+        {/* Second Resizer */}
+        <div 
+          className={styles.resizer}
+          onMouseDown={(e) => handleRightResize(e)}
+        >
+          <GripVertical size={16} />
+        </div>
+
+        {/* Right Panel - AI Analysis */}
+        <div 
+          className={styles.aiPanel}
+          style={{ width: rightWidth }}
+        >
           {/* AI Analysis Results Panel */}
           {executionResult && (
             <div className={styles.resultsPanel}>
@@ -1378,6 +1408,7 @@ export default function CodeChallengePage() {
               )}
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>
