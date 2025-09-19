@@ -708,6 +708,31 @@ export default function CodeChallengePage() {
     setExecutionResult(null);
   };
 
+  // Initialize code template when component mounts or language changes
+  useEffect(() => {
+    if (!code || code.trim() === '') {
+      const template = getCodeTemplate(selectedLanguage);
+      console.log('Initializing code template:', template);
+      setCode(template);
+    }
+  }, [selectedLanguage, problem, getCodeTemplate]);
+
+  // Update code when language changes (if user wants to switch)
+  useEffect(() => {
+    // Only update if we have some code and user explicitly changed language
+    if (code && code.trim() !== '') {
+      const currentTemplate = getCodeTemplate(selectedLanguage);
+      // Check if current code is still the default template
+      const allTemplates = Object.values(languageBoilerplates);
+      const isDefaultTemplate = allTemplates.some(template => code.trim() === template.trim());
+      
+      if (isDefaultTemplate) {
+        console.log('Language changed, updating template to:', selectedLanguage);
+        setCode(currentTemplate);
+      }
+    }
+  }, [selectedLanguage]);
+
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1242,13 +1267,18 @@ export default function CodeChallengePage() {
               <textarea
                 ref={codeTextareaRef}
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  console.log('Code changing:', e.target.value);
+                  setCode(e.target.value);
+                }}
                 className={styles.codeTextarea}
                 placeholder="Write your solution here..."
                 spellCheck={false}
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
+                disabled={false}
+                readOnly={false}
                 onScroll={(e) => {
                   // Sync line numbers scroll
                   const target = e.target as HTMLTextAreaElement;
