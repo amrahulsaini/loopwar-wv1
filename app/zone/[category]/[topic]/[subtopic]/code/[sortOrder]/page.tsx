@@ -400,8 +400,8 @@ export default function CodeChallengePage() {
   // Format inline text with bold, code, etc. (strip emojis)
   const formatInlineText = (text: string) => {
     return text
-      // Remove all emojis first
-      .replace(/[🎯💡🔍🔥⚠️💭🚀🛠️📚✨🔧⭐💻📝😀🚀💡⚡🎯📝💻🔧⭐✨🔥]/g, '')
+      // Remove all emojis first - comprehensive emoji regex
+      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
       // Bold text **text** or **text:**
       .replace(/\*\*([^*]+)\*\*:?/g, '<strong class="' + styles.boldText + '">$1</strong>')
       // Code snippets `code`
@@ -410,6 +410,115 @@ export default function CodeChallengePage() {
       .replace(/(\[[\d,\s-]+\])/g, '<code class="' + styles.arrayCode + '">$1</code>')
       // Function calls and variables
       .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="' + styles.functionCode + '">$1</code>');
+  };
+
+  // Modern syntax highlighting function
+  const highlightSyntax = (line: string, language: string) => {
+    if (!line.trim()) return <span>&nbsp;</span>;
+
+    const patterns = {
+      javascript: {
+        keywords: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|class|extends|import|export|from|default|async|await|true|false|null|undefined|typeof|instanceof|new|this|super)\b/g,
+        strings: /(["'`])(?:(?!\1)[^\\]|\\(.|\n))*?\1/g,
+        comments: /\/\/.*$|\/\*[\s\S]*?\*\//g,
+        numbers: /\b(\d+\.?\d*)\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /[+\-*/%=<>!&|^~?:]/g,
+        brackets: /[()[\]{}]/g
+      },
+      python: {
+        keywords: /\b(def|class|if|elif|else|for|while|in|return|import|from|as|try|except|finally|with|pass|break|continue|True|False|None|and|or|not|is|lambda|yield|global|nonlocal)\b/g,
+        strings: /(["'])(?:(?!\1)[^\\]|\\(.|\n))*?\1|"""[\s\S]*?"""|'''[\s\S]*?'''/g,
+        comments: /#.*$/g,
+        numbers: /\b(\d+\.?\d*)\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /[+\-*/%=<>!&|^~?:]/g,
+        brackets: /[()[\]{}]/g
+      },
+      java: {
+        keywords: /\b(public|private|protected|static|final|abstract|class|interface|extends|implements|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|throws|new|this|super|true|false|null|void|int|double|float|char|boolean|String|byte|short|long)\b/g,
+        strings: /(["'])(?:(?!\1)[^\\]|\\(.|\n))*?\1/g,
+        comments: /\/\/.*$|\/\*[\s\S]*?\*\//g,
+        numbers: /\b(\d+\.?\d*)\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /[+\-*/%=<>!&|^~?:]/g,
+        brackets: /[()[\]{}]/g
+      },
+      cpp: {
+        keywords: /\b(auto|bool|break|case|catch|char|class|const|continue|default|delete|do|double|else|enum|explicit|extern|false|float|for|friend|goto|if|inline|int|long|namespace|new|operator|private|protected|public|return|short|signed|sizeof|static|struct|switch|template|this|throw|true|try|typedef|typename|union|unsigned|using|virtual|void|volatile|while|std|cout|cin|endl|vector|string|include)\b/g,
+        strings: /(["'])(?:(?!\1)[^\\]|\\(.|\n))*?\1/g,
+        comments: /\/\/.*$|\/\*[\s\S]*?\*\//g,
+        numbers: /\b(\d+\.?\d*)\b/g,
+        functions: /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g,
+        operators: /[+\-*/%=<>!&|^~?:]/g,
+        brackets: /[()[\]{}]/g,
+        preprocessor: /#\w+/g
+      }
+    };
+
+    const langPatterns = patterns[language as keyof typeof patterns] || patterns.javascript;
+    
+    let result = line;
+    let elements: { start: number; end: number; className: string; content: string }[] = [];
+
+    // Find all matches for each pattern
+    Object.entries(langPatterns).forEach(([type, pattern]) => {
+      let match;
+      const regex = new RegExp(pattern.source, pattern.flags);
+      while ((match = regex.exec(line)) !== null) {
+        elements.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          className: `syntax-${type}`,
+          content: match[0]
+        });
+      }
+    });
+
+    // Sort by start position and handle overlaps
+    elements.sort((a, b) => a.start - b.start);
+    
+    // Remove overlapping elements (keep the first one)
+    const filtered = elements.filter((element, index) => {
+      return !elements.slice(0, index).some(prev => 
+        prev.start <= element.start && prev.end > element.start
+      );
+    });
+
+    if (filtered.length === 0) {
+      return <span>{line}</span>;
+    }
+
+    // Build the highlighted result
+    const resultElements = [];
+    let lastEnd = 0;
+
+    filtered.forEach((element, index) => {
+      // Add text before this element
+      if (element.start > lastEnd) {
+        resultElements.push(
+          <span key={`text-${index}`}>{line.slice(lastEnd, element.start)}</span>
+        );
+      }
+      
+      // Add the highlighted element
+      resultElements.push(
+        <span key={`highlight-${index}`} className={styles[element.className.replace('syntax-', 'syntax')] || styles.syntaxDefault}>
+          {element.content}
+        </span>
+      );
+      
+      lastEnd = element.end;
+    });
+
+    // Add remaining text
+    if (lastEnd < line.length) {
+      resultElements.push(
+        <span key="text-end">{line.slice(lastEnd)}</span>
+      );
+    }
+
+    return <>{resultElements}</>;
   };
 
   // Error boundary function
@@ -1234,68 +1343,77 @@ export default function CodeChallengePage() {
           <div className={styles.codeEditorArea}>
             {/* Code Editor with Syntax Highlighting */}
             <div className={styles.codeEditor}>
-            {/* Line Numbers */}
-            <div className={styles.lineNumbers}>
-              {code.split('\n').map((_, index) => (
-                <div key={index + 1}>
-                  {index + 1}
-                </div>
-              ))}
+              {/* Line Numbers */}
+              <div className={styles.lineNumbers}>
+                {code.split('\n').map((_, index) => (
+                  <div key={index + 1} className={styles.lineNumber}>
+                    {index + 1}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Syntax Highlighter */}
+              <div className={styles.syntaxHighlighter}>
+                {code.split('\n').map((line, index) => (
+                  <div key={index} className={styles.codeLine}>
+                    {highlightSyntax(line, selectedLanguage)}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Code Textarea */}
+              <textarea
+                ref={codeTextareaRef}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className={styles.codeTextarea}
+                placeholder="Write your solution here..."
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                onScroll={(e) => {
+                  // Sync line numbers and syntax highlighting scroll
+                  const target = e.target as HTMLTextAreaElement;
+                  const lineNumbers = target.parentElement?.querySelector(`.${styles.lineNumbers}`) as HTMLElement;
+                  const syntaxHighlighter = target.parentElement?.querySelector(`.${styles.syntaxHighlighter}`) as HTMLElement;
+                  if (lineNumbers) {
+                    lineNumbers.scrollTop = target.scrollTop;
+                  }
+                  if (syntaxHighlighter) {
+                    syntaxHighlighter.scrollTop = target.scrollTop;
+                    syntaxHighlighter.scrollLeft = target.scrollLeft;
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Auto-indentation and bracket completion
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const target = e.target as HTMLTextAreaElement;
+                    const start = target.selectionStart;
+                    const end = target.selectionEnd;
+                    const newValue = code.substring(0, start) + '  ' + code.substring(end);
+                    setCode(newValue);
+                    setTimeout(() => {
+                      target.selectionStart = target.selectionEnd = start + 2;
+                    }, 0);
+                  } else if (e.key === 'Enter') {
+                    // Auto-indentation on new line
+                    const target = e.target as HTMLTextAreaElement;
+                    const start = target.selectionStart;
+                    const lines = code.substring(0, start).split('\n');
+                    const currentLine = lines[lines.length - 1];
+                    const indent = currentLine.match(/^(\s*)/)?.[1] || '';
+                    const newValue = code.substring(0, start) + '\n' + indent + code.substring(start);
+                    setCode(newValue);
+                    e.preventDefault();
+                    setTimeout(() => {
+                      target.selectionStart = target.selectionEnd = start + 1 + indent.length;
+                    }, 0);
+                  }
+                }}
+              />
             </div>
-            
-            {/* Code Textarea */}
-            <textarea
-              ref={codeTextareaRef}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className={styles.codeTextarea}
-              placeholder="Write your solution here..."
-              spellCheck={false}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              onScroll={(e) => {
-                // Sync line numbers and syntax highlighting scroll
-                const target = e.target as HTMLTextAreaElement;
-                const lineNumbers = target.parentElement?.querySelector(`.${styles.lineNumbers}`) as HTMLElement;
-                const syntaxHighlighter = target.parentElement?.querySelector(`.${styles.syntaxHighlighter}`) as HTMLElement;
-                if (lineNumbers) {
-                  lineNumbers.scrollTop = target.scrollTop;
-                }
-                if (syntaxHighlighter) {
-                  syntaxHighlighter.scrollTop = target.scrollTop;
-                  syntaxHighlighter.scrollLeft = target.scrollLeft;
-                }
-              }}
-              onKeyDown={(e) => {
-                // Auto-indentation and bracket completion
-                if (e.key === 'Tab') {
-                  e.preventDefault();
-                  const target = e.target as HTMLTextAreaElement;
-                  const start = target.selectionStart;
-                  const end = target.selectionEnd;
-                  const newValue = code.substring(0, start) + '  ' + code.substring(end);
-                  setCode(newValue);
-                  setTimeout(() => {
-                    target.selectionStart = target.selectionEnd = start + 2;
-                  }, 0);
-                } else if (e.key === 'Enter') {
-                  // Auto-indentation on new line
-                  const target = e.target as HTMLTextAreaElement;
-                  const start = target.selectionStart;
-                  const lines = code.substring(0, start).split('\n');
-                  const currentLine = lines[lines.length - 1];
-                  const indent = currentLine.match(/^(\s*)/)?.[1] || '';
-                  const newValue = code.substring(0, start) + '\n' + indent + code.substring(start);
-                  setCode(newValue);
-                  e.preventDefault();
-                  setTimeout(() => {
-                    target.selectionStart = target.selectionEnd = start + 1 + indent.length;
-                  }, 0);
-                }
-              }}
-            />
-          </div>
           </div>
 
           {/* Console Section */}
