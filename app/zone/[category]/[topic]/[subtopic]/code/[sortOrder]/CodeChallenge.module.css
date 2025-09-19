@@ -1096,32 +1096,10 @@
   color: #3b82f6;
 }
 
-/* Syntax Highlighter Overlay */
-.syntaxHighlighter {
-  position: absolute;
-  top: 0;
-  left: 60px;
-  right: 0;
-  bottom: 0;
-  padding: 1.5rem;
-  pointer-events: none;
-  white-space: pre;
-  overflow: hidden;
-  font-family: 'JetBrains Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  color: transparent;
-  z-index: 1;
-}
-
-.codeLine {
-  min-height: 1.6em;
-}
-
 /* Enhanced Code Textarea */
 .codeTextarea {
   flex: 1;
-  background: transparent;
+  background: #ffffff;
   color: #1f2937;
   border: none;
   padding: 1.5rem;
@@ -1135,7 +1113,7 @@
   overflow: auto;
   tab-size: 2;
   position: relative;
-  z-index: 2;
+  z-index: 1;
   caret-color: #3b82f6;
   
   /* Modern scrollbar styling */
@@ -1171,50 +1149,6 @@
 
 .codeTextarea:focus {
   background: rgba(59, 130, 246, 0.02);
-}
-
-/* Syntax Highlighting Styles */
-.syntaxkeywords {
-  color: #8b5cf6;
-  font-weight: 600;
-}
-
-.syntaxstrings {
-  color: #10b981;
-}
-
-.syntaxcomments {
-  color: #6b7280;
-  font-style: italic;
-}
-
-.syntaxnumbers {
-  color: #f59e0b;
-  font-weight: 500;
-}
-
-.syntaxfunctions {
-  color: #3b82f6;
-  font-weight: 500;
-}
-
-.syntaxoperators {
-  color: #ef4444;
-  font-weight: 500;
-}
-
-.syntaxbrackets {
-  color: #6366f1;
-  font-weight: 600;
-}
-
-.syntaxpreprocessor {
-  color: #ec4899;
-  font-weight: 500;
-}
-
-.syntaxDefault {
-  color: #374151;
 }
 
 /* Console Section */
