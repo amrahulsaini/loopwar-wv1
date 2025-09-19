@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Editor from '@monaco-editor/react';
 import {
   ArrowLeft,
   Play,
@@ -268,8 +269,6 @@ export default function CodeChallengePage() {
   
   // Console state
   const [consoleExpanded, setConsoleExpanded] = useState(false);
-
-  const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Function to get the appropriate code template for a language
   const getCodeTemplate = (language: string): string => {
@@ -1238,68 +1237,57 @@ export default function CodeChallengePage() {
 
           {/* Code Editor Content Wrapper */}
           <div className={styles.codeEditorArea}>
-            {/* Code Editor with Clean Interface */}
-            <div className={styles.codeEditor}>
-              {/* Line Numbers */}
-              <div className={styles.lineNumbers}>
-                {code.split('\n').map((_, index) => (
-                  <div key={index + 1} className={styles.lineNumber}>
-                    {index + 1}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Code Textarea */}
-              <textarea
-                ref={codeTextareaRef}
+            {/* Monaco Editor with VS Code-like Interface */}
+            <div className={styles.monacoEditorWrapper}>
+              <Editor
+                height="100%"
+                language={selectedLanguage}
                 value={code}
-                onChange={(e) => {
-                  console.log('Code changing:', e.target.value);
-                  setCode(e.target.value);
+                onChange={(value) => {
+                  setCode(value || '');
                 }}
-                className={styles.codeTextarea}
-                placeholder="Write your solution here..."
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                disabled={false}
-                readOnly={false}
-                onScroll={(e) => {
-                  // Sync line numbers scroll
-                  const target = e.target as HTMLTextAreaElement;
-                  const lineNumbers = target.parentElement?.querySelector(`.${styles.lineNumbers}`) as HTMLElement;
-                  if (lineNumbers) {
-                    lineNumbers.scrollTop = target.scrollTop;
-                  }
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  fontFamily: 'JetBrains Mono, Monaco, Consolas, Courier New, monospace',
+                  lineNumbers: 'on',
+                  roundedSelection: false,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 2,
+                  insertSpaces: true,
+                  wordWrap: 'off',
+                  contextmenu: true,
+                  selectOnLineNumbers: true,
+                  lineNumbersMinChars: 3,
+                  glyphMargin: false,
+                  folding: true,
+                  lineDecorationsWidth: 0,
+                  lineHeight: 22,
+                  renderLineHighlight: 'line',
+                  cursorBlinking: 'blink',
+                  cursorSmoothCaretAnimation: "on",
+                  smoothScrolling: true,
+                  scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8,
+                  },
+                  bracketPairColorization: {
+                    enabled: true,
+                  },
+                  guides: {
+                    bracketPairs: true,
+                    indentation: true,
+                  },
+                  suggestOnTriggerCharacters: true,
+                  acceptSuggestionOnEnter: 'on',
+                  quickSuggestions: true,
+                  parameterHints: {
+                    enabled: true,
+                  },
                 }}
-                onKeyDown={(e) => {
-                  // Auto-indentation and bracket completion
-                  if (e.key === 'Tab') {
-                    e.preventDefault();
-                    const target = e.target as HTMLTextAreaElement;
-                    const start = target.selectionStart;
-                    const end = target.selectionEnd;
-                    const newValue = code.substring(0, start) + '  ' + code.substring(end);
-                    setCode(newValue);
-                    setTimeout(() => {
-                      target.selectionStart = target.selectionEnd = start + 2;
-                    }, 0);
-                  } else if (e.key === 'Enter') {
-                    // Auto-indentation on new line
-                    const target = e.target as HTMLTextAreaElement;
-                    const start = target.selectionStart;
-                    const lines = code.substring(0, start).split('\n');
-                    const currentLine = lines[lines.length - 1];
-                    const indent = currentLine.match(/^(\s*)/)?.[1] || '';
-                    const newValue = code.substring(0, start) + '\n' + indent + code.substring(start);
-                    setCode(newValue);
-                    e.preventDefault();
-                    setTimeout(() => {
-                      target.selectionStart = target.selectionEnd = start + 1 + indent.length;
-                    }, 0);
-                  }
-                }}
+                loading={<div className={styles.editorLoading}>Loading editor...</div>}
               />
             </div>
           </div>
