@@ -61,14 +61,14 @@ interface CodeProblem {
   constraints?: string;
   examples?: string;
   hints?: string[];
-  time_complexity?: string;
-  space_complexity?: string;
-  test_cases: Array<{
+  timeComplexity?: string; // Changed from time_complexity to timeComplexity
+  spaceComplexity?: string; // Changed from space_complexity to spaceComplexity
+  testCases: Array<{
     input: string;
     expected: string;
     explanation?: string;
-  }>;
-  function_templates?: Record<string, string>;
+  }>; // Changed from test_cases to testCases
+  functionTemplates?: Record<string, string>; // Changed from function_templates to functionTemplates
   is_ai_generated: boolean;
   user_id?: number;
   created_at: string;
@@ -214,10 +214,10 @@ export async function GET(request: NextRequest) {
         constraints: problem.constraints,
         examples: problem.examples,
         hints: parsedHints,
-        time_complexity: problem.time_complexity,
-        space_complexity: problem.space_complexity,
-        test_cases: parsedTestCases,
-        function_templates: parsedFunctionTemplates,
+        timeComplexity: problem.time_complexity,
+        spaceComplexity: problem.space_complexity,
+        testCases: parsedTestCases, // Changed from test_cases to testCases
+        functionTemplates: parsedFunctionTemplates, // Changed from function_templates to functionTemplates
         is_ai_generated: problem.is_ai_generated,
         user_id: problem.user_id,
         created_at: problem.created_at,
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
       console.log('Formatted problem being returned:', {
         id: formattedProblem.id,
         title: formattedProblem.title,
-        testCasesCount: formattedProblem.test_cases.length,
+        testCasesCount: formattedProblem.testCases.length,
         hintsCount: formattedProblem.hints?.length || 0
       });
 
@@ -310,9 +310,10 @@ export async function GET(request: NextRequest) {
       constraints: null,
       examples: null,
       hints: null,
-      time_complexity: null,
-      space_complexity: null,
-      test_cases: [],
+      timeComplexity: null, // Changed from time_complexity
+      spaceComplexity: null, // Changed from space_complexity
+      testCases: [], // Changed from test_cases
+      functionTemplates: {}, // Changed from function_templates
       is_ai_generated: false,
       needs_generation: true // Flag to indicate this needs AI generation
     });

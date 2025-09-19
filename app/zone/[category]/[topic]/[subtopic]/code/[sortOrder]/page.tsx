@@ -542,7 +542,8 @@ export default function CodeChallengePage() {
               id: generatedProblem.id,
               title: generatedProblem.title,
               testCasesCount: generatedProblem.testCases?.length || 0,
-              testCases: generatedProblem.testCases
+              testCases: generatedProblem.testCases,
+              functionTemplatesKeys: generatedProblem.functionTemplates ? Object.keys(generatedProblem.functionTemplates) : 'None'
             });
             setProblem(generatedProblem);
             
@@ -565,8 +566,10 @@ export default function CodeChallengePage() {
                     id: verifiedProblem.id,
                     title: verifiedProblem.title,
                     testCasesCount: verifiedProblem.testCases?.length || 0,
+                    testCasesData: verifiedProblem.testCases,
                     hasTestCases: !verifiedProblem.needs_generation,
-                    needsGeneration: verifiedProblem.needs_generation
+                    needsGeneration: verifiedProblem.needs_generation,
+                    functionTemplatesKeys: verifiedProblem.functionTemplates ? Object.keys(verifiedProblem.functionTemplates) : 'None'
                   });
                   // Always update with the verified problem from database
                   setProblem(verifiedProblem);
