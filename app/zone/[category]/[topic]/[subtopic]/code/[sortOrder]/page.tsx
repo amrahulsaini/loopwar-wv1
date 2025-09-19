@@ -25,11 +25,6 @@ import {
   Eye,
   List,
   GripVertical,
-  RefreshCw,
-  Bot,
-  Database,
-  Shield,
-  Loader,
   Brain
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
@@ -458,8 +453,7 @@ export default function CodeChallengePage() {
 
     const langPatterns = patterns[language as keyof typeof patterns] || patterns.javascript;
     
-    let result = line;
-    let elements: { start: number; end: number; className: string; content: string }[] = [];
+    const elements: { start: number; end: number; className: string; content: string }[] = [];
 
     // Find all matches for each pattern
     Object.entries(langPatterns).forEach(([type, pattern]) => {
@@ -736,7 +730,7 @@ export default function CodeChallengePage() {
   // Update code when language changes
   useEffect(() => {
     setCode(getCodeTemplate(selectedLanguage));
-  }, [selectedLanguage, problem]); // Keep problem as dependency
+  }, [selectedLanguage, problem, getCodeTemplate]); // Added getCodeTemplate to dependencies
 
   // Handle code execution
   const runCode = async () => {
