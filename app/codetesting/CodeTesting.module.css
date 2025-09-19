@@ -48,7 +48,8 @@
 }
 
 .hintsSection,
-.learningSection {
+.learningSection,
+.analysisSection {
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -57,7 +58,8 @@
 }
 
 .hintsSection h4,
-.learningSection h4 {
+.learningSection h4,
+.analysisSection h4 {
   margin: 0 0 0.75rem 0;
   color: var(--color-primary);
   font-size: 1rem;
@@ -65,18 +67,31 @@
 }
 
 .hintsSection ul,
-.learningSection ul {
+.learningSection ul,
+.analysisSection ul {
   margin: 0;
   padding-left: 1.25rem;
   list-style-type: disc;
 }
 
 .hintsSection li,
-.learningSection li {
+.learningSection li,
+.analysisSection li {
   margin-bottom: 0.5rem;
   color: var(--color-text);
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+.analysisSection div {
+  margin: 0.5rem 0;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.analysisSection strong {
+  color: var(--color-primary);
+  margin-right: 0.5rem;
 }
   --color-success: #000000;
   --color-error: #666666;

@@ -923,7 +923,8 @@
 
 .hintsSection,
 .learningSection,
-.efficiencySection {
+.efficiencySection,
+.analysisSection {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -933,14 +934,16 @@
 
 .light .hintsSection,
 .light .learningSection,
-.light .efficiencySection {
+.light .efficiencySection,
+.light .analysisSection {
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .hintsSection h4,
 .learningSection h4,
-.efficiencySection h4 {
+.efficiencySection h4,
+.analysisSection h4 {
   margin: 0 0 1rem 0;
   color: #ff6b6b;
   font-size: 1.1rem;
@@ -951,19 +954,35 @@
 }
 
 .hintsSection ul,
-.learningSection ul {
+.learningSection ul,
+.analysisSection ul {
   margin: 0;
   padding-left: 1.5rem;
   list-style-type: disc;
 }
 
 .hintsSection li,
-.learningSection li {
+.learningSection li,
+.analysisSection li {
   margin-bottom: 0.75rem;
   color: inherit;
   font-size: 0.9rem;
   line-height: 1.6;
   opacity: 0.9;
+}
+
+.analysisSection div {
+  margin: 0.5rem 0;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.analysisSection strong {
+  color: #ff6b6b;
+  margin-right: 0.5rem;
+  opacity: 1;
 }
 
 .efficiencyGrid {

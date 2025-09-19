@@ -397,9 +397,89 @@ int main() {
                         <h4>AI Analysis Summary</h4>
                         <div><strong>Score:</strong> {results.score}/100</div>
                         <div><strong>Status:</strong> {results.isCorrect ? 'Correct Solution' : 'Needs Improvement'}</div>
-                        <div><strong>Feedback:</strong> {results.feedback}</div>
+                        <div><strong>Overall Feedback:</strong> {results.feedback}</div>
                       </div>
                     </div>
+
+                    {/* Detailed Analysis Sections */}
+                    {results.detailedAnalysis && (
+                      <>
+                        {/* Syntax Analysis */}
+                        {results.detailedAnalysis.syntax && (
+                          <div className={styles.resultItem}>
+                            <div className={styles.analysisSection}>
+                              <h4>🔍 Syntax Analysis</h4>
+                              <div><strong>Valid:</strong> {results.detailedAnalysis.syntax.isValid ? 'Yes' : 'No'}</div>
+                              {results.detailedAnalysis.syntax.issues.length > 0 && (
+                                <div>
+                                  <strong>Issues:</strong>
+                                  <ul>
+                                    {results.detailedAnalysis.syntax.issues.map((issue, index) => (
+                                      <li key={index}>{issue}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Logic Analysis */}
+                        {results.detailedAnalysis.logic && (
+                          <div className={styles.resultItem}>
+                            <div className={styles.analysisSection}>
+                              <h4>🧠 Logic Analysis</h4>
+                              <div><strong>Correct:</strong> {results.detailedAnalysis.logic.isCorrect ? 'Yes' : 'No'}</div>
+                              
+                              {results.detailedAnalysis.logic.issues.length > 0 && (
+                                <div>
+                                  <strong>Issues Found:</strong>
+                                  <ul>
+                                    {results.detailedAnalysis.logic.issues.map((issue, index) => (
+                                      <li key={index}>{issue}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {results.detailedAnalysis.logic.suggestions.length > 0 && (
+                                <div>
+                                  <strong>Suggestions:</strong>
+                                  <ul>
+                                    {results.detailedAnalysis.logic.suggestions.map((suggestion, index) => (
+                                      <li key={index}>{suggestion}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Efficiency Analysis */}
+                        {results.detailedAnalysis.efficiency && (
+                          <div className={styles.resultItem}>
+                            <div className={styles.analysisSection}>
+                              <h4>⚡ Efficiency Analysis</h4>
+                              <div><strong>Time Complexity:</strong> {results.detailedAnalysis.efficiency.timeComplexity}</div>
+                              <div><strong>Space Complexity:</strong> {results.detailedAnalysis.efficiency.spaceComplexity}</div>
+                              <div><strong>Rating:</strong> {results.detailedAnalysis.efficiency.rating}/5</div>
+                              
+                              {results.detailedAnalysis.efficiency.improvements.length > 0 && (
+                                <div>
+                                  <strong>Potential Improvements:</strong>
+                                  <ul>
+                                    {results.detailedAnalysis.efficiency.improvements.map((improvement, index) => (
+                                      <li key={index}>{improvement}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
 
                     {/* Test Cases */}
                     {results.detailedAnalysis?.testCases?.results && 

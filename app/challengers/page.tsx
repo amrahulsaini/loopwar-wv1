@@ -450,9 +450,62 @@ const ChallengersPage: React.FC = () => {
                       <div><strong>Status:</strong> {results.isCorrect ? 'Correct Solution' : 'Needs Improvement'}</div>
                     </div>
                     <div className={styles.feedback}>
-                      <strong>Feedback:</strong> {results.feedback}
+                      <strong>Overall Feedback:</strong> {results.feedback}
                     </div>
                   </div>
+
+                  {/* Detailed Analysis Sections */}
+                  {results.detailedAnalysis && (
+                    <>
+                      {/* Syntax Analysis */}
+                      {results.detailedAnalysis.syntax && (
+                        <div className={styles.analysisSection}>
+                          <h4>🔍 Syntax Analysis</h4>
+                          <div><strong>Valid:</strong> {results.detailedAnalysis.syntax.isValid ? 'Yes' : 'No'}</div>
+                          {results.detailedAnalysis.syntax.issues.length > 0 && (
+                            <div>
+                              <strong>Issues:</strong>
+                              <ul>
+                                {results.detailedAnalysis.syntax.issues.map((issue, index) => (
+                                  <li key={index}>{issue}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Logic Analysis */}
+                      {results.detailedAnalysis.logic && (
+                        <div className={styles.analysisSection}>
+                          <h4>🧠 Logic Analysis</h4>
+                          <div><strong>Correct:</strong> {results.detailedAnalysis.logic.isCorrect ? 'Yes' : 'No'}</div>
+                          
+                          {results.detailedAnalysis.logic.issues.length > 0 && (
+                            <div>
+                              <strong>Issues Found:</strong>
+                              <ul>
+                                {results.detailedAnalysis.logic.issues.map((issue, index) => (
+                                  <li key={index}>{issue}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {results.detailedAnalysis.logic.suggestions.length > 0 && (
+                            <div>
+                              <strong>Suggestions:</strong>
+                              <ul>
+                                {results.detailedAnalysis.logic.suggestions.map((suggestion, index) => (
+                                  <li key={index}>{suggestion}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
 
                   {/* Test Cases */}
                   {results.detailedAnalysis?.testCases?.results && 
