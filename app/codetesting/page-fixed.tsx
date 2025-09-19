@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import styles from './CodeTesting.module.css';
-import judge0Service from '@/lib/judge0-service';
 
 interface TestCase {
   input: string;
@@ -11,7 +10,41 @@ interface TestCase {
 
 interface ExecutionResult {
   success: boolean;
-  results: Array<{
+  isCorrect: boolean;
+  score: number; // 0-100
+  feedback: string;
+  detailedAnalysis: {
+    syntax: {
+      isValid: boolean;
+      issues: string[];
+    };
+    logic: {
+      isCorrect: boolean;
+      issues: string[];
+      suggestions: string[];
+    };
+    efficiency: {
+      timeComplexity: string;
+      spaceComplexity: string;
+      rating: number; // 1-5
+      improvements: string[];
+    };
+    testCases: {
+      passed: number;
+      total: number;
+      results: Array<{
+        input: string;
+        expectedOutput: string;
+        actualOutput: string;
+        passed: boolean;
+        explanation: string;
+      }>;
+    };
+  };
+  hints: string[];
+  learningPoints: string[];
+  // Keep legacy fields for backward compatibility
+  results?: Array<{
     testCase: number;
     passed: boolean;
     input: string;
@@ -21,7 +54,7 @@ interface ExecutionResult {
     executionTime?: string;
     memory?: number;
   }>;
-  overallStatus: string;
+  overallStatus?: string;
   error?: string;
 }
 
@@ -205,12 +238,29 @@ int main() {
     setShowResults(false);
 
     try {
-      // Use the judge0Service directly
-      const result = await judge0Service.executeWithTestCases(
-        code,
-        selectedLanguage,
-        TEST_CASES
-      );
+      // Use AI code checking instead of Judge0
+      const response = await fetch('/api/code/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language: selectedLanguage,
+          problemDescription: 'Two Sum Problem: Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.',
+          testCases: TEST_CASES
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'AI code checking failed');
+      }
 
       if (result.success) {
         setResults(result);
@@ -230,7 +280,7 @@ int main() {
     return passed ? '#000000' : '#666666';
   };
 
-  const allTestsPassed = results?.results && results.results.length > 0 && results.results.every(r => r.passed);
+  const allTestsPassed = results?.isCorrect || false;
 
   return (
     <div className={styles.container}>
@@ -340,43 +390,76 @@ int main() {
                     </div>
                   </div>
                 ) : (
-                  results.results.map((result, index) => (
-                    <div key={index} className={styles.resultItem}>
-                      <div className={styles.resultHeader}>
-                        <span className={styles.testNumber}>
-                          Test Case {result.testCase}
-                        </span>
-                        <span 
-                          className={styles.status}
-                          style={{ 
-                            color: getStatusColor(result.passed) 
-                          }}
-                        >
-                          {result.error ? 'ERROR' : result.passed ? 'PASSED' : 'FAILED'}
-                        </span>
-                      </div>
-                      
-                      <div className={styles.resultDetails}>
-                        <div><strong>Input:</strong> {result.input}</div>
-                        <div><strong>Expected:</strong> {result.expected}</div>
-                        <div><strong>Actual:</strong> {result.actual || 'No output'}</div>
-                        
-                        {result.executionTime && (
-                          <div><strong>Time:</strong> {result.executionTime}s</div>
-                        )}
-                        
-                        {result.memory && (
-                          <div><strong>Memory:</strong> {Math.round(result.memory / 1024)}KB</div>
-                        )}
-                        
-                        {result.error && (
-                          <div className={styles.error}>
-                            <strong>Error:</strong> {result.error}
-                          </div>
-                        )}
+                  <>
+                    {/* AI Analysis Summary */}
+                    <div className={styles.resultItem}>
+                      <div className={styles.aiSummary}>
+                        <h4>AI Analysis Summary</h4>
+                        <div><strong>Score:</strong> {results.score}/100</div>
+                        <div><strong>Status:</strong> {results.isCorrect ? 'Correct Solution' : 'Needs Improvement'}</div>
+                        <div><strong>Feedback:</strong> {results.feedback}</div>
                       </div>
                     </div>
-                  ))
+
+                    {/* Test Cases */}
+                    {results.detailedAnalysis?.testCases?.results && 
+                      results.detailedAnalysis.testCases.results.map((result, index) => (
+                        <div key={index} className={styles.resultItem}>
+                          <div className={styles.resultHeader}>
+                            <span className={styles.testNumber}>
+                              Test Case {index + 1}
+                            </span>
+                            <span 
+                              className={styles.status}
+                              style={{ 
+                                color: getStatusColor(result.passed) 
+                              }}
+                            >
+                              {result.passed ? 'PASSED' : 'FAILED'}
+                            </span>
+                          </div>
+                          
+                          <div className={styles.resultDetails}>
+                            <div><strong>Input:</strong> {result.input}</div>
+                            <div><strong>Expected:</strong> {result.expectedOutput}</div>
+                            <div><strong>Actual:</strong> {result.actualOutput || 'No output'}</div>
+                            
+                            {result.explanation && (
+                              <div><strong>Explanation:</strong> {result.explanation}</div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    }
+
+                    {/* Hints */}
+                    {results.hints && results.hints.length > 0 && (
+                      <div className={styles.resultItem}>
+                        <div className={styles.hintsSection}>
+                          <h4>Hints</h4>
+                          <ul>
+                            {results.hints.map((hint, index) => (
+                              <li key={index}>{hint}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Learning Points */}
+                    {results.learningPoints && results.learningPoints.length > 0 && (
+                      <div className={styles.resultItem}>
+                        <div className={styles.learningSection}>
+                          <h4>Learning Points</h4>
+                          <ul>
+                            {results.learningPoints.map((point, index) => (
+                              <li key={index}>{point}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

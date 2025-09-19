@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
-import judge0Service from '../../../../../../../lib/judge0-service';
 import styles from './CodeChallenge.module.css';
 
 interface TestCase {
@@ -68,7 +67,41 @@ interface ProblemData {
 
 interface ExecutionResult {
   success: boolean;
-  results: Array<{
+  isCorrect: boolean;
+  score: number; // 0-100
+  feedback: string;
+  detailedAnalysis: {
+    syntax: {
+      isValid: boolean;
+      issues: string[];
+    };
+    logic: {
+      isCorrect: boolean;
+      issues: string[];
+      suggestions: string[];
+    };
+    efficiency: {
+      timeComplexity: string;
+      spaceComplexity: string;
+      rating: number; // 1-5
+      improvements: string[];
+    };
+    testCases: {
+      passed: number;
+      total: number;
+      results: Array<{
+        input: string;
+        expectedOutput: string;
+        actualOutput: string;
+        passed: boolean;
+        explanation: string;
+      }>;
+    };
+  };
+  hints: string[];
+  learningPoints: string[];
+  // Keep legacy fields for backward compatibility
+  results?: Array<{
     testCase: number;
     passed: boolean;
     input: string;
@@ -78,7 +111,7 @@ interface ExecutionResult {
     executionTime?: string;
     memory?: number;
   }>;
-  overallStatus: string;
+  overallStatus?: string;
   error?: string;
 }
 
@@ -593,11 +626,29 @@ export default function CodeChallengePage() {
     setExecutionResult(null);
 
     try {
-      const result = await judge0Service.executeWithTestCases(
-        code,
-        selectedLanguage,
-        problem.testCases
-      );
+      // Use AI code checking instead of Judge0 execution
+      const response = await fetch('/api/code/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language: selectedLanguage,
+          problemDescription: problem.description,
+          testCases: problem.testCases
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'AI code checking failed');
+      }
 
       setExecutionResult(result);
       
@@ -624,8 +675,17 @@ export default function CodeChallengePage() {
       console.error('Error running code:', error);
       setExecutionResult({
         success: false,
-        results: [],
-        overallStatus: 'Error',
+        isCorrect: false,
+        score: 0,
+        feedback: 'Failed to execute code. Please try again.',
+        detailedAnalysis: {
+          syntax: { isValid: false, issues: [] },
+          logic: { isCorrect: false, issues: [], suggestions: [] },
+          efficiency: { timeComplexity: '', spaceComplexity: '', rating: 0, improvements: [] },
+          testCases: { passed: 0, total: 0, results: [] }
+        },
+        hints: [],
+        learningPoints: [],
         error: 'Failed to execute code. Please try again.'
       });
     } finally {
@@ -1104,73 +1164,164 @@ export default function CodeChallengePage() {
             />
           </div>
 
-          {/* Results Panel */}
+          {/* AI Analysis Results Panel */}
           {executionResult && (
             <div className={styles.resultsPanel}>
               <div className={styles.resultsHeader}>
-                <h3>Test Results</h3>
-                <div className={`${styles.overallStatus} ${executionResult.success ? styles.statusSuccess : styles.statusError}`}>
-                  {executionResult.success ? (
+                <h3>AI Code Analysis</h3>
+                <div className={`${styles.overallStatus} ${executionResult.isCorrect ? styles.statusSuccess : styles.statusError}`}>
+                  {executionResult.isCorrect ? (
                     <CheckCircle2 size={16} />
                   ) : (
                     <XCircle size={16} />
                   )}
-                  {executionResult.overallStatus}
+                  Score: {executionResult.score}/100 {executionResult.isCorrect ? '- Correct!' : '- Needs Improvement'}
                 </div>
               </div>
-              
-              <div className={styles.testCases}>
-                {executionResult.results.map((result, index) => (
-                  <div 
-                    key={index} 
-                    className={`${styles.testCase} ${result.passed ? styles.testCasePassed : styles.testCaseFailed}`}
-                  >
-                    <div className={styles.testCaseHeader}>
-                      <span>Test Case #{result.testCase}</span>
-                      {result.passed ? (
-                        <CheckCircle2 size={14} className={styles.testCaseIcon} />
-                      ) : (
-                        <XCircle size={14} className={styles.testCaseIcon} />
-                      )}
-                    </div>
-                    
-                    {result.error ? (
-                      <div className={styles.testCaseError}>
-                        <strong>Error:</strong>
-                        <pre>{result.error}</pre>
-                      </div>
-                    ) : (
-                      <>
+
+              {/* Main Feedback */}
+              <div className={styles.feedbackSection}>
+                <h4>Overall Feedback</h4>
+                <p>{executionResult.feedback}</p>
+              </div>
+
+              {/* Test Cases Results */}
+              {executionResult.detailedAnalysis?.testCases && (
+                <div className={styles.testCasesSection}>
+                  <h4>Test Cases ({executionResult.detailedAnalysis.testCases.passed}/{executionResult.detailedAnalysis.testCases.total} Passed)</h4>
+                  <div className={styles.testCases}>
+                    {executionResult.detailedAnalysis.testCases.results.map((result, index) => (
+                      <div 
+                        key={index} 
+                        className={`${styles.testCase} ${result.passed ? styles.testCasePassed : styles.testCaseFailed}`}
+                      >
+                        <div className={styles.testCaseHeader}>
+                          <span>Test Case #{index + 1}</span>
+                          {result.passed ? (
+                            <CheckCircle2 size={14} className={styles.testCaseIcon} />
+                          ) : (
+                            <XCircle size={14} className={styles.testCaseIcon} />
+                          )}
+                        </div>
+                        
                         <div className={styles.testCaseInput}>
                           <strong>Input:</strong>
                           <pre>{result.input || 'No input'}</pre>
                         </div>
                         <div className={styles.testCaseExpected}>
                           <strong>Expected:</strong>
-                          <pre>{result.expected}</pre>
+                          <pre>{result.expectedOutput}</pre>
                         </div>
                         <div className={styles.testCaseActual}>
                           <strong>Your Output:</strong>
-                          <pre>{result.actual}</pre>
+                          <pre>{result.actualOutput}</pre>
                         </div>
-                      </>
-                    )}
-                    
-                    {result.executionTime && (
-                      <div className={styles.testCaseStats}>
-                        <Clock size={12} />
-                        {result.executionTime}
-                        {result.memory && (
-                          <>
-                            <Target size={12} />
-                            {result.memory} KB
-                          </>
+                        
+                        {result.explanation && (
+                          <div className={styles.testCaseExplanation}>
+                            <strong>Explanation:</strong>
+                            <p>{result.explanation}</p>
+                          </div>
                         )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {/* Syntax Analysis */}
+              {executionResult.detailedAnalysis?.syntax && !executionResult.detailedAnalysis.syntax.isValid && (
+                <div className={styles.analysisSection}>
+                  <h4><AlertTriangle size={16} /> Syntax Issues</h4>
+                  <ul className={styles.issuesList}>
+                    {executionResult.detailedAnalysis.syntax.issues.map((issue, index) => (
+                      <li key={index} className={styles.syntaxIssue}>{issue}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Logic Analysis */}
+              {executionResult.detailedAnalysis?.logic && (
+                <div className={styles.analysisSection}>
+                  <h4><Lightbulb size={16} /> Logic Analysis</h4>
+                  
+                  {executionResult.detailedAnalysis.logic.issues.length > 0 && (
+                    <div className={styles.subSection}>
+                      <strong>Issues Found:</strong>
+                      <ul className={styles.issuesList}>
+                        {executionResult.detailedAnalysis.logic.issues.map((issue, index) => (
+                          <li key={index} className={styles.logicIssue}>{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {executionResult.detailedAnalysis.logic.suggestions.length > 0 && (
+                    <div className={styles.subSection}>
+                      <strong>Suggestions:</strong>
+                      <ul className={styles.suggestionsList}>
+                        {executionResult.detailedAnalysis.logic.suggestions.map((suggestion, index) => (
+                          <li key={index} className={styles.suggestion}>{suggestion}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Efficiency Analysis */}
+              {executionResult.detailedAnalysis?.efficiency && (
+                <div className={styles.analysisSection}>
+                  <h4><Zap size={16} /> Efficiency Analysis</h4>
+                  <div className={styles.efficiencyGrid}>
+                    <div className={styles.efficiencyItem}>
+                      <strong>Time Complexity:</strong> {executionResult.detailedAnalysis.efficiency.timeComplexity}
+                    </div>
+                    <div className={styles.efficiencyItem}>
+                      <strong>Space Complexity:</strong> {executionResult.detailedAnalysis.efficiency.spaceComplexity}
+                    </div>
+                    <div className={styles.efficiencyItem}>
+                      <strong>Rating:</strong> {executionResult.detailedAnalysis.efficiency.rating}/5
+                    </div>
+                  </div>
+                  
+                  {executionResult.detailedAnalysis.efficiency.improvements.length > 0 && (
+                    <div className={styles.subSection}>
+                      <strong>Optimization Suggestions:</strong>
+                      <ul className={styles.improvementsList}>
+                        {executionResult.detailedAnalysis.efficiency.improvements.map((improvement, index) => (
+                          <li key={index} className={styles.improvement}>{improvement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Hints */}
+              {executionResult.hints && executionResult.hints.length > 0 && (
+                <div className={styles.analysisSection}>
+                  <h4><Info size={16} /> Hints</h4>
+                  <ul className={styles.hintsList}>
+                    {executionResult.hints.map((hint, index) => (
+                      <li key={index} className={styles.hint}>{hint}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Learning Points */}
+              {executionResult.learningPoints && executionResult.learningPoints.length > 0 && (
+                <div className={styles.analysisSection}>
+                  <h4><FileText size={16} /> Learning Points</h4>
+                  <ul className={styles.learningPointsList}>
+                    {executionResult.learningPoints.map((point, index) => (
+                      <li key={index} className={styles.learningPoint}>{point}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>

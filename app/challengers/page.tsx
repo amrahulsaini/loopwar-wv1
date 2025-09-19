@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './challengers.module.css';
-import judge0Service from '@/lib/judge0-service';
 import { ADDITIONAL_PROBLEMS, PROBLEM_LANGUAGES } from './problemsData';
 
 interface TestCase {
@@ -13,7 +12,41 @@ interface TestCase {
 
 interface ExecutionResult {
   success: boolean;
-  results: Array<{
+  isCorrect: boolean;
+  score: number; // 0-100
+  feedback: string;
+  detailedAnalysis: {
+    syntax: {
+      isValid: boolean;
+      issues: string[];
+    };
+    logic: {
+      isCorrect: boolean;
+      issues: string[];
+      suggestions: string[];
+    };
+    efficiency: {
+      timeComplexity: string;
+      spaceComplexity: string;
+      rating: number; // 1-5
+      improvements: string[];
+    };
+    testCases: {
+      passed: number;
+      total: number;
+      results: Array<{
+        input: string;
+        expectedOutput: string;
+        actualOutput: string;
+        passed: boolean;
+        explanation: string;
+      }>;
+    };
+  };
+  hints: string[];
+  learningPoints: string[];
+  // Keep legacy fields for backward compatibility
+  results?: Array<{
     testCase: number;
     passed: boolean;
     input: string;
@@ -23,7 +56,7 @@ interface ExecutionResult {
     executionTime?: string;
     memory?: number;
   }>;
-  overallStatus: string;
+  overallStatus?: string;
   error?: string;
 }
 
@@ -165,11 +198,29 @@ const ChallengersPage: React.FC = () => {
 
     try {
       const problem = PROBLEMS[selectedProblem];
-      const result = await judge0Service.executeWithTestCases(
-        code,
-        selectedLanguage,
-        problem.testCases
-      );
+      // Use AI code checking instead of Judge0
+      const response = await fetch('/api/code/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language: selectedLanguage,
+          problemDescription: problem.description,
+          testCases: problem.testCases
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'AI code checking failed');
+      }
       
       setResults(result);
       setShowResults(true);
@@ -177,8 +228,17 @@ const ChallengersPage: React.FC = () => {
       console.error('Error running code:', error);
       setResults({
         success: false,
-        results: [],
-        overallStatus: 'Error',
+        isCorrect: false,
+        score: 0,
+        feedback: error instanceof Error ? error.message : 'Unknown error occurred',
+        detailedAnalysis: {
+          syntax: { isValid: false, issues: [] },
+          logic: { isCorrect: false, issues: [], suggestions: [] },
+          efficiency: { timeComplexity: '', spaceComplexity: '', rating: 0, improvements: [] },
+          testCases: { passed: 0, total: 0, results: [] }
+        },
+        hints: [],
+        learningPoints: [],
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       });
       setShowResults(true);
@@ -382,46 +442,95 @@ const ChallengersPage: React.FC = () => {
                 </div>
               ) : (
                 <div className={styles.testResults}>
-                  {results.results.map((result, index) => (
-                    <div key={index} className={`${styles.testCase} ${result.passed ? styles.passed : styles.failed}`}>
-                      <div className={styles.testCaseHeader}>
-                        <span className={styles.testNumber}>Test Case {result.testCase}</span>
-                        <span className={`${styles.status} ${result.passed ? styles.passed : styles.failed}`}>
-                          {result.passed ? '✅ Passed' : '❌ Failed'}
-                        </span>
-                      </div>
-                      
-                      <div className={styles.testDetails}>
-                        <div className={styles.testDetail}>
-                          <strong>Input:</strong> <code>{result.input}</code>
-                        </div>
-                        <div className={styles.testDetail}>
-                          <strong>Expected:</strong> <code>{result.expected}</code>
-                        </div>
-                        <div className={styles.testDetail}>
-                          <strong>Actual:</strong> <code>{result.actual}</code>
-                        </div>
-                        
-                        {result.executionTime && (
-                          <div className={styles.testDetail}>
-                            <strong>Time:</strong> {result.executionTime}
-                          </div>
-                        )}
-                        
-                        {result.memory && (
-                          <div className={styles.testDetail}>
-                            <strong>Memory:</strong> {result.memory} KB
-                          </div>
-                        )}
-
-                        {result.error && (
-                          <div className={styles.testDetail}>
-                            <strong>Error:</strong> <code className={styles.errorText}>{result.error}</code>
-                          </div>
-                        )}
-                      </div>
+                  {/* AI Analysis Summary */}
+                  <div className={styles.aiSummary}>
+                    <h3>AI Analysis Summary</h3>
+                    <div className={styles.summaryGrid}>
+                      <div><strong>Score:</strong> {results.score}/100</div>
+                      <div><strong>Status:</strong> {results.isCorrect ? 'Correct Solution' : 'Needs Improvement'}</div>
                     </div>
-                  ))}
+                    <div className={styles.feedback}>
+                      <strong>Feedback:</strong> {results.feedback}
+                    </div>
+                  </div>
+
+                  {/* Test Cases */}
+                  {results.detailedAnalysis?.testCases?.results && 
+                    results.detailedAnalysis.testCases.results.map((result, index) => (
+                      <div key={index} className={`${styles.testCase} ${result.passed ? styles.passed : styles.failed}`}>
+                        <div className={styles.testCaseHeader}>
+                          <span className={styles.testNumber}>Test Case {index + 1}</span>
+                          <span className={`${styles.status} ${result.passed ? styles.passed : styles.failed}`}>
+                            {result.passed ? '✅ Passed' : '❌ Failed'}
+                          </span>
+                        </div>
+                        
+                        <div className={styles.testDetails}>
+                          <div className={styles.testDetail}>
+                            <strong>Input:</strong> <code>{result.input}</code>
+                          </div>
+                          <div className={styles.testDetail}>
+                            <strong>Expected:</strong> <code>{result.expectedOutput}</code>
+                          </div>
+                          <div className={styles.testDetail}>
+                            <strong>Actual:</strong> <code>{result.actualOutput}</code>
+                          </div>
+                          
+                          {result.explanation && (
+                            <div className={styles.testDetail}>
+                              <strong>Explanation:</strong> {result.explanation}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  }
+
+                  {/* Hints */}
+                  {results.hints && results.hints.length > 0 && (
+                    <div className={styles.hintsSection}>
+                      <h4>💡 Hints</h4>
+                      <ul>
+                        {results.hints.map((hint, index) => (
+                          <li key={index}>{hint}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Learning Points */}
+                  {results.learningPoints && results.learningPoints.length > 0 && (
+                    <div className={styles.learningSection}>
+                      <h4>📚 Learning Points</h4>
+                      <ul>
+                        {results.learningPoints.map((point, index) => (
+                          <li key={index}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Efficiency Analysis */}
+                  {results.detailedAnalysis?.efficiency && (
+                    <div className={styles.efficiencySection}>
+                      <h4>⚡ Efficiency Analysis</h4>
+                      <div className={styles.efficiencyGrid}>
+                        <div><strong>Time Complexity:</strong> {results.detailedAnalysis.efficiency.timeComplexity}</div>
+                        <div><strong>Space Complexity:</strong> {results.detailedAnalysis.efficiency.spaceComplexity}</div>
+                        <div><strong>Rating:</strong> {results.detailedAnalysis.efficiency.rating}/5</div>
+                      </div>
+                      {results.detailedAnalysis.efficiency.improvements.length > 0 && (
+                        <div>
+                          <strong>Optimization Suggestions:</strong>
+                          <ul>
+                            {results.detailedAnalysis.efficiency.improvements.map((improvement, index) => (
+                              <li key={index}>{improvement}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
