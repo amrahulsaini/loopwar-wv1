@@ -416,10 +416,6 @@
   padding: 2rem;
 }
 
-.contextSection .sectionTitle::before {
-  content: "🎯";
-}
-
 .contextGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -468,10 +464,6 @@
   border: 1px solid #22c55e;
   border-radius: 16px;
   padding: 2rem;
-}
-
-.quickRefSection .sectionTitle::before {
-  content: "⚡";
 }
 
 .complexityGrid {

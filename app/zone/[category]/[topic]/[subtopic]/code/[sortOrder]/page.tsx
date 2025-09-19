@@ -520,7 +520,36 @@ export default function CodeChallengePage() {
 
           if (generateResponse.ok) {
             const generatedProblem = await generateResponse.json();
+            console.log('Generated problem received:', {
+              id: generatedProblem.id,
+              title: generatedProblem.title,
+              testCasesCount: generatedProblem.testCases?.length || 0,
+              testCases: generatedProblem.testCases
+            });
             setProblem(generatedProblem);
+            
+            // Small delay to ensure database consistency, then refetch to verify
+            setTimeout(async () => {
+              try {
+                const verifyResponse = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`, {
+                  cache: 'no-cache'
+                });
+                if (verifyResponse.ok) {
+                  const verifiedProblem = await verifyResponse.json();
+                  console.log('Verified problem after generation:', {
+                    id: verifiedProblem.id,
+                    title: verifiedProblem.title,
+                    testCasesCount: verifiedProblem.testCases?.length || 0,
+                    hasTestCases: !verifiedProblem.needs_generation
+                  });
+                  if (!verifiedProblem.needs_generation && verifiedProblem.testCases) {
+                    setProblem(verifiedProblem);
+                  }
+                }
+              } catch (error) {
+                console.log('Verification fetch failed, using generated problem');
+              }
+            }, 1000);
           } else {
             // Use the base problem data with minimal enhancements
             setProblem({
@@ -710,13 +739,29 @@ export default function CodeChallengePage() {
     setExecutionResult(null);
   };
 
-  // Initialize code template when component mounts or language changes (only if code is empty)
+  // Initialize code template when component mounts or language changes
   useEffect(() => {
     if (!code || code.trim() === '') {
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
   }, [selectedLanguage, problem]); // Removed getCodeTemplate to prevent infinite re-renders
+
+  // Handle language switching for Monaco Editor
+  useEffect(() => {
+    // Check if current code matches any default template
+    const allTemplates = Object.values(languageBoilerplates);
+    const currentTemplate = getCodeTemplate(selectedLanguage);
+    
+    // If current code is a template or empty, update to new language template
+    const isCurrentlyTemplate = allTemplates.some(template => 
+      code.trim() === template.trim()
+    ) || code.trim() === '' || code.trim() === '// Start coding here...';
+    
+    if (isCurrentlyTemplate) {
+      setCode(currentTemplate);
+    }
+  }, [selectedLanguage]); // Only trigger on language change
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
