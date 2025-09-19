@@ -619,10 +619,13 @@ export default function CodeChallengePage() {
     };
   }, [checkUserSession, fetchOrGenerateProblem, handleError]);
 
-  // Update code when language changes
+  // Initialize code template when component mounts or language changes (only if code is empty)
   useEffect(() => {
-    setCode(getCodeTemplate(selectedLanguage));
-  }, [selectedLanguage, problem, getCodeTemplate]); // Added getCodeTemplate to dependencies
+    if (!code || code.trim() === '') {
+      const template = getCodeTemplate(selectedLanguage);
+      setCode(template);
+    }
+  }, [selectedLanguage, problem]); // Removed getCodeTemplate to prevent infinite re-renders
 
   // Handle code execution
   const runCode = async () => {
@@ -708,30 +711,13 @@ export default function CodeChallengePage() {
     setExecutionResult(null);
   };
 
-  // Initialize code template when component mounts or language changes
+  // Initialize code template when component mounts or language changes (only if code is empty)
   useEffect(() => {
     if (!code || code.trim() === '') {
       const template = getCodeTemplate(selectedLanguage);
-      console.log('Initializing code template:', template);
       setCode(template);
     }
-  }, [selectedLanguage, problem, getCodeTemplate]);
-
-  // Update code when language changes (if user wants to switch)
-  useEffect(() => {
-    // Only update if we have some code and user explicitly changed language
-    if (code && code.trim() !== '') {
-      const currentTemplate = getCodeTemplate(selectedLanguage);
-      // Check if current code is still the default template
-      const allTemplates = Object.values(languageBoilerplates);
-      const isDefaultTemplate = allTemplates.some(template => code.trim() === template.trim());
-      
-      if (isDefaultTemplate) {
-        console.log('Language changed, updating template to:', selectedLanguage);
-        setCode(currentTemplate);
-      }
-    }
-  }, [selectedLanguage]);
+  }, [selectedLanguage, problem]); // Removed getCodeTemplate to prevent infinite re-renders
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
