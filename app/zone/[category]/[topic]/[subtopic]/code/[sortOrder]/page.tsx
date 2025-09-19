@@ -480,19 +480,36 @@ export default function CodeChallengePage() {
   // Fetch or generate problem data
   const fetchOrGenerateProblem = useCallback(async () => {
     try {
-      // First, try to fetch existing code problem
+      // First, try to fetch existing code problem with aggressive cache busting
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`, {
+      const timestamp = Date.now();
+      console.log('=== FETCHING PROBLEM DATA ===');
+      console.log('URL params:', { category, topic, subtopic, sortOrder });
+      
+      const response = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}&cache=${timestamp}`, {
         signal: controller.signal,
-        cache: 'no-cache'
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
       });
       
       clearTimeout(timeoutId);
       
       if (response.ok) {
         const problemData = await response.json();
+        console.log('=== RECEIVED PROBLEM DATA ===');
+        console.log('Problem ID:', problemData.id);
+        console.log('Title:', problemData.title);
+        console.log('Test Cases Count:', problemData.testCases?.length || 0);
+        console.log('Test Cases:', problemData.testCases);
+        console.log('Needs Generation:', problemData.needs_generation);
+        console.log('Function Templates Keys:', problemData.function_templates ? Object.keys(problemData.function_templates) : 'None');
+        console.log('=== END RECEIVED DATA ===');
         
         // Check if this is a base problem that needs AI generation
         if (problemData.needs_generation) {
@@ -528,11 +545,18 @@ export default function CodeChallengePage() {
             });
             setProblem(generatedProblem);
             
-            // Small delay to ensure database consistency, then refetch to verify
+            // Force a complete refetch after generation to ensure persistence
             setTimeout(async () => {
               try {
-                const verifyResponse = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}`, {
-                  cache: 'no-cache'
+                console.log('Force refetching problem after generation...');
+                const timestamp = Date.now();
+                const verifyResponse = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}&t=${timestamp}`, {
+                  cache: 'no-store',
+                  headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                  }
                 });
                 if (verifyResponse.ok) {
                   const verifiedProblem = await verifyResponse.json();
@@ -540,16 +564,18 @@ export default function CodeChallengePage() {
                     id: verifiedProblem.id,
                     title: verifiedProblem.title,
                     testCasesCount: verifiedProblem.testCases?.length || 0,
-                    hasTestCases: !verifiedProblem.needs_generation
+                    hasTestCases: !verifiedProblem.needs_generation,
+                    needsGeneration: verifiedProblem.needs_generation
                   });
-                  if (!verifiedProblem.needs_generation && verifiedProblem.testCases) {
-                    setProblem(verifiedProblem);
-                  }
+                  // Always update with the verified problem from database
+                  setProblem(verifiedProblem);
+                } else {
+                  console.error('Verification fetch failed with status:', verifyResponse.status);
                 }
               } catch (error) {
-                console.log('Verification fetch failed, using generated problem');
+                console.error('Verification fetch failed:', error);
               }
-            }, 1000);
+            }, 2000); // Increased delay to 2 seconds
           } else {
             // Use the base problem data with minimal enhancements
             setProblem({
