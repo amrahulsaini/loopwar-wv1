@@ -23,7 +23,13 @@ import {
   TestTube,
   FileCode,
   Eye,
-  List
+  List,
+  GripVertical,
+  RefreshCw,
+  Bot,
+  Database,
+  Shield,
+  Loader
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -259,6 +265,11 @@ export default function CodeChallengePage() {
   const [generatingProblemTitle, setGeneratingProblemTitle] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [hasError, setHasError] = useState(false);
+  
+  // Resizable panel state
+  const [leftWidth, setLeftWidth] = useState(30); // Problem section %
+  const [rightWidth, setRightWidth] = useState(35); // AI section %
+  const middleWidth = 100 - leftWidth - rightWidth; // Code section %
 
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -697,6 +708,49 @@ export default function CodeChallengePage() {
   const resetCode = () => {
     setCode(getCodeTemplate(selectedLanguage));
     setExecutionResult(null);
+  };
+
+  // Resize handlers for panels
+  const handleLeftResize = (e: React.MouseEvent) => {
+    const startX = e.clientX;
+    const startLeftWidth = leftWidth;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const containerWidth = window.innerWidth;
+      const deltaPercent = (deltaX / containerWidth) * 100;
+      const newLeftWidth = Math.max(20, Math.min(50, startLeftWidth + deltaPercent));
+      setLeftWidth(newLeftWidth);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleRightResize = (e: React.MouseEvent) => {
+    const startX = e.clientX;
+    const startRightWidth = rightWidth;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = startX - e.clientX; // Reversed for right panel
+      const containerWidth = window.innerWidth;
+      const deltaPercent = (deltaX / containerWidth) * 100;
+      const newRightWidth = Math.max(20, Math.min(50, startRightWidth + deltaPercent));
+      setRightWidth(newRightWidth);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // Get difficulty color
