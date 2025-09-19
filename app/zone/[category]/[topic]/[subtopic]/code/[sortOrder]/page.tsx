@@ -1404,50 +1404,6 @@ export default function CodeChallengePage() {
                 <p>{executionResult.feedback}</p>
               </div>
 
-              {/* Test Cases Results */}
-              {executionResult.detailedAnalysis?.testCases && (
-                <div className={styles.testCasesSection}>
-                  <h4>Test Cases ({executionResult.detailedAnalysis.testCases.passed}/{executionResult.detailedAnalysis.testCases.total} Passed)</h4>
-                  <div className={styles.testCases}>
-                    {executionResult.detailedAnalysis.testCases.results.map((result, index) => (
-                      <div 
-                        key={index} 
-                        className={`${styles.testCase} ${result.passed ? styles.testCasePassed : styles.testCaseFailed}`}
-                      >
-                        <div className={styles.testCaseHeader}>
-                          <span>Test Case #{index + 1}</span>
-                          {result.passed ? (
-                            <CheckCircle2 size={14} className={styles.testCaseIcon} />
-                          ) : (
-                            <XCircle size={14} className={styles.testCaseIcon} />
-                          )}
-                        </div>
-                        
-                        <div className={styles.testCaseInput}>
-                          <strong>Input:</strong>
-                          <pre>{result.input || 'No input'}</pre>
-                        </div>
-                        <div className={styles.testCaseExpected}>
-                          <strong>Expected:</strong>
-                          <pre>{result.expectedOutput}</pre>
-                        </div>
-                        <div className={styles.testCaseActual}>
-                          <strong>Your Output:</strong>
-                          <pre>{result.actualOutput}</pre>
-                        </div>
-                        
-                        {result.explanation && (
-                          <div className={styles.testCaseExplanation}>
-                            <strong>Explanation:</strong>
-                            <p>{result.explanation}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Syntax Analysis */}
               {executionResult.detailedAnalysis?.syntax && !executionResult.detailedAnalysis.syntax.isValid && (
                 <div className={styles.analysisSection}>
