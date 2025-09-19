@@ -1223,8 +1223,18 @@ export default function CodeChallengePage() {
             </div>
           </div>
 
-          {/* Code Editor */}
+          {/* Code Editor with Line Numbers */}
           <div className={styles.codeEditor}>
+            {/* Line Numbers */}
+            <div className={styles.lineNumbers}>
+              {code.split('\n').map((_, index) => (
+                <div key={index + 1}>
+                  {index + 1}
+                </div>
+              ))}
+            </div>
+            
+            {/* Code Textarea */}
             <textarea
               ref={codeTextareaRef}
               value={code}
@@ -1232,6 +1242,14 @@ export default function CodeChallengePage() {
               className={styles.codeTextarea}
               placeholder="Write your solution here..."
               spellCheck={false}
+              onScroll={(e) => {
+                // Sync line numbers scroll with textarea scroll
+                const target = e.target as HTMLTextAreaElement;
+                const lineNumbers = target.parentElement?.querySelector(`.${styles.lineNumbers}`) as HTMLElement;
+                if (lineNumbers) {
+                  lineNumbers.scrollTop = target.scrollTop;
+                }
+              }}
             />
           </div>
         </div>
