@@ -917,19 +917,22 @@ export default function CodeChallengePage() {
 
   // Handle language switching for Monaco Editor
   useEffect(() => {
-    // Check if current code matches any default template
-    const allTemplates = Object.values(languageBoilerplates);
+    // Get all possible templates (boilerplates + function templates)
+    const allBoilerplates = Object.values(languageBoilerplates);
+    const allFunctionTemplates = problem?.functionTemplates ? Object.values(problem.functionTemplates) : [];
+    const allTemplates = [...allBoilerplates, ...allFunctionTemplates];
+    
     const currentTemplate = getCodeTemplate(selectedLanguage);
     
-    // If current code is a template or empty, update to new language template
+    // If current code is a template, empty, or default placeholder, update to new language template
     const isCurrentlyTemplate = allTemplates.some(template => 
       code.trim() === template.trim()
-    ) || code.trim() === '' || code.trim() === '// Start coding here...';
+    ) || code.trim() === '' || code.trim() === '// Start coding here...' || code.trim() === getCodeTemplate('javascript').trim();
     
     if (isCurrentlyTemplate) {
       setCode(currentTemplate);
     }
-  }, [selectedLanguage, code, getCodeTemplate]); // Added missing dependencies
+  }, [selectedLanguage, code, getCodeTemplate, problem?.functionTemplates]);
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {

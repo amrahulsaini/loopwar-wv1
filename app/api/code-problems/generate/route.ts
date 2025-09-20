@@ -275,38 +275,28 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Enhanced JSON cleaning function
+        // Simplified JSON cleaning function
         function cleanJsonString(jsonStr: string): string {
+          console.log('Raw AI text (first 500 chars):', jsonStr.substring(0, 500));
+          
           // Remove code block markers
           let cleaned = jsonStr
             .replace(/```json\s*/g, '')
             .replace(/```\s*$/g, '')
             .trim();
           
-          // Replace problematic characters and sequences
+          // Find the actual JSON boundaries
+          const jsonStart = cleaned.indexOf('{');
+          const jsonEnd = cleaned.lastIndexOf('}');
+          
+          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+          }
+          
+          // Only essential cleaning
           cleaned = cleaned
-            // Remove all control characters
-            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
-            // Remove unicode control chars
-            .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
-            // Remove format class artifacts that might appear in JSON values
-            .replace(/"format-[^"]*">/g, '')
-            .replace(/format-[a-zA-Z]*">/g, '')
-            .replace(/class="format-[^"]*"/g, '')
-            .replace(/"format-[^"]*"/g, '')
-            .replace(/format-\w+/g, '')
-            // Remove HTML-like tags from JSON content
-            .replace(/<[^>]*>/g, '')
-            // Convert actual newlines/tabs to escaped versions
-            .replace(/\r\n/g, '\\n')
-            .replace(/\r/g, '\\n')   
-            .replace(/\n/g, '\\n')   
-            .replace(/\t/g, '\\t')   
             // Remove any trailing commas before closing braces/brackets
-            .replace(/,(\s*[}\]])/g, '$1')
-            // Remove any extra whitespace
-            .replace(/\s+/g, ' ')
-            .trim();
+            .replace(/,(\s*[}\]])/g, '$1');
           
           return cleaned;
         }
@@ -319,23 +309,8 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
           console.log('AI generation successful');
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
-          console.error('Problematic JSON (first 1000 chars):', cleanedText.substring(0, 1000));
-          
-          // Try one more aggressive cleaning attempt
-          try {
-            const superCleanedText = cleanedText
-              .replace(/\\n/g, ' ')  // Replace escaped newlines with spaces
-              .replace(/\\t/g, ' ')  // Replace escaped tabs with spaces
-              .replace(/\s+/g, ' ')  // Collapse multiple spaces
-              .trim();
-            
-            console.log('Attempting super-cleaned version...');
-            generatedProblem = JSON.parse(superCleanedText);
-            console.log('Super-cleaned parsing successful');
-          } catch (secondParseError) {
-            console.error('Second parse attempt also failed:', secondParseError);
-            throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
-          }
+          console.error('Problematic JSON:', cleanedText);
+          throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
         }
       } else {
         const errorText = await response.text();
