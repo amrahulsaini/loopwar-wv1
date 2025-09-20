@@ -208,62 +208,58 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-bottom: 3px solid #000000;
+  border-bottom: 2px solid #e0e0e0;
   padding-bottom: 0.75rem;
-}
-
-.inputOutputBox {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 1px solid #0ea5e9;
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin: 1rem 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
-}
-
-.inputOutputBox p {
-  margin: 0;
-  font-weight: 500;
-  color: #0c4a6e;
-  line-height: 1.6;
-}
-
-.hintBox {
-  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-  border: 1px solid #eab308;
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin: 1rem 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
-}
-
-.hintIcon {
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  color: #a16207;
-}
-
-.hintBox p {
-  margin: 0;
-  font-weight: 500;
-  color: #a16207;
-  line-height: 1.6;
-}
-
-.sectionTitle::before {
-  content: "📝";
-  font-size: 1.3rem;
 }
 
 .descriptionContent {
   line-height: 1.8;
   color: #2d3748;
+}
+
+.descriptionSection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.complexitySection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.complexityGrid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.complexityItem {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+}
+
+.complexityItem code {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #666;
 }
 
 .formattedParagraph {
@@ -299,34 +295,33 @@
 }
 
 .arrayCode {
-  background: #ebf8ff;
-  color: #2b6cb0;
+  background: #f8f9fa;
+  color: #495057;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.9rem;
-  border: 1px solid #bee3f8;
+  border: 1px solid #e0e0e0;
   font-weight: 600;
 }
 
 .functionCode {
-  background: #f0fff4;
-  color: #22543d;
+  background: #f8f9fa;
+  color: #495057;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.9rem;
-  border: 1px solid #9ae6b4;
+  border: 1px solid #e0e0e0;
   font-weight: 500;
 }
 
 .bulletList {
   margin: 1.5rem 0;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   padding: 1.5rem;
-  border-left: 4px solid #4299e1;
 }
 
 .bulletItem {
@@ -343,7 +338,7 @@
 }
 
 .bulletIcon {
-  color: #4299e1;
+  color: #666;
   flex-shrink: 0;
   margin-top: 0.2rem;
 }
@@ -360,111 +355,56 @@
 }
 
 .requirementBox {
-  background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
-  border: 1px solid #f59e0b;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #f59e0b;
+  border-radius: 6px;
   padding: 1.25rem;
   margin: 1.5rem 0;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
 }
 
 .requirementIcon {
   flex-shrink: 0;
   margin-top: 0.1rem;
-  color: #d97706;
+  color: #f59e0b;
 }
 
 .requirementBox p {
   margin: 0;
   font-weight: 500;
-  color: #92400e;
+  color: #1a1a1a;
   line-height: 1.6;
 }
 
 .exampleBox {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #3b82f6;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
   padding: 1.25rem;
   margin: 1.5rem 0;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .exampleIcon {
   flex-shrink: 0;
   margin-top: 0.1rem;
-  color: #1d4ed8;
+  color: #3b82f6;
 }
 
 .exampleBox p {
   margin: 0;
   font-weight: 500;
-  color: #1e40af;
+  color: #1a1a1a;
   line-height: 1.6;
 }
 
-.contextSection {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 2rem;
-}
-
-.contextGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.contextItem {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.contextItem:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.contextLabel {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.contextValue {
-  font-size: 1rem;
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.contextDifficulty {
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.quickRefSection {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 1px solid #22c55e;
-  border-radius: 16px;
-  padding: 2rem;
-}
+/* Remove old contextSection, contextGrid, etc. as they are no longer used */
 
 .complexityGrid {
   display: flex;
@@ -472,41 +412,7 @@
   flex-wrap: wrap;
 }
 
-.complexityItem {
-  background: #ffffff;
-  border: 1px solid #d1fae5;
-  border-radius: 12px;
-  padding: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 200px;
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
-}
-
-.complexityIcon {
-  flex-shrink: 0;
-  color: #15803d;
-}
-
-.complexityLabel {
-  font-size: 0.875rem;
-  color: #15803d;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.complexityValue {
-  background: #22c55e;
-  color: #ffffff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
+/* Removed old complexity styling that was too decorative */
 
 .loadingDescription {
   display: flex;
@@ -557,22 +463,26 @@
 
 .constraints {
   color: #333333;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
 }
 
 .constraints h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   color: #1a1a1a;
   font-weight: 600;
   font-size: 1.1rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 1px solid #e0e0e0;
   padding-bottom: 0.5rem;
 }
 
 .constraints p {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1.25rem;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
   margin: 1rem 0;
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
   font-size: 0.875rem;
@@ -582,9 +492,10 @@
 
 .complexity {
   margin: 1rem 0;
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #f59e0b;
+  border-radius: 6px;
   padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
@@ -592,7 +503,7 @@
 }
 
 .complexity strong {
-  color: #92400e;
+  color: #1a1a1a;
   font-weight: 600;
 }
 
@@ -2897,5 +2808,33 @@
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+  }
+
+  /* Responsive adjustments for smaller panels */
+  .descriptionSection,
+  .complexitySection {
+    padding: 1rem;
+  }
+
+  .complexityGrid {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .complexityItem {
+    min-width: auto;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+
+  .bulletList,
+  .requirementBox,
+  .exampleBox {
+    padding: 1rem;
+    margin: 1rem 0;
   }
 }

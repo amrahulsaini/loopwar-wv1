@@ -1052,71 +1052,19 @@ export default function CodeChallengePage() {
               <div className={styles.descriptionContainer}>
                 {problem && problem.description ? (
                   <div className={styles.problemDescription}>
-                    {(() => {
-                      const sections = parseDescription(problem.description);
-                      
-                      if (!sections || sections.length === 0) {
-                        // Fallback for simple descriptions
-                        return (
-                          <div className={styles.descriptionSection}>
-                            <h3 className={styles.sectionTitle}>
-                              <FileText size={20} />
-                              Problem Description
-                            </h3>
-                            <div className={styles.descriptionContent}>
-                              {formatContent(problem.description)}
-                            </div>
-                          </div>
-                        );
-                      }
-                      
-                      return sections.map((section, index) => (
-                        <div key={index} className={styles.descriptionSection}>
-                          <h3 className={styles.sectionTitle}>
-                            <section.icon size={20} />
-                            {section.title}
-                          </h3>
-                          <div className={styles.descriptionContent}>
-                            {formatContent(section.content)}
-                          </div>
-                        </div>
-                      ));
-                    })()}
-                    
-                    {/* Problem Context Section */}
-                    <div className={styles.contextSection}>
+                    <div className={styles.descriptionSection}>
                       <h3 className={styles.sectionTitle}>
-                        <Target size={20} />
-                        Problem Context
+                        <FileText size={20} />
+                        Description
                       </h3>
-                      <div className={styles.contextGrid}>
-                        <div className={styles.contextItem}>
-                          <span className={styles.contextLabel}>Category:</span>
-                          <span className={styles.contextValue}>{problem.category_name}</span>
-                        </div>
-                        <div className={styles.contextItem}>
-                          <span className={styles.contextLabel}>Topic:</span>
-                          <span className={styles.contextValue}>{problem.topic_name}</span>
-                        </div>
-                        <div className={styles.contextItem}>
-                          <span className={styles.contextLabel}>Subtopic:</span>
-                          <span className={styles.contextValue}>{problem.subtopic_name}</span>
-                        </div>
-                        <div className={styles.contextItem}>
-                          <span className={styles.contextLabel}>Difficulty:</span>
-                          <span 
-                            className={styles.contextDifficulty}
-                            style={{ color: getDifficultyColor(problem.difficulty) }}
-                          >
-                            {problem.difficulty}
-                          </span>
-                        </div>
+                      <div className={styles.descriptionContent}>
+                        {formatContent(problem.description)}
                       </div>
                     </div>
                     
-                    {/* Quick Reference Section */}
+                    {/* Expected Complexity */}
                     {(problem.timeComplexity || problem.spaceComplexity) && (
-                      <div className={styles.quickRefSection}>
+                      <div className={styles.complexitySection}>
                         <h3 className={styles.sectionTitle}>
                           <Zap size={20} />
                           Expected Complexity
@@ -1124,16 +1072,14 @@ export default function CodeChallengePage() {
                         <div className={styles.complexityGrid}>
                           {problem.timeComplexity && (
                             <div className={styles.complexityItem}>
-                              <Clock size={20} className={styles.complexityIcon} />
-                              <span className={styles.complexityLabel}>Time:</span>
-                              <code className={styles.complexityValue}>{problem.timeComplexity}</code>
+                              <Clock size={16} />
+                              <span>Time: <code>{problem.timeComplexity}</code></span>
                             </div>
                           )}
                           {problem.spaceComplexity && (
                             <div className={styles.complexityItem}>
-                              <Target size={20} className={styles.complexityIcon} />
-                              <span className={styles.complexityLabel}>Space:</span>
-                              <code className={styles.complexityValue}>{problem.spaceComplexity}</code>
+                              <Target size={16} />
+                              <span>Space: <code>{problem.spaceComplexity}</code></span>
                             </div>
                           )}
                         </div>
