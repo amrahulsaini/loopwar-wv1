@@ -390,30 +390,30 @@ export default function CodeChallengePage() {
     });
   };
 
-  // Enhanced inline text formatting - using simple CSS classes to avoid module conflicts
+  // Enhanced inline text formatting - simplified inline styles
   const formatInlineText = (text: string) => {
     return text
       // Bold text patterns - various formats
-      .replace(/\*\*([^*]+)\*\*/g, '<strong style="font-weight: 600; color: #1f2937;">$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<strong style="font-weight: 600; color: #1f2937;">$1</strong>')
-      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ' <strong style="font-weight: 600; color: #1f2937;">$1</strong>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong style="font-weight:600;color:#1f2937;">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<strong style="font-weight:600;color:#1f2937;">$1</strong>')
+      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ' <strong style="font-weight:600;color:#1f2937;">$1</strong>')
       
       // Important keywords and concepts
-      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, '<strong style="font-weight: 600; color: #059669; background-color: #d1fae5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em;">$1</strong>')
+      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, '<strong style="font-weight:600;color:#059669;background-color:#d1fae5;padding:2px 6px;border-radius:4px;font-size:0.9em;">$1</strong>')
       
       // Code snippets and technical terms
-      .replace(/`([^`]+)`/g, '<code style="background-color: #f3f4f6; color: #374151; padding: 2px 6px; border-radius: 4px; font-family: \'Monaco\', \'Menlo\', \'Ubuntu Mono\', monospace; font-size: 0.9em;">$1</code>')
-      .replace(/(\[[\d,\s-]+\])/g, '<code style="background-color: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-family: \'Monaco\', \'Menlo\', \'Ubuntu Mono\', monospace; font-size: 0.9em; font-weight: 500;">$1</code>')
-      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code style="background-color: #dbeafe; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; font-family: \'Monaco\', \'Menlo\', \'Ubuntu Mono\', monospace; font-size: 0.9em; font-weight: 500;">$1</code>')
+      .replace(/`([^`]+)`/g, '<code style="background-color:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-family:Monaco,Menlo,monospace;font-size:0.9em;">$1</code>')
+      .replace(/(\[[\d,\s-]+\])/g, '<code style="background-color:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-family:Monaco,Menlo,monospace;font-size:0.9em;font-weight:500;">$1</code>')
+      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code style="background-color:#dbeafe;color:#1d4ed8;padding:2px 6px;border-radius:4px;font-family:Monaco,Menlo,monospace;font-size:0.9em;font-weight:500;">$1</code>')
       
       // Numbers and values
-      .replace(/\b(\d+)\b/g, '<span style="color: #7c3aed; font-weight: 500;">$1</span>')
+      .replace(/\b(\d+)\b/g, '<span style="color:#7c3aed;font-weight:500;">$1</span>')
       
       // Quotes and strings
-      .replace(/"([^"]+)"/g, '<span style="color: #059669; font-style: italic;">"$1"</span>')
+      .replace(/"([^"]+)"/g, '<span style="color:#059669;font-style:italic;">"$1"</span>')
       
       // Mathematical expressions
-      .replace(/\b(O\([^)]+\))/g, '<code style="background-color: #fde68a; color: #92400e; padding: 2px 6px; border-radius: 4px; font-family: \'Monaco\', \'Menlo\', \'Ubuntu Mono\', monospace; font-size: 0.9em; font-weight: 600;">$1</code>');
+      .replace(/\b(O\([^)]+\))/g, '<code style="background-color:#fde68a;color:#92400e;padding:2px 6px;border-radius:4px;font-family:Monaco,Menlo,monospace;font-size:0.9em;font-weight:600;">$1</code>');
   };
 
   // Error boundary function
