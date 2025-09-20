@@ -284,8 +284,22 @@ export default function CodeChallengePage() {
   const formatContent = (content: string) => {
     if (!content) return null;
 
-    // First, let's clean and prepare the content
-    const cleanContent = content
+    // First, clean up any CSS class names that might have been generated as text
+    let cleanContent = content
+      // Remove CSS class references that appear as text
+      .replace(/"format-[^"]*">/g, '')
+      .replace(/format-[a-zA-Z]*">/g, '')
+      .replace(/class="format-[^"]*"/g, '')
+      .replace(/"format-[^"]*"/g, '')
+      .replace(/format-\w+/g, '')
+      // Remove any span or other tags with format classes
+      .replace(/<[^>]*format-[^>]*>/g, '')
+      .replace(/<\/[^>]*>/g, '')
+      // Remove any escaped HTML that might appear
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      // Remove unicode emojis
       .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
       .trim();
 
@@ -341,7 +355,7 @@ export default function CodeChallengePage() {
         case 'header':
           return (
             <h4 key={index} className={styles.contentHeader}>
-              {formatInlineText(section.text)}
+              <span dangerouslySetInnerHTML={{ __html: formatInlineText(section.text) }} />
             </h4>
           );
           

@@ -78,8 +78,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if code problem already exists (only for non-regeneration requests)
+    // Check if code problem already exists and find next available sort order
+    let finalSortOrder = sortOrder;
     if (!isRegeneration) {
+      // For new problems, find the next available sort order
+      const existingProblems = await Database.query(
+        `SELECT sort_order FROM code_problems 
+         WHERE category = ? AND topic = ? AND subtopic = ? 
+         ORDER BY sort_order DESC`,
+        [category, topic, subtopic]
+      ) as Array<{ sort_order: number }>;
+
+      if (existingProblems && existingProblems.length > 0) {
+        // Find the highest sort order and increment
+        const maxSortOrder = Math.max(...existingProblems.map(p => p.sort_order));
+        finalSortOrder = maxSortOrder + 1;
+        console.log(`Found existing problems, using next sort order: ${finalSortOrder}`);
+      }
+    } else {
+      // For regeneration, check if the specific problem exists
       const existingProblem = await Database.query(
         `SELECT id FROM code_problems 
          WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
@@ -87,15 +104,12 @@ export async function POST(request: NextRequest) {
       ) as CodeProblemExistsRow[];
 
       if (existingProblem && existingProblem.length > 0) {
-        return NextResponse.json(
-          { error: 'Code problem already exists for this location' },
-          { status: 409 }
-        );
+        console.log(`Regenerating existing problem at sort order: ${sortOrder}`);
       }
     }
 
     // Use base problem data or create default
-    let problemTitle = baseProblem?.title || `${subtopic.replace(/-/g, ' ')} Challenge #${sortOrder}`;
+    let problemTitle = baseProblem?.title || `${subtopic.replace(/-/g, ' ')} Challenge #${finalSortOrder}`;
     let problemDescription = baseProblem?.description || 'Solve this coding challenge step by step.';
     const problemDifficulty = baseProblem?.difficulty || 'Medium';
 
@@ -111,7 +125,7 @@ export async function POST(request: NextRequest) {
       };
 
       const subtopicDisplay = formatDisplayName(subtopic);
-      problemTitle = `${subtopicDisplay} Challenge #${sortOrder}`;
+      problemTitle = `${subtopicDisplay} Challenge #${finalSortOrder}`;
       problemDescription = `Solve this ${subtopicDisplay.toLowerCase()} problem step by step.`;
     }
 
@@ -364,7 +378,7 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       String(category),
       String(topic),
       String(subtopic),
-      Number(sortOrder),
+      Number(finalSortOrder), // Use the calculated sort order
       String(generatedProblem.constraints || '').trim(),
       String(generatedProblem.examples || '').trim(),
       JSON.stringify(generatedProblem.hints || []),
@@ -382,25 +396,39 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       value: typeof val === 'string' ? val.substring(0, 100) + (val.length > 100 ? '...' : '') : val
     })));
     
-    const insertResult = await Database.query(
-      `INSERT INTO code_problems (
-        title, description, difficulty, category, topic, subtopic, sort_order,
-        constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        title = VALUES(title),
-        description = VALUES(description),
-        difficulty = VALUES(difficulty),
-        constraints = VALUES(constraints),
-        examples = VALUES(examples),
-        hints = VALUES(hints),
-        time_complexity = VALUES(time_complexity),
-        space_complexity = VALUES(space_complexity),
-        test_cases = VALUES(test_cases),
-        function_templates = VALUES(function_templates),
-        updated_at = CURRENT_TIMESTAMP`,
-      insertData
-    ) as ResultSetHeader;
+    let insertResult;
+    
+    if (isRegeneration) {
+      // For regeneration, update existing record
+      insertResult = await Database.query(
+        `INSERT INTO code_problems (
+          title, description, difficulty, category, topic, subtopic, sort_order,
+          constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          title = VALUES(title),
+          description = VALUES(description),
+          difficulty = VALUES(difficulty),
+          constraints = VALUES(constraints),
+          examples = VALUES(examples),
+          hints = VALUES(hints),
+          time_complexity = VALUES(time_complexity),
+          space_complexity = VALUES(space_complexity),
+          test_cases = VALUES(test_cases),
+          function_templates = VALUES(function_templates),
+          updated_at = CURRENT_TIMESTAMP`,
+        insertData
+      ) as ResultSetHeader;
+    } else {
+      // For new problems, insert new record
+      insertResult = await Database.query(
+        `INSERT INTO code_problems (
+          title, description, difficulty, category, topic, subtopic, sort_order,
+          constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        insertData
+      ) as ResultSetHeader;
+    }
 
     console.log('Problem saved with ID:', insertResult.insertId);
 
@@ -421,7 +449,7 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       category,
       topic,
       subtopic,
-      sort_order: sortOrder,
+      sort_order: finalSortOrder, // Use the calculated sort order
       category_name: formatDisplayName(category),
       topic_name: formatDisplayName(topic),
       subtopic_name: formatDisplayName(subtopic),
