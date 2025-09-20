@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { category, topic, subtopic, sortOrder, baseProblem } = await request.json();
+    const { category, topic, subtopic, sortOrder, baseProblem, isRegeneration } = await request.json();
     
-    console.log('Request data received:', { category, topic, subtopic, sortOrder, baseProblem });
+    console.log('Request data received:', { category, topic, subtopic, sortOrder, baseProblem, isRegeneration });
 
     if (!category || !topic || !subtopic || typeof sortOrder !== 'number') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -78,18 +78,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if code problem already exists
-    const existingProblem = await Database.query(
-      `SELECT id FROM code_problems 
-       WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
-      [category, topic, subtopic, sortOrder]
-    ) as CodeProblemExistsRow[];
+    // Check if code problem already exists (only for non-regeneration requests)
+    if (!isRegeneration) {
+      const existingProblem = await Database.query(
+        `SELECT id FROM code_problems 
+         WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
+        [category, topic, subtopic, sortOrder]
+      ) as CodeProblemExistsRow[];
 
-    if (existingProblem && existingProblem.length > 0) {
-      return NextResponse.json(
-        { error: 'Code problem already exists for this location' },
-        { status: 409 }
-      );
+      if (existingProblem && existingProblem.length > 0) {
+        return NextResponse.json(
+          { error: 'Code problem already exists for this location' },
+          { status: 409 }
+        );
+      }
     }
 
     // Use base problem data or create default

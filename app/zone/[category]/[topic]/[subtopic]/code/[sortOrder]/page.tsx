@@ -26,7 +26,9 @@ import {
   Eye,
   List,
   GripVertical,
-  Brain
+  Brain,
+  SeparatorHorizontal,
+  Move3D
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -357,54 +359,140 @@ export default function CodeChallengePage() {
     return sections;
   };
 
-  // Format content with markdown-style parsing
+  // Enhanced format content with better AI content parsing
   const formatContent = (content: string) => {
     if (!content) return null;
 
-    // Split into paragraphs and format each one
-    const paragraphs = content.split(/\n\s*\n|\. (?=[A-Z])/);
+    // First, let's clean and prepare the content
+    let cleanContent = content
+      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
+      .trim();
+
+    // Split content into sections based on common AI patterns
+    const sections = [];
+    let currentSection = '';
     
-    return paragraphs.map((paragraph, index) => {
-      if (!paragraph.trim()) return null;
+    // Split by double newlines or major sentence breaks
+    const parts = cleanContent.split(/\n\s*\n|\.\s*(?=[A-Z][a-z]+(?:\s|:))/);
+    
+    for (let i = 0; i < parts.length; i++) {
+      let part = parts[i].trim();
+      if (!part) continue;
       
-      // Handle bullet points
-      if (paragraph.includes(' - ') || paragraph.includes('* ')) {
-        const items = paragraph.split(/\s*[-*]\s+/).filter(item => item.trim());
-        if (items.length > 1) {
+      // Check if this looks like a title or header (starts with caps, short)
+      if (part.length < 100 && /^[A-Z][^.]*:?\s*$/.test(part) && !part.includes(' the ') && !part.includes(' a ')) {
+        if (currentSection) {
+          sections.push({ type: 'content', text: currentSection });
+          currentSection = '';
+        }
+        sections.push({ type: 'header', text: part.replace(/:$/, '') });
+      }
+      // Check for bullet point content
+      else if (part.includes('\n-') || part.includes('\n•') || part.includes('\n*') || /^\s*[-•*]\s/.test(part)) {
+        if (currentSection) {
+          sections.push({ type: 'content', text: currentSection });
+          currentSection = '';
+        }
+        sections.push({ type: 'bullets', text: part });
+      }
+      // Check for numbered lists
+      else if (/^\s*\d+\./.test(part) || part.includes('\n1.') || part.includes('\n2.')) {
+        if (currentSection) {
+          sections.push({ type: 'content', text: currentSection });
+          currentSection = '';
+        }
+        sections.push({ type: 'numbered', text: part });
+      }
+      // Regular content
+      else {
+        currentSection += (currentSection ? ' ' : '') + part;
+      }
+    }
+    
+    // Add remaining content
+    if (currentSection) {
+      sections.push({ type: 'content', text: currentSection });
+    }
+
+    // Render the sections
+    return sections.map((section, index) => {
+      switch (section.type) {
+        case 'header':
+          return (
+            <h4 key={index} className={styles.contentHeader}>
+              {formatInlineText(section.text)}
+            </h4>
+          );
+          
+        case 'bullets':
+          const bulletItems = section.text
+            .split(/\n\s*[-•*]\s+/)
+            .filter(item => item.trim())
+            .slice(section.text.startsWith('-') || section.text.startsWith('•') || section.text.startsWith('*') ? 0 : 1);
+          
           return (
             <div key={index} className={styles.bulletList}>
-              {items.slice(1).map((item, itemIndex) => (
+              {bulletItems.map((item, itemIndex) => (
                 <div key={itemIndex} className={styles.bulletItem}>
-                  <List size={14} className={styles.bulletIcon} />
+                  <div className={styles.bulletPoint}>•</div>
                   <span dangerouslySetInnerHTML={{ __html: formatInlineText(item.trim()) }} />
                 </div>
               ))}
             </div>
           );
-        }
+          
+        case 'numbered':
+          const numberedItems = section.text
+            .split(/\n\s*\d+\.\s*/)
+            .filter(item => item.trim())
+            .slice(1);
+          
+          return (
+            <div key={index} className={styles.numberedList}>
+              {numberedItems.map((item, itemIndex) => (
+                <div key={itemIndex} className={styles.numberedItem}>
+                  <div className={styles.numberPoint}>{itemIndex + 1}.</div>
+                  <span dangerouslySetInnerHTML={{ __html: formatInlineText(item.trim()) }} />
+                </div>
+              ))}
+            </div>
+          );
+          
+        case 'content':
+        default:
+          return (
+            <div key={index} className={styles.contentParagraph}>
+              <span dangerouslySetInnerHTML={{ __html: formatInlineText(section.text) }} />
+            </div>
+          );
       }
-      
-      // Regular paragraph with inline formatting
-      return (
-        <p key={index} className={styles.formattedParagraph} 
-           dangerouslySetInnerHTML={{ __html: formatInlineText(paragraph.trim()) }} />
-      );
-    }).filter(Boolean);
+    });
   };
 
-  // Format inline text with bold, code, etc. (strip emojis)
+  // Enhanced inline text formatting
   const formatInlineText = (text: string) => {
     return text
-      // Remove all emojis first - comprehensive emoji regex
-      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
-      // Bold text **text** or **text:**
-      .replace(/\*\*([^*]+)\*\*:?/g, '<strong class="' + styles.boldText + '">$1</strong>')
-      // Code snippets `code`
+      // Bold text patterns - various formats
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="' + styles.boldText + '">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<strong class="' + styles.boldText + '">$1</strong>')
+      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ' <strong class="' + styles.boldText + '">$1</strong>')
+      
+      // Important keywords and concepts
+      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, '<strong class="' + styles.keywordText + '">$1</strong>')
+      
+      // Code snippets and technical terms
       .replace(/`([^`]+)`/g, '<code class="' + styles.inlineCode + '">$1</code>')
-      // Numbers and arrays [1,2,3]
       .replace(/(\[[\d,\s-]+\])/g, '<code class="' + styles.arrayCode + '">$1</code>')
-      // Function calls and variables
-      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="' + styles.functionCode + '">$1</code>');
+      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="' + styles.functionCode + '">$1</code>')
+      
+      // Numbers and values
+      .replace(/\b(\d+)\b/g, '<span class="' + styles.numberText + '">$1</span>')
+      
+      // Quotes and strings
+      .replace(/"([^"]+)"/g, '<span class="' + styles.quotedText + '">"$1"</span>')
+      
+      // Mathematical expressions
+      .replace(/\b(O\([^)]+\))/g, '<code class="' + styles.complexityCode + '">$1</code>');
   };
 
   // Error boundary function
@@ -854,21 +942,7 @@ export default function CodeChallengePage() {
     
     setIsRegenerating(true);
     try {
-      // Delete existing code problem first
-      await fetch(`/api/code-problems/delete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          category,
-          topic,
-          subtopic,
-          sortOrder: parseInt(sortOrder)
-        }),
-      });
-
-      // Generate new problem
+      // Generate new problem without deleting the previous one
       const generateResponse = await fetch('/api/code-problems/generate', {
         method: 'POST',
         headers: {
@@ -883,7 +957,9 @@ export default function CodeChallengePage() {
             title: problem.title.replace(/Challenge #\d+/, `Challenge #${sortOrder}`),
             description: `Generate a new coding challenge for ${subtopic.replace(/-/g, ' ')} topic.`,
             difficulty: problem.difficulty
-          }
+          },
+          // Flag to indicate this is a regeneration (save as new version)
+          isRegeneration: true
         }),
       });
 
@@ -1204,8 +1280,9 @@ export default function CodeChallengePage() {
         <div 
           className={styles.resizer}
           onMouseDown={(e) => handleLeftResize(e)}
+          title="Drag to resize panel"
         >
-          <GripVertical size={16} />
+          <SeparatorHorizontal size={14} />
         </div>
 
         {/* Middle Panel - Code Editor */}
@@ -1388,8 +1465,9 @@ export default function CodeChallengePage() {
         <div 
           className={styles.resizer}
           onMouseDown={(e) => handleRightResize(e)}
+          title="Drag to resize panel"
         >
-          <GripVertical size={16} />
+          <SeparatorHorizontal size={14} />
         </div>
 
         {/* Right Panel - AI Analysis */}

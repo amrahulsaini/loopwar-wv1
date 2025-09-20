@@ -92,13 +92,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // First, try to fetch existing code problem
+    // First, try to fetch the latest code problem for this location (ordered by creation date)
     const codeProblems = await Database.query(
       `SELECT id, title, description, difficulty, category, topic, subtopic, sort_order,
               constraints, examples, hints, time_complexity, space_complexity, 
               test_cases, function_templates, is_ai_generated, user_id, created_at, updated_at
        FROM code_problems 
-       WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
+       WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?
+       ORDER BY created_at DESC, id DESC
+       LIMIT 1`,
       [category, topic, subtopic, parseInt(sortOrder)]
     ) as CodeProblemRow[];
 
