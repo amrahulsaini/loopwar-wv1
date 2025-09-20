@@ -150,10 +150,24 @@ CRITICAL INSTRUCTIONS:
 CRITICAL FORMATTING RULES:
 - NEVER include HTML tags, CSS classes, or formatting markup in any text
 - NO format-keyword, format-code, format-number, format-string, or any similar tags
+- NEVER write anything like "format-code"> or "format-keyword"> or class="format-anything"
 - Write PLAIN TEXT ONLY - no HTML, no CSS, no markup of any kind
+- Do not use any HTML tags like <span>, <code>, <strong>, etc.
 - Use markdown-style formatting only: **bold**, *italic*, \`code\`
 - For code examples use backticks: \`variable\` or \`function()\`
 - For code blocks use triple backticks: \`\`\`code\`\`\`
+- ABSOLUTELY NO CSS class names or HTML formatting in the output
+
+EXAMPLES OF WHAT NOT TO DO:
+- "format-code">variable
+- class="format-keyword"
+- <span class="format-number">
+- "format-keyword">Given
+
+EXAMPLES OF CORRECT FORMATTING:
+- Use \`variable\` for code
+- Use **bold** for emphasis
+- Use plain text for descriptions
 
 CRITICAL: TEST CASES MUST BE REALISTIC AND SPECIFIC
 - Never use empty strings, blank inputs, or generic placeholders
@@ -275,6 +289,14 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
             .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
             // Remove unicode control chars
             .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+            // Remove format class artifacts that might appear in JSON values
+            .replace(/"format-[^"]*">/g, '')
+            .replace(/format-[a-zA-Z]*">/g, '')
+            .replace(/class="format-[^"]*"/g, '')
+            .replace(/"format-[^"]*"/g, '')
+            .replace(/format-\w+/g, '')
+            // Remove HTML-like tags from JSON content
+            .replace(/<[^>]*>/g, '')
             // Convert actual newlines/tabs to escaped versions
             .replace(/\r\n/g, '\\n')
             .replace(/\r/g, '\\n')   
@@ -342,12 +364,43 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       );
     }
 
-    // Validate generated problem data
+    // Validate and clean generated problem data
     if (!generatedProblem.title || typeof generatedProblem.title !== 'string') {
       throw new Error('Generated problem missing valid title');
     }
     if (!generatedProblem.description || typeof generatedProblem.description !== 'string') {
       throw new Error('Generated problem missing valid description');
+    }
+
+    // Clean all text fields from format artifacts
+    function cleanTextContent(text: string): string {
+      if (!text || typeof text !== 'string') return text;
+      
+      return text
+        // Remove format class artifacts
+        .replace(/"format-[^"]*">/g, '')
+        .replace(/format-[a-zA-Z]*">/g, '')
+        .replace(/class="format-[^"]*"/g, '')
+        .replace(/"format-[^"]*"/g, '')
+        .replace(/format-\w+/g, '')
+        // Remove HTML tags
+        .replace(/<[^>]*>/g, '')
+        // Clean up quotes and spacing
+        .replace(/"/g, '"')
+        .replace(/'/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Clean all text fields in the generated problem
+    generatedProblem.title = cleanTextContent(generatedProblem.title);
+    generatedProblem.description = cleanTextContent(generatedProblem.description);
+    generatedProblem.constraints = cleanTextContent(generatedProblem.constraints || '');
+    generatedProblem.examples = cleanTextContent(generatedProblem.examples || '');
+    
+    // Clean hints array
+    if (Array.isArray(generatedProblem.hints)) {
+      generatedProblem.hints = generatedProblem.hints.map(hint => cleanTextContent(hint));
     }
     if (!generatedProblem.difficulty || !['Easy', 'Medium', 'Hard'].includes(generatedProblem.difficulty)) {
       generatedProblem.difficulty = 'Medium'; // Default fallback

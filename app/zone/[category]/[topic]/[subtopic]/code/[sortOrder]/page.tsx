@@ -287,7 +287,7 @@ export default function CodeChallengePage() {
 
     // First, clean up any CSS class names that might have been generated as text
     const cleanContent = content
-      // Remove CSS class references that appear as text - improved patterns
+      // Remove broken HTML tags and format artifacts - comprehensive patterns
       .replace(/"format-[^"]*">/g, '')
       .replace(/format-[a-zA-Z]*">/g, '')
       .replace(/class="format-[^"]*"/g, '')
@@ -298,16 +298,26 @@ export default function CodeChallengePage() {
       .replace(/"format-number">/g, '')
       .replace(/"format-string">/g, '')
       .replace(/"format-comment">/g, '')
+      .replace(/"format-function">/g, '')
+      .replace(/"format-array">/g, '')
+      .replace(/"format-complexity">/g, '')
       .replace(/format-keyword>/g, '')
       .replace(/format-code>/g, '')
       .replace(/format-number>/g, '')
       .replace(/format-string>/g, '')
       .replace(/format-comment>/g, '')
+      .replace(/format-function>/g, '')
+      .replace(/format-array>/g, '')
+      .replace(/format-complexity>/g, '')
       // Remove any span or other tags with format classes
       .replace(/<[^>]*format-[^>]*>/g, '')
       .replace(/<\/[^>]*>/g, '')
       .replace(/<span[^>]*>/g, '')
       .replace(/<\/span>/g, '')
+      .replace(/<code[^>]*>/g, '')
+      .replace(/<\/code>/g, '')
+      .replace(/<strong[^>]*>/g, '')
+      .replace(/<\/strong>/g, '')
       // Remove any escaped HTML that might appear
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -420,30 +430,15 @@ export default function CodeChallengePage() {
     });
   };
 
-  // Enhanced inline text formatting - using CSS classes instead of inline styles
+  // Enhanced inline text formatting - DISABLED to prevent format class injection
   const formatInlineText = (text: string) => {
+    // Temporarily disabled to prevent CSS class injection issues
+    // Just return cleaned text without adding any format classes
     return text
-      // Bold text patterns - various formats
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="format-bold">$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<strong class="format-bold">$1</strong>')
-      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ' <strong class="format-bold">$1</strong>')
-      
-      // Important keywords and concepts
-      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, '<strong class="format-keyword">$1</strong>')
-      
-      // Code snippets and technical terms
-      .replace(/`([^`]+)`/g, '<code class="format-code">$1</code>')
-      .replace(/(\[[\d,\s-]+\])/g, '<code class="format-array">$1</code>')
-      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="format-function">$1</code>')
-      
-      // Numbers and values
-      .replace(/\b(\d+)\b/g, '<span class="format-number">$1</span>')
-      
-      // Quotes and strings
-      .replace(/"([^"]+)"/g, '<span class="format-string">"$1"</span>')
-      
-      // Mathematical expressions
-      .replace(/\b(O\([^)]+\))/g, '<code class="format-complexity">$1</code>');
+      .replace(/<[^>]*>/g, '') // Remove any HTML tags
+      .replace(/"/g, '"') // Fix quotes
+      .replace(/'/g, "'") // Fix apostrophes
+      .trim();
   };
 
   // Error boundary function
