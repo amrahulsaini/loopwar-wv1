@@ -285,7 +285,7 @@ export default function CodeChallengePage() {
     if (!content) return null;
 
     // First, clean up any CSS class names that might have been generated as text
-    let cleanContent = content
+    const cleanContent = content
       // Remove CSS class references that appear as text
       .replace(/"format-[^"]*">/g, '')
       .replace(/format-[a-zA-Z]*">/g, '')
