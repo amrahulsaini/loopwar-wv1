@@ -394,26 +394,26 @@ export default function CodeChallengePage() {
   const formatInlineText = (text: string) => {
     return text
       // Bold text patterns - various formats
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="' + styles.boldText + '">$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<strong class="' + styles.boldText + '">$1</strong>')
-      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ' <strong class="' + styles.boldText + '">$1</strong>')
+      .replace(/\*\*([^*]+)\*\*/g, `<strong class="${styles.boldText}">$1</strong>`)
+      .replace(/\*([^*]+)\*/g, `<strong class="${styles.boldText}">$1</strong>`)
+      .replace(/(?:^|\s)([A-Z][A-Z\s]{2,}?)(?=\s|$)/g, ` <strong class="${styles.boldText}">$1</strong>`)
       
       // Important keywords and concepts
-      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, '<strong class="' + styles.keywordText + '">$1</strong>')
+      .replace(/\b(Input|Output|Example|Note|Constraint|Algorithm|Time Complexity|Space Complexity|Return|Given|Find|Determine|Calculate|Implement)\b/g, `<strong class="${styles.keywordText}">$1</strong>`)
       
       // Code snippets and technical terms
-      .replace(/`([^`]+)`/g, '<code class="' + styles.inlineCode + '">$1</code>')
-      .replace(/(\[[\d,\s-]+\])/g, '<code class="' + styles.arrayCode + '">$1</code>')
-      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, '<code class="' + styles.functionCode + '">$1</code>')
+      .replace(/`([^`]+)`/g, `<code class="${styles.inlineCode}">$1</code>`)
+      .replace(/(\[[\d,\s-]+\])/g, `<code class="${styles.arrayCode}">$1</code>`)
+      .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*\([^)]*\))/g, `<code class="${styles.functionCode}">$1</code>`)
       
       // Numbers and values
-      .replace(/\b(\d+)\b/g, '<span class="' + styles.numberText + '">$1</span>')
+      .replace(/\b(\d+)\b/g, `<span class="${styles.numberText}">$1</span>`)
       
       // Quotes and strings
-      .replace(/"([^"]+)"/g, '<span class="' + styles.quotedText + '">"$1"</span>')
+      .replace(/"([^"]+)"/g, `<span class="${styles.quotedText}">"$1"</span>`)
       
       // Mathematical expressions
-      .replace(/\b(O\([^)]+\))/g, '<code class="' + styles.complexityCode + '">$1</code>');
+      .replace(/\b(O\([^)]+\))/g, `<code class="${styles.complexityCode}">$1</code>`);
   };
 
   // Error boundary function

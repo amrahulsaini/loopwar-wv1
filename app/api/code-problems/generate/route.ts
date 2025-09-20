@@ -386,7 +386,19 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       `INSERT INTO code_problems (
         title, description, difficulty, category, topic, subtopic, sort_order,
         constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        description = VALUES(description),
+        difficulty = VALUES(difficulty),
+        constraints = VALUES(constraints),
+        examples = VALUES(examples),
+        hints = VALUES(hints),
+        time_complexity = VALUES(time_complexity),
+        space_complexity = VALUES(space_complexity),
+        test_cases = VALUES(test_cases),
+        function_templates = VALUES(function_templates),
+        updated_at = CURRENT_TIMESTAMP`,
       insertData
     ) as ResultSetHeader;
 
