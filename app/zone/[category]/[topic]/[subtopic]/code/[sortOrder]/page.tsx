@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Editor from '@monaco-editor/react';
@@ -23,12 +23,8 @@ import {
   CheckCircle,
   TestTube,
   FileCode,
-  Eye,
-  List,
-  GripVertical,
   Brain,
-  SeparatorHorizontal,
-  Move3D
+  SeparatorHorizontal
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -274,7 +270,7 @@ export default function CodeChallengePage() {
   const [consoleExpanded, setConsoleExpanded] = useState(false);
 
   // Function to get the appropriate code template for a language
-  const getCodeTemplate = (language: string): string => {
+  const getCodeTemplate = useCallback((language: string): string => {
     // First try to use function template from the problem (if available)
     if (problem?.functionTemplates && problem.functionTemplates[language as keyof typeof problem.functionTemplates]) {
       return problem.functionTemplates[language as keyof typeof problem.functionTemplates];
@@ -282,89 +278,14 @@ export default function CodeChallengePage() {
     
     // Fallback to hardcoded boilerplates
     return languageBoilerplates[language] || '// Start coding here...';
-  };
-
-  // Parse description with proper markdown-style formatting (strip emojis)
-  const parseDescription = (description: string) => {
-    if (!description) return null;
-
-    // Split into logical sections based on common patterns
-    const sections: Array<{
-      type: 'statement' | 'input-output' | 'examples' | 'edge-cases' | 'hints';
-      title: string;
-      content: string;
-      icon: React.ComponentType<{ size?: number; className?: string }>;
-    }> = [];
-
-    // Clean up the description, remove emojis, and split into parts
-    const cleanDesc = description
-      .replace(/\\n/g, '\n')
-      .replace(/[🎯💡🔍🔥⚠️💭🚀🛠️📚✨🔧⭐💻📝😀🚀💡⚡🎯📝💻🔧⭐✨🔥]/g, '') // Remove all emojis
-      .trim();
-    const parts = cleanDesc.split(/(?=\*\*[A-Z][^*]*\*\*:?)|(?=Examples?:)|(?=Edge Cases?:)|(?=Algorithm|Hint)/i);
-    
-    let mainStatement = '';
-    
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i].trim();
-      if (!part) continue;
-
-      const lowerPart = part.toLowerCase();
-      
-      if (lowerPart.includes('**input:**') || lowerPart.includes('**output:**') || 
-          lowerPart.includes('input:') || lowerPart.includes('output:')) {
-        sections.push({
-          type: 'input-output',
-          title: 'Input & Output Specification',
-          content: part,
-          icon: Code
-        });
-      } else if (lowerPart.includes('example') || lowerPart.includes('**example')) {
-        sections.push({
-          type: 'examples',
-          title: 'Examples & Test Cases',
-          content: part,
-          icon: Eye
-        });
-      } else if (lowerPart.includes('edge case') || lowerPart.includes('**edge case')) {
-        sections.push({
-          type: 'edge-cases',
-          title: 'Edge Cases & Special Scenarios',
-          content: part,
-          icon: AlertTriangle
-        });
-      } else if (lowerPart.includes('algorithm') || lowerPart.includes('hint')) {
-        sections.push({
-          type: 'hints',
-          title: 'Algorithm Hints & Approach',
-          content: part,
-          icon: Lightbulb
-        });
-      } else if (i === 0 || (!lowerPart.includes('**') && mainStatement.length < 500)) {
-        // This is likely the main problem statement
-        mainStatement += (mainStatement ? ' ' : '') + part;
-      }
-    }
-
-    // If we have a main statement, add it as the first section
-    if (mainStatement) {
-      sections.unshift({
-        type: 'statement',
-        title: 'Problem Statement',
-        content: mainStatement,
-        icon: FileText
-      });
-    }
-
-    return sections;
-  };
+  }, [problem]);
 
   // Enhanced format content with better AI content parsing
   const formatContent = (content: string) => {
     if (!content) return null;
 
     // First, let's clean and prepare the content
-    let cleanContent = content
+    const cleanContent = content
       .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
       .trim();
 
@@ -376,7 +297,7 @@ export default function CodeChallengePage() {
     const parts = cleanContent.split(/\n\s*\n|\.\s*(?=[A-Z][a-z]+(?:\s|:))/);
     
     for (let i = 0; i < parts.length; i++) {
-      let part = parts[i].trim();
+      const part = parts[i].trim();
       if (!part) continue;
       
       // Check if this looks like a title or header (starts with caps, short)
@@ -771,7 +692,7 @@ export default function CodeChallengePage() {
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
-  }, [selectedLanguage, problem]); // Removed getCodeTemplate to prevent infinite re-renders
+  }, [selectedLanguage, problem, code, getCodeTemplate]);
 
   // Handle code execution
   const runCode = async () => {
@@ -863,7 +784,7 @@ export default function CodeChallengePage() {
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
-  }, [selectedLanguage, problem]); // Removed getCodeTemplate to prevent infinite re-renders
+  }, [selectedLanguage, problem, code, getCodeTemplate]);
 
   // Handle language switching for Monaco Editor
   useEffect(() => {
@@ -879,7 +800,7 @@ export default function CodeChallengePage() {
     if (isCurrentlyTemplate) {
       setCode(currentTemplate);
     }
-  }, [selectedLanguage]); // Only trigger on language change
+  }, [selectedLanguage, code, getCodeTemplate]); // Added missing dependencies
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
