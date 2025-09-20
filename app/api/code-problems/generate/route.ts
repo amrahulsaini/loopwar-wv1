@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Check if code problem already exists and find next available sort order
     let finalSortOrder = sortOrder;
     if (!isRegeneration) {
-      // For new problems, find the next available sort order
+      // For new problems, always find the next available sort order to create a new record
       const existingProblems = await Database.query(
         `SELECT sort_order FROM code_problems 
          WHERE category = ? AND topic = ? AND subtopic = ? 
@@ -96,15 +96,19 @@ export async function POST(request: NextRequest) {
         console.log(`Found existing problems, using next sort order: ${finalSortOrder}`);
       }
     } else {
-      // For regeneration, check if the specific problem exists
-      const existingProblem = await Database.query(
-        `SELECT id FROM code_problems 
-         WHERE category = ? AND topic = ? AND subtopic = ? AND sort_order = ?`,
-        [category, topic, subtopic, sortOrder]
-      ) as CodeProblemExistsRow[];
+      // For regeneration, also create a new record instead of updating
+      // Find the next available sort order even for regeneration
+      const existingProblems = await Database.query(
+        `SELECT sort_order FROM code_problems 
+         WHERE category = ? AND topic = ? AND subtopic = ? 
+         ORDER BY sort_order DESC`,
+        [category, topic, subtopic]
+      ) as Array<{ sort_order: number }>;
 
-      if (existingProblem && existingProblem.length > 0) {
-        console.log(`Regenerating existing problem at sort order: ${sortOrder}`);
+      if (existingProblems && existingProblems.length > 0) {
+        const maxSortOrder = Math.max(...existingProblems.map(p => p.sort_order));
+        finalSortOrder = maxSortOrder + 1;
+        console.log(`Regeneration: creating new record with sort order: ${finalSortOrder}`);
       }
     }
 
@@ -146,6 +150,14 @@ CRITICAL INSTRUCTIONS:
 3. Generate a problem specifically related to "${subtopic.replace(/-/g, ' ')}" topic
 4. If the base title suggests a specific algorithm/concept, build upon that exact concept
 5. Make the problem title similar or related to "${problemTitle}"
+
+CRITICAL FORMATTING RULES:
+- NEVER include HTML tags, CSS classes, or formatting markup in any text
+- NO format-keyword, format-code, format-number, format-string, or any similar tags
+- Write PLAIN TEXT ONLY - no HTML, no CSS, no markup of any kind
+- Use markdown-style formatting only: **bold**, *italic*, \`code\`
+- For code examples use backticks: \`variable\` or \`function()\`
+- For code blocks use triple backticks: \`\`\`code\`\`\`
 
 CRITICAL: TEST CASES MUST BE REALISTIC AND SPECIFIC
 - Never use empty strings, blank inputs, or generic placeholders
@@ -398,37 +410,15 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
     
     let insertResult;
     
-    if (isRegeneration) {
-      // For regeneration, update existing record
-      insertResult = await Database.query(
-        `INSERT INTO code_problems (
-          title, description, difficulty, category, topic, subtopic, sort_order,
-          constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-          title = VALUES(title),
-          description = VALUES(description),
-          difficulty = VALUES(difficulty),
-          constraints = VALUES(constraints),
-          examples = VALUES(examples),
-          hints = VALUES(hints),
-          time_complexity = VALUES(time_complexity),
-          space_complexity = VALUES(space_complexity),
-          test_cases = VALUES(test_cases),
-          function_templates = VALUES(function_templates),
-          updated_at = CURRENT_TIMESTAMP`,
-        insertData
-      ) as ResultSetHeader;
-    } else {
-      // For new problems, insert new record
-      insertResult = await Database.query(
-        `INSERT INTO code_problems (
-          title, description, difficulty, category, topic, subtopic, sort_order,
-          constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        insertData
-      ) as ResultSetHeader;
-    }
+    // Always insert a new record - no more updating existing ones
+    // This ensures each user generation creates a separate problem record
+    insertResult = await Database.query(
+      `INSERT INTO code_problems (
+        title, description, difficulty, category, topic, subtopic, sort_order,
+        constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      insertData
+    ) as ResultSetHeader;
 
     console.log('Problem saved with ID:', insertResult.insertId);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Editor from '@monaco-editor/react';
 import {
@@ -244,6 +244,7 @@ puts solution`
 
 export default function CodeChallengePage() {
   const params = useParams();
+  const router = useRouter();
   const category = params.category as string;
   const topic = params.topic as string;
   const subtopic = params.subtopic as string;
@@ -286,21 +287,36 @@ export default function CodeChallengePage() {
 
     // First, clean up any CSS class names that might have been generated as text
     const cleanContent = content
-      // Remove CSS class references that appear as text
+      // Remove CSS class references that appear as text - improved patterns
       .replace(/"format-[^"]*">/g, '')
       .replace(/format-[a-zA-Z]*">/g, '')
       .replace(/class="format-[^"]*"/g, '')
       .replace(/"format-[^"]*"/g, '')
       .replace(/format-\w+/g, '')
+      .replace(/"format-keyword">/g, '')
+      .replace(/"format-code">/g, '')
+      .replace(/"format-number">/g, '')
+      .replace(/"format-string">/g, '')
+      .replace(/"format-comment">/g, '')
+      .replace(/format-keyword>/g, '')
+      .replace(/format-code>/g, '')
+      .replace(/format-number>/g, '')
+      .replace(/format-string>/g, '')
+      .replace(/format-comment>/g, '')
       // Remove any span or other tags with format classes
       .replace(/<[^>]*format-[^>]*>/g, '')
       .replace(/<\/[^>]*>/g, '')
+      .replace(/<span[^>]*>/g, '')
+      .replace(/<\/span>/g, '')
       // Remove any escaped HTML that might appear
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
       // Remove unicode emojis
       .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
+      // Remove any remaining HTML-like tags
+      .replace(/<[^>]*>/g, '')
       .trim();
 
     // Split content into sections based on common AI patterns
@@ -566,8 +582,17 @@ export default function CodeChallengePage() {
               title: generatedProblem.title,
               testCasesCount: generatedProblem.testCases?.length || 0,
               testCases: generatedProblem.testCases,
-              functionTemplatesKeys: generatedProblem.functionTemplates ? Object.keys(generatedProblem.functionTemplates) : 'None'
+              functionTemplatesKeys: generatedProblem.functionTemplates ? Object.keys(generatedProblem.functionTemplates) : 'None',
+              newSortOrder: generatedProblem.sort_order
             });
+            
+            // Check if we need to navigate to a new URL with different sort order
+            if (generatedProblem.sort_order && generatedProblem.sort_order !== parseInt(sortOrder)) {
+              // Navigate to the new problem
+              router.push(`/zone/${category}/${topic}/${subtopic}/code/${generatedProblem.sort_order}`);
+              return; // Exit early since we're navigating away
+            }
+            
             setProblem(generatedProblem);
             
             // Force a complete refetch after generation to ensure persistence
@@ -900,9 +925,16 @@ export default function CodeChallengePage() {
 
       if (generateResponse.ok) {
         const newProblem = await generateResponse.json();
-        setProblem(newProblem);
-        setExecutionResult(null);
-        resetCode();
+        
+        // Navigate to the new problem with the correct sort order
+        if (newProblem.sort_order && newProblem.sort_order !== parseInt(sortOrder)) {
+          router.push(`/zone/${category}/${topic}/${subtopic}/code/${newProblem.sort_order}`);
+        } else {
+          // If sort order is the same, just update the current problem
+          setProblem(newProblem);
+          setExecutionResult(null);
+          resetCode();
+        }
       } else {
         alert('Failed to regenerate problem. Please try again.');
       }
