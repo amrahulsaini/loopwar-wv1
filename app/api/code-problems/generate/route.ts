@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from '../../../../lib/database';
 import { SecurityService } from '../../../../lib/security';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 
 // Initialize Gemini AI
 const apiKey = process.env.GEMINI_API_KEY;
@@ -37,10 +37,6 @@ interface GeneratedProblem {
     php: string;
     ruby: string;
   };
-}
-
-interface CodeProblemExistsRow extends RowDataPacket {
-  id: number;
 }
 
 // POST /api/code-problems/generate
@@ -408,11 +404,9 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
       value: typeof val === 'string' ? val.substring(0, 100) + (val.length > 100 ? '...' : '') : val
     })));
     
-    let insertResult;
-    
     // Always insert a new record - no more updating existing ones
     // This ensures each user generation creates a separate problem record
-    insertResult = await Database.query(
+    const insertResult = await Database.query(
       `INSERT INTO code_problems (
         title, description, difficulty, category, topic, subtopic, sort_order,
         constraints, examples, hints, time_complexity, space_complexity, test_cases, function_templates, is_ai_generated, user_id

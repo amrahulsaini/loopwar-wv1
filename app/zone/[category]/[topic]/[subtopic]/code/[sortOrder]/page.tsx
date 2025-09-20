@@ -698,7 +698,7 @@ export default function CodeChallengePage() {
       setIsGeneratingProblem(false);
       setIsLoading(false);
     }
-  }, [category, topic, subtopic, sortOrder, categoryDisplay, topicDisplay, subtopicDisplay]);
+  }, [category, topic, subtopic, sortOrder, categoryDisplay, topicDisplay, subtopicDisplay, router]);
 
   // Initialize component
   useEffect(() => {
