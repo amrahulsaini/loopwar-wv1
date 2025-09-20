@@ -441,6 +441,101 @@ export default function CodeChallengePage() {
       .trim();
   };
 
+  // Format test cases for different programming languages
+  const formatTestCaseForLanguage = (testCase: TestCase, language: string) => {
+    const input = testCase.input || '';
+    const expected = testCase.expected || '';
+    
+    // Helper function to detect and format different data types
+    const formatValue = (value: string, lang: string) => {
+      if (!value) return value;
+      
+      // Handle arrays
+      if (value.includes('[') && value.includes(']')) {
+        const arrayContent = value.match(/\[([^\]]+)\]/g);
+        if (arrayContent) {
+          let formatted = value;
+          arrayContent.forEach(arr => {
+            const content = arr.slice(1, -1); // Remove brackets
+            switch (lang) {
+              case 'java':
+              case 'cpp':
+              case 'c':
+              case 'csharp':
+                formatted = formatted.replace(arr, `{${content}}`);
+                break;
+              case 'go':
+                formatted = formatted.replace(arr, `[]int{${content}}`);
+                break;
+              case 'rust':
+                formatted = formatted.replace(arr, `vec![${content}]`);
+                break;
+              case 'php':
+                formatted = formatted.replace(arr, `[${content}]`);
+                break;
+              default: // javascript, python, ruby
+                formatted = formatted.replace(arr, `[${content}]`);
+            }
+          });
+          return formatted;
+        }
+      }
+      
+      return value;
+    };
+
+    // Language-specific variable declaration and syntax
+    const formatVariable = (varDeclaration: string, lang: string) => {
+      // Match patterns like "nums = [1,2,3]" or "target = 5"
+      const match = varDeclaration.match(/(\w+)\s*=\s*(.+)/);
+      if (!match) return varDeclaration;
+      
+      const varName = match[1];
+      const varValue = formatValue(match[2], lang);
+      
+      switch (lang) {
+        case 'javascript':
+          return `let ${varName} = ${varValue};`;
+        case 'python':
+        case 'ruby':
+          return `${varName} = ${varValue}`;
+        case 'java':
+        case 'cpp':
+        case 'c':
+        case 'csharp':
+          return `${varName} = ${varValue};`;
+        case 'go':
+          return `${varName} := ${varValue}`;
+        case 'rust':
+          return `let ${varName} = ${varValue};`;
+        case 'php':
+          return `$${varName} = ${varValue};`;
+        default:
+          return varDeclaration;
+      }
+    };
+
+    // Format input - handle multiple variable declarations
+    let formattedInput = input;
+    if (input.includes('=')) {
+      const declarations = input.split(',').map(decl => decl.trim());
+      formattedInput = declarations
+        .map(decl => formatVariable(decl, language))
+        .join('\n');
+    } else {
+      formattedInput = formatValue(input, language);
+    }
+
+    // Format expected output
+    const formattedExpected = formatValue(expected, language);
+
+    return {
+      input: formattedInput,
+      expected: formattedExpected,
+      explanation: testCase.explanation || ''
+    };
+  };
+
   // Error boundary function
   const handleError = useCallback((error: Error, errorInfo?: string) => {
     console.error('Component error:', error, errorInfo);
@@ -1159,41 +1254,44 @@ export default function CodeChallengePage() {
                 </div>
                 {problem && problem.testCases && problem.testCases.length > 0 ? (
                   <div className={styles.testCasesContainer}>
-                    {problem.testCases.map((testCase, index) => (
-                      <div key={index} className={styles.testCaseCard}>
-                        <div className={styles.testCaseHeader}>
-                          <h4>
-                            <FileCode size={18} />
-                            Test Case {index + 1}
-                          </h4>
-                        </div>
-                        <div className={styles.testCaseContent}>
-                          <div className={styles.testCaseInput}>
-                            <div className={styles.testCaseLabel}>
-                              <Code size={14} />
-                              <strong>Input:</strong>
-                            </div>
-                            <pre className={styles.testCaseCode}>{testCase.input || 'No input provided'}</pre>
+                    {problem.testCases.map((testCase, index) => {
+                      const formattedTestCase = formatTestCaseForLanguage(testCase, selectedLanguage);
+                      return (
+                        <div key={`${index}-${selectedLanguage}`} className={styles.testCaseCard}>
+                          <div className={styles.testCaseHeader}>
+                            <h4>
+                              <FileCode size={18} />
+                              Test Case {index + 1} ({selectedLanguage})
+                            </h4>
                           </div>
-                          <div className={styles.testCaseOutput}>
-                            <div className={styles.testCaseLabel}>
-                              <CheckCircle size={14} />
-                              <strong>Expected Output:</strong>
-                            </div>
-                            <pre className={styles.testCaseCode}>{testCase.expected || 'No expected output'}</pre>
-                          </div>
-                          {testCase.explanation && (
-                            <div className={styles.testCaseExplanation}>
+                          <div className={styles.testCaseContent}>
+                            <div className={styles.testCaseInput}>
                               <div className={styles.testCaseLabel}>
-                                <Info size={14} />
-                                <strong>Explanation:</strong>
+                                <Code size={14} />
+                                <strong>Input:</strong>
                               </div>
-                              <p className={styles.testCaseExplanationText}>{testCase.explanation}</p>
+                              <pre className={styles.testCaseCode}>{formattedTestCase.input || 'No input provided'}</pre>
                             </div>
-                          )}
+                            <div className={styles.testCaseOutput}>
+                              <div className={styles.testCaseLabel}>
+                                <CheckCircle size={14} />
+                                <strong>Expected Output:</strong>
+                              </div>
+                              <pre className={styles.testCaseCode}>{formattedTestCase.expected || 'No expected output'}</pre>
+                            </div>
+                            {formattedTestCase.explanation && (
+                              <div className={styles.testCaseExplanation}>
+                                <div className={styles.testCaseLabel}>
+                                  <Info size={14} />
+                                  <strong>Explanation:</strong>
+                                </div>
+                                <p className={styles.testCaseExplanationText}>{formattedTestCase.explanation}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className={styles.testCasesEmpty}>
