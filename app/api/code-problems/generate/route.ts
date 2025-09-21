@@ -1,7 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from '../../../../lib/database';
 import { SecurityService } from '../../../../lib/security';
-import { ResultSetHeader } from 'mysql2';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
+
+// Initialize Gemini AI
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error('GEMINI_API_KEY is required');
+}
+
+interface CodeProblemRow extends RowDataPacket {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  category: string;
+  topic: string;
+  subtopic: string;
+  sort_order: number;
+  constraints?: string;
+  examples?: string;
+  hints?: string;
+  time_complexity?: string;
+  space_complexity?: string;
+  test_cases?: string;
+  function_templates?: string;
+  is_ai_generated: boolean;
+  user_id?: number;
+  created_at: string;
+  updated_at: string;
+}
 
 // Initialize Gemini AI
 const apiKey = process.env.GEMINI_API_KEY;
@@ -77,7 +105,68 @@ export async function POST(request: NextRequest) {
     // Check if code problem already exists and find next available sort order
     let finalSortOrder = sortOrder;
     if (!isRegeneration) {
-      // For new problems, always find the next available sort order to create a new record
+      // Check if a problem with the same title already exists for this location
+      if (baseProblem && baseProblem.title) {
+        const existingProblemWithTitle = await Database.query(
+          `SELECT id, sort_order, title FROM code_problems 
+           WHERE category = ? AND topic = ? AND subtopic = ? AND title = ?
+           ORDER BY created_at DESC LIMIT 1`,
+          [category, topic, subtopic, baseProblem.title]
+        ) as Array<{ id: number; sort_order: number; title: string }>;
+
+        if (existingProblemWithTitle && existingProblemWithTitle.length > 0) {
+          // Found existing problem with same title - return it instead of creating new one
+          const existingProblem = existingProblemWithTitle[0];
+          console.log(`Found existing problem with same title "${baseProblem.title}" at sort_order ${existingProblem.sort_order}`);
+          
+          // Fetch the complete problem data
+          const fullProblemData = await Database.query(
+            `SELECT * FROM code_problems WHERE id = ?`,
+            [existingProblem.id]
+          ) as CodeProblemRow[];
+          
+          if (fullProblemData && fullProblemData.length > 0) {
+            const problem = fullProblemData[0];
+            // Format display names
+            const formatDisplayName = (urlName: string) => {
+              return urlName
+                .replace(/-/g, ' ')
+                .replace(/and/g, '&')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            };
+
+            const responseData = {
+              id: problem.id,
+              title: problem.title,
+              description: problem.description,
+              difficulty: problem.difficulty,
+              category: problem.category,
+              topic: problem.topic,
+              subtopic: problem.subtopic,
+              sort_order: problem.sort_order,
+              constraints: problem.constraints,
+              examples: problem.examples,
+              hints: problem.hints ? JSON.parse(problem.hints) : [],
+              timeComplexity: problem.time_complexity,
+              spaceComplexity: problem.space_complexity,
+              testCases: problem.test_cases ? JSON.parse(problem.test_cases) : [],
+              functionTemplates: problem.function_templates ? JSON.parse(problem.function_templates) : {},
+              category_name: formatDisplayName(category),
+              topic_name: formatDisplayName(topic),
+              subtopic_name: formatDisplayName(subtopic),
+              is_ai_generated: problem.is_ai_generated,
+              created_at: problem.created_at,
+              updated_at: problem.updated_at
+            };
+
+            return NextResponse.json(responseData);
+          }
+        }
+      }
+
+      // For new problems, find the next available sort order to create a new record
       const existingProblems = await Database.query(
         `SELECT sort_order FROM code_problems 
          WHERE category = ? AND topic = ? AND subtopic = ? 
