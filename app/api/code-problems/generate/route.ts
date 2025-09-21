@@ -129,128 +129,45 @@ export async function POST(request: NextRequest) {
       problemDescription = `Solve this ${subtopicDisplay.toLowerCase()} problem step by step.`;
     }
 
-    // Create AI prompt for comprehensive problem generation
-    const systemPrompt = `You are a LeetCode-style coding problem generator. Create a specific, well-defined coding problem.
+    // Create a much simpler AI prompt
+    const systemPrompt = `Generate a coding problem as valid JSON only.
 
-PROBLEM CONTEXT:
-- Base Title: "${problemTitle}"
-- Base Description: "${problemDescription}"
-- Difficulty: ${problemDifficulty}
-- Category: ${category.replace(/-/g, ' ')}
-- Topic: ${topic.replace(/-/g, ' ')}
-- Subtopic: ${subtopic.replace(/-/g, ' ')}
+Topic: ${subtopic.replace(/-/g, ' ')}
+Title: ${problemTitle}
+Difficulty: ${problemDifficulty}
 
-CRITICAL INSTRUCTIONS:
-1. USE THE PROVIDED BASE TITLE "${problemTitle}" as the foundation for your problem
-2. Expand on the BASE DESCRIPTION "${problemDescription}" to create a comprehensive problem
-3. Generate a problem specifically related to "${subtopic.replace(/-/g, ' ')}" topic
-4. If the base title suggests a specific algorithm/concept, build upon that exact concept
-5. Make the problem title similar or related to "${problemTitle}"
+Return ONLY this JSON structure with no extra text:
 
-CRITICAL FORMATTING RULES:
-- NEVER include HTML tags, CSS classes, or formatting markup in any text
-- NO format-keyword, format-code, format-number, format-string, or any similar tags
-- NEVER write anything like "format-code"> or "format-keyword"> or class="format-anything"
-- Write PLAIN TEXT ONLY - no HTML, no CSS, no markup of any kind
-- Do not use any HTML tags like <span>, <code>, <strong>, etc.
-- Use markdown-style formatting only: **bold**, *italic*, \`code\`
-- For code examples use backticks: \`variable\` or \`function()\`
-- For code blocks use triple backticks: \`\`\`code\`\`\`
-- ABSOLUTELY NO CSS class names or HTML formatting in the output
-
-CRITICAL JSON FORMATTING:
-- ALL STRING VALUES must be properly escaped
-- NO unescaped newlines in JSON strings - use \\n instead
-- NO unescaped quotes in JSON strings - use \\" instead
-- Keep JSON structure clean and valid
-- DO NOT include any text after the closing }
-- Ensure all braces { } are properly matched
-- NEVER truncate the JSON - complete all fields fully
-
-EXAMPLES OF WHAT NOT TO DO:
-- "format-code">variable
-- class="format-keyword"
-- <span class="format-number">
-- "format-keyword">Given
-
-EXAMPLES OF CORRECT FORMATTING:
-- Use \`variable\` for code
-- Use **bold** for emphasis
-- Use plain text for descriptions
-
-CRITICAL: TEST CASES MUST BE REALISTIC AND SPECIFIC
-- Never use empty strings, blank inputs, or generic placeholders
-- Always include proper variable names: "nums = [1,2,3]", "target = 5", "s = \"example\""
-- Generate 6 diverse test cases covering:
-  * Basic functionality (2-3 cases)
-  * Edge cases (empty arrays, single elements, boundaries)
-  * Complex scenarios (large inputs, special patterns)
-- Each test case requires: concrete input, expected output, clear explanation
-- Use realistic data that developers would actually test with
-
-Example GOOD test cases for array problems:
-{"input": "nums = [2,7,11,15], target = 9", "expected": "[0,1]", "explanation": "nums[0] + nums[1] = 2 + 7 = 9"}
-{"input": "nums = [3,2,4], target = 6", "expected": "[1,2]", "explanation": "nums[1] + nums[2] = 2 + 4 = 6"}
-{"input": "nums = [], target = 0", "expected": "[]", "explanation": "Empty array returns empty result"}
-
-Example GOOD test cases for string problems:
-{"input": "s = \"racecar\"", "expected": "true", "explanation": "String reads same forwards and backwards"}
-{"input": "s = \"hello\"", "expected": "false", "explanation": "String is not a palindrome"}
-
-REQUIREMENTS:
-1. **Title**: Use or adapt "${problemTitle}" (make it closely related to this title)
-2. **Description**: Comprehensive problem statement (200-400 words) based on "${problemDescription}" explaining:
-   - Problem context and real-world application
-   - Detailed input/output specifications
-   - Multiple examples with step-by-step explanations
-   - Edge cases and special scenarios to consider
-   - Algorithm approach hints and complexity considerations
-3. **Examples**: 2-3 examples for user understanding
-4. **Test Cases**: 6 hidden test cases for code validation
-5. **Constraints**: Realistic technical limits
-6. **Hints**: 4 helpful hints about the solution approach
-7. **Function Templates**: Generate function-only templates for each language (NO main/print/input statements)
-
-FUNCTION TEMPLATE REQUIREMENTS:
-- Only include the function signature and stub
-- Use appropriate parameter names and return types based on the problem
-- Body should contain "// TODO: implement" or language equivalent
-- NO main(), input(), print(), console.log(), or test code
-- The hidden test runner will call these functions directly
-
-RESPOND WITH VALID JSON ONLY - no markdown formatting:
 {
-  "title": "Use or adapt the provided title: ${problemTitle}",
-  "description": "Expand on: ${problemDescription}. Create comprehensive 200-400 word description with context, examples, and approach hints.",
+  "title": "Problem title here",
+  "description": "Problem description here",
   "difficulty": "${problemDifficulty}",
-  "constraints": "Create realistic technical constraints with mathematical notation",
-  "examples": "Provide 2-3 concrete examples with step-by-step explanations",
-  "hints": ["Generate 4 helpful hints for ${subtopic.replace(/-/g, ' ')} related to ${problemTitle}"],
-  "timeComplexity": "Appropriate complexity for this algorithm",
-  "spaceComplexity": "Appropriate space complexity",
+  "constraints": "Constraints here",
+  "examples": "Examples here",
+  "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4"],
+  "timeComplexity": "O(n)",
+  "spaceComplexity": "O(1)",
   "testCases": [
-    {"input": "nums = [actual array], target = actual_number", "expected": "[actual result]", "explanation": "Clear step-by-step explanation"},
-    {"input": "nums = [different array], target = different_number", "expected": "[different result]", "explanation": "Another clear explanation"},
-    {"input": "nums = [edge case like empty or single element]", "expected": "[appropriate result]", "explanation": "Edge case explanation"},
-    {"input": "nums = [complex case]", "expected": "[complex result]", "explanation": "Complex scenario explanation"},
-    {"input": "nums = [boundary case]", "expected": "[boundary result]", "explanation": "Boundary condition explanation"},
-    {"input": "nums = [stress test case]", "expected": "[stress result]", "explanation": "Performance test explanation"}
+    {"input": "example input", "expected": "example output", "explanation": "explanation"},
+    {"input": "example input", "expected": "example output", "explanation": "explanation"},
+    {"input": "example input", "expected": "example output", "explanation": "explanation"},
+    {"input": "example input", "expected": "example output", "explanation": "explanation"},
+    {"input": "example input", "expected": "example output", "explanation": "explanation"},
+    {"input": "example input", "expected": "example output", "explanation": "explanation"}
   ],
   "functionTemplates": {
-    "javascript": "function solutionName(param1, param2) {\n    // TODO: implement\n    return null;\n}",
-    "python": "def solution_name(param1, param2):\n    # TODO: implement\n    pass",
-    "java": "public class Solution {\n    public ReturnType solutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return null;\n    }\n}",
-    "cpp": "class Solution {\npublic:\n    ReturnType solutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return ReturnType();\n    }\n};",
-    "c": "ReturnType solution_name(ParamType param1, ParamType param2) {\n    // TODO: implement\n    return 0;\n}",
-    "csharp": "public class Solution {\n    public ReturnType SolutionName(ParamType param1, ParamType param2) {\n        // TODO: implement\n        return default(ReturnType);\n    }\n}",
-    "go": "func solutionName(param1 ParamType, param2 ParamType) ReturnType {\n    // TODO: implement\n    return ReturnType{}\n}",
-    "rust": "impl Solution {\n    pub fn solution_name(param1: ParamType, param2: ParamType) -> ReturnType {\n        // TODO: implement\n        ReturnType::new()\n    }\n}",
-    "php": "function solutionName($param1, $param2) {\n    // TODO: implement\n    return null;\n}",
-    "ruby": "def solution_name(param1, param2)\n    # TODO: implement\n    nil\nend"
+    "javascript": "function solve() { return null; }",
+    "python": "def solve(): return None",
+    "java": "public int solve() { return 0; }",
+    "cpp": "int solve() { return 0; }",
+    "c": "int solve() { return 0; }",
+    "csharp": "public int Solve() { return 0; }",
+    "go": "func solve() int { return 0 }",
+    "rust": "fn solve() -> i32 { 0 }",
+    "php": "function solve() { return 0; }",
+    "ruby": "def solve; 0; end"
   }
-}
-
-Generate a problem specifically based on "${problemTitle}" and "${problemDescription}" for ${subtopic.replace(/-/g, ' ')} topic.`;
+}`;
 
     console.log('Generating AI problem for:', { problemTitle, category, topic, subtopic });
     console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
@@ -284,34 +201,19 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Enhanced JSON cleaning function
+        // Simple JSON extraction
         function cleanJsonString(jsonStr: string): string {
-          console.log('Raw AI text (first 500 chars):', jsonStr.substring(0, 500));
-          
-          // Remove code block markers
           let cleaned = jsonStr
-            .replace(/```json\s*/g, '')
-            .replace(/```\s*$/g, '')
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
             .trim();
           
-          // Find the actual JSON boundaries
           const jsonStart = cleaned.indexOf('{');
           const jsonEnd = cleaned.lastIndexOf('}');
           
           if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
             cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
           }
-          
-          // Fix common JSON issues that break parsing
-          cleaned = cleaned
-            // Fix unescaped newlines in string values (preserve structure)
-            .replace(/(?<!\\)\n(?=\s*[^"}])/g, '\\n')
-            .replace(/(?<!\\)\r(?=\s*[^"}])/g, '\\r')
-            .replace(/(?<!\\)\t(?=\s*[^"}])/g, '\\t')
-            // Remove any trailing commas before closing braces/brackets
-            .replace(/,(\s*[}\]])/g, '$1')
-            // Collapse multiple spaces but preserve structure
-            .replace(/\s+/g, ' ');
           
           return cleaned;
         }
@@ -324,49 +226,9 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
           console.log('AI generation successful');
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
-          console.error('Problematic JSON (first 2000 chars):', cleanedText.substring(0, 2000));
-          
-          // Try to fix common JSON issues and parse again
-          try {
-            console.log('Attempting to fix JSON issues...');
-            let fixedJson = cleanedText;
-            
-            // Find where the error roughly occurred (around position 1954)
-            const errorPos = 1950;
-            const beforeError = cleanedText.substring(errorPos - 50, errorPos + 50);
-            console.log('Context around error position:', beforeError);
-            
-            // More targeted fixes
-            fixedJson = fixedJson
-              // Escape any unescaped newlines properly
-              .replace(/([^\\])\n/g, '$1\\n')
-              .replace(/([^\\])\r/g, '$1\\r')
-              .replace(/([^\\])\t/g, '$1\\t')
-              // Fix any unescaped quotes in the middle of strings
-              .replace(/"([^"]*)"([^,:}\]]+[^,}\]]*)"([^,}\]]*)/g, '"$1$2$3"')
-              // Remove any stray characters after JSON
-              .replace(/}[^}]*$/, '}');
-            
-            // If the JSON was truncated, try to close it properly
-            if (!fixedJson.trim().endsWith('}')) {
-              // Count open braces vs closed braces
-              const openBraces = (fixedJson.match(/{/g) || []).length;
-              const closeBraces = (fixedJson.match(/}/g) || []).length;
-              const missingBraces = openBraces - closeBraces;
-              
-              if (missingBraces > 0) {
-                console.log(`Adding ${missingBraces} missing closing braces`);
-                fixedJson += '}'.repeat(missingBraces);
-              }
-            }
-            
-            generatedProblem = JSON.parse(fixedJson);
-            console.log('JSON fixed and parsed successfully');
-          } catch (secondParseError) {
-            console.error('Second parse attempt also failed:', secondParseError);
-            console.error('JSON around error position:', cleanedText.substring(Math.max(0, 1950), 2050));
-            throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
-          }
+          console.error('Problematic JSON:', cleanedText);
+          console.error('JSON around error position:', cleanedText.substring(830, 850));
+          throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
         }
       } else {
         const errorText = await response.text();
