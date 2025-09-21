@@ -878,7 +878,7 @@ export default function CodeChallengePage() {
   // Handle code execution
   const runCode = async () => {
     if (!problem || !code.trim()) {
-      alert('Please write some code first!');
+      showNotification('Please write some code first!', 'warning');
       return;
     }
 
@@ -1243,11 +1243,11 @@ export default function CodeChallengePage() {
           resetCode();
         }
       } else {
-        alert('Failed to regenerate problem. Please try again.');
+        showNotification('Failed to regenerate problem. Please try again.', 'error');
       }
     } catch (error) {
       console.error('Error regenerating problem:', error);
-      alert('Failed to regenerate problem. Please try again.');
+      showNotification('Failed to regenerate problem. Please try again.', 'error');
     } finally {
       setIsRegenerating(false);
     }
