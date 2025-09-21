@@ -262,6 +262,7 @@ export default function CodeChallengePage() {
   const [generatingProblemTitle, setGeneratingProblemTitle] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [userClearedCode, setUserClearedCode] = useState(false);
   
   // Resizable panel state
   const [leftWidth, setLeftWidth] = useState('30%'); // Problem section (30%)
@@ -819,13 +820,13 @@ export default function CodeChallengePage() {
     };
   }, [checkUserSession, fetchOrGenerateProblem, handleError]);
 
-  // Initialize code template when component mounts or language changes (only if code is empty)
+  // Initialize code template when component mounts or language changes (only if code is empty and not user-cleared)
   useEffect(() => {
-    if (!code || code.trim() === '') {
+    if ((!code || code.trim() === '') && !userClearedCode) {
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
-  }, [selectedLanguage, problem, code, getCodeTemplate]);
+  }, [selectedLanguage, problem, code, getCodeTemplate, userClearedCode]);
 
   // Handle code execution
   const runCode = async () => {
@@ -909,6 +910,14 @@ export default function CodeChallengePage() {
   const resetCode = () => {
     setCode(getCodeTemplate(selectedLanguage));
     setExecutionResult(null);
+    setUserClearedCode(false);
+  };
+
+  // Handle code clear
+  const clearCode = () => {
+    setCode('');
+    setExecutionResult(null);
+    setUserClearedCode(true);
   };
 
   // Initialize code template when component mounts or language changes
@@ -935,6 +944,7 @@ export default function CodeChallengePage() {
     
     if (isCurrentlyTemplate) {
       setCode(currentTemplate);
+      setUserClearedCode(false);
     }
   }, [selectedLanguage, code, getCodeTemplate, problem?.functionTemplates]);
 
@@ -1388,9 +1398,16 @@ export default function CodeChallengePage() {
               <button 
                 onClick={resetCode}
                 className={styles.iconButton}
-                title="Reset Code"
+                title="Reset to Template"
               >
                 <RotateCcw size={16} />
+              </button>
+              <button 
+                onClick={clearCode}
+                className={styles.iconButton}
+                title="Clear All Code"
+              >
+                <XCircle size={16} />
               </button>
               <button 
                 onClick={runCode}
@@ -1421,7 +1438,15 @@ export default function CodeChallengePage() {
                 language={selectedLanguage}
                 value={code}
                 onChange={(value) => {
-                  setCode(value || '');
+                  const newCode = value || '';
+                  setCode(newCode);
+                  // If user manually clears all code, respect that
+                  if (newCode.trim() === '') {
+                    setUserClearedCode(true);
+                  } else {
+                    // If user starts typing, they're no longer in "cleared" state
+                    setUserClearedCode(false);
+                  }
                 }}
                 theme="vs-dark"
                 options={{
