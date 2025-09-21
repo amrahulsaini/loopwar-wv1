@@ -820,14 +820,6 @@ export default function CodeChallengePage() {
     };
   }, [checkUserSession, fetchOrGenerateProblem, handleError]);
 
-  // Initialize code template when component mounts or language changes (only if code is empty and not user-cleared)
-  useEffect(() => {
-    if ((!code || code.trim() === '') && !userClearedCode) {
-      const template = getCodeTemplate(selectedLanguage);
-      setCode(template);
-    }
-  }, [selectedLanguage, problem, code, getCodeTemplate, userClearedCode]);
-
   // Handle code execution
   const runCode = async () => {
     if (!problem || !code.trim()) {
@@ -915,6 +907,7 @@ export default function CodeChallengePage() {
 
   // Handle code clear
   const clearCode = () => {
+    console.log('Clearing code...'); // Debug log
     setCode('');
     setExecutionResult(null);
     setUserClearedCode(true);
@@ -929,13 +922,15 @@ export default function CodeChallengePage() {
     setExecutionResult(null);
   };
 
-  // Initialize code template when component mounts
+  // Initialize code template only when component first mounts with a problem
   useEffect(() => {
-    if ((!code || code.trim() === '') && !userClearedCode) {
+    console.log('useEffect triggered - problem:', !!problem, 'code:', !!code, 'userClearedCode:', userClearedCode);
+    if (problem && !code) {
+      console.log('Loading initial template for language:', selectedLanguage);
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
-  }, [problem, code, getCodeTemplate, selectedLanguage, userClearedCode]);
+  }, [problem]); // Only runs when problem loads, not when code changes
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
