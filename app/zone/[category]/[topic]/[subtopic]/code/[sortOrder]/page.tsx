@@ -479,97 +479,124 @@ export default function CodeChallengePage() {
 
   // Format test cases for different programming languages
   const formatTestCaseForLanguage = (testCase: TestCase, language: string) => {
+    if (!testCase) {
+      return {
+        input: 'No input provided',
+        expected: 'No expected output',
+        explanation: ''
+      };
+    }
+
     const input = testCase.input || '';
     const expected = testCase.expected || '';
     
     // Helper function to detect and format different data types
     const formatValue = (value: string, lang: string) => {
-      if (!value) return value;
+      if (!value || typeof value !== 'string') return value || '';
       
-      // Handle arrays
-      if (value.includes('[') && value.includes(']')) {
-        const arrayContent = value.match(/\[([^\]]+)\]/g);
-        if (arrayContent) {
-          let formatted = value;
-          arrayContent.forEach(arr => {
-            const content = arr.slice(1, -1); // Remove brackets
-            switch (lang) {
-              case 'java':
-              case 'cpp':
-              case 'c':
-              case 'csharp':
-                formatted = formatted.replace(arr, `{${content}}`);
-                break;
-              case 'go':
-                formatted = formatted.replace(arr, `[]int{${content}}`);
-                break;
-              case 'rust':
-                formatted = formatted.replace(arr, `vec![${content}]`);
-                break;
-              case 'php':
-                formatted = formatted.replace(arr, `[${content}]`);
-                break;
-              default: // javascript, python, ruby
-                formatted = formatted.replace(arr, `[${content}]`);
-            }
-          });
-          return formatted;
+      try {
+        // Handle arrays
+        if (value.includes('[') && value.includes(']')) {
+          const arrayContent = value.match(/\[([^\]]*)\]/g);
+          if (arrayContent) {
+            let formatted = value;
+            arrayContent.forEach(arr => {
+              const content = arr.slice(1, -1); // Remove brackets
+              switch (lang) {
+                case 'java':
+                case 'cpp':
+                case 'c':
+                case 'csharp':
+                  formatted = formatted.replace(arr, `{${content}}`);
+                  break;
+                case 'go':
+                  formatted = formatted.replace(arr, `[]int{${content}}`);
+                  break;
+                case 'rust':
+                  formatted = formatted.replace(arr, `vec![${content}]`);
+                  break;
+                case 'php':
+                  formatted = formatted.replace(arr, `[${content}]`);
+                  break;
+                default: // javascript, python, ruby
+                  formatted = formatted.replace(arr, `[${content}]`);
+              }
+            });
+            return formatted;
+          }
         }
+        
+        return value;
+      } catch (error) {
+        console.error('Error formatting value:', error);
+        return value;
       }
-      
-      return value;
     };
 
     // Language-specific variable declaration and syntax
     const formatVariable = (varDeclaration: string, lang: string) => {
-      // Match patterns like "nums = [1,2,3]" or "target = 5"
-      const match = varDeclaration.match(/(\w+)\s*=\s*(.+)/);
-      if (!match) return varDeclaration;
-      
-      const varName = match[1];
-      const varValue = formatValue(match[2], lang);
-      
-      switch (lang) {
-        case 'javascript':
-          return `let ${varName} = ${varValue};`;
-        case 'python':
-        case 'ruby':
-          return `${varName} = ${varValue}`;
-        case 'java':
-        case 'cpp':
-        case 'c':
-        case 'csharp':
-          return `${varName} = ${varValue};`;
-        case 'go':
-          return `${varName} := ${varValue}`;
-        case 'rust':
-          return `let ${varName} = ${varValue};`;
-        case 'php':
-          return `$${varName} = ${varValue};`;
-        default:
-          return varDeclaration;
+      try {
+        // Match patterns like "nums = [1,2,3]" or "target = 5"
+        const match = varDeclaration.match(/(\w+)\s*=\s*(.+)/);
+        if (!match) return varDeclaration;
+        
+        const varName = match[1];
+        const varValue = formatValue(match[2], lang);
+        
+        switch (lang) {
+          case 'javascript':
+            return `let ${varName} = ${varValue};`;
+          case 'python':
+          case 'ruby':
+            return `${varName} = ${varValue}`;
+          case 'java':
+          case 'cpp':
+          case 'c':
+          case 'csharp':
+            return `${varName} = ${varValue};`;
+          case 'go':
+            return `${varName} := ${varValue}`;
+          case 'rust':
+            return `let ${varName} = ${varValue};`;
+          case 'php':
+            return `$${varName} = ${varValue};`;
+          default:
+            return varDeclaration;
+        }
+      } catch (error) {
+        console.error('Error formatting variable:', error);
+        return varDeclaration;
       }
     };
 
-    // Format input - handle multiple variable declarations
-    let formattedInput = input;
-    if (input.includes('=')) {
-      const declarations = input.split(',').map(decl => decl.trim());
-      formattedInput = declarations
-        .map(decl => formatVariable(decl, language))
-        .join('\n');
-    } else {
-      formattedInput = formatValue(input, language);
+    try {
+      // Format input - handle multiple variable declarations
+      let formattedInput = input;
+      if (input && input.includes('=')) {
+        const declarations = input.split(',').map(decl => decl.trim());
+        formattedInput = declarations
+          .map(decl => formatVariable(decl, language))
+          .join('\n');
+      } else {
+        formattedInput = formatValue(input, language);
+      }
+
+      // Format expected output
+      const formattedExpected = formatValue(expected, language);
+
+      return {
+        input: formattedInput || 'No input provided',
+        expected: formattedExpected || 'No expected output',
+        explanation: testCase.explanation || ''
+      };
+    } catch (error) {
+      console.error('Error in formatTestCaseForLanguage:', error);
+      return {
+        input: input || 'No input provided',
+        expected: expected || 'No expected output',
+        explanation: testCase.explanation || ''
+      };
     }
-
-    // Format expected output
-    const formattedExpected = formatValue(expected, language);
-
-    return {
-      input: formattedInput,
-      expected: formattedExpected,
-      explanation: testCase.explanation || ''
-    };
   };
 
   // Error boundary function
