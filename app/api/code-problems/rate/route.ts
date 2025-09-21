@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       const oldRating = existingRatingRows[0].rating;
       
       await Database.query(
-        'UPDATE problem_ratings SET rating = ?, rated_at = NOW() WHERE problem_id = ? AND user_id = ?',
+        'UPDATE problem_ratings SET rating = ?, updated_at = NOW() WHERE problem_id = ? AND user_id = ?',
         [rating, problemId, userId]
       );
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Insert new rating
       await Database.query(
-        'INSERT INTO problem_ratings (problem_id, user_id, rating, rated_at) VALUES (?, ?, ?, NOW())',
+        'INSERT INTO problem_ratings (problem_id, user_id, rating, created_at) VALUES (?, ?, ?, NOW())',
         [problemId, userId, rating]
       );
 
