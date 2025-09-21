@@ -920,33 +920,22 @@ export default function CodeChallengePage() {
     setUserClearedCode(true);
   };
 
-  // Initialize code template when component mounts or language changes
+  // Handle language switching - always load template for new language
+  const handleLanguageChange = (newLanguage: string) => {
+    setSelectedLanguage(newLanguage);
+    const template = getCodeTemplate(newLanguage);
+    setCode(template);
+    setUserClearedCode(false);
+    setExecutionResult(null);
+  };
+
+  // Initialize code template when component mounts
   useEffect(() => {
-    if (!code || code.trim() === '') {
+    if ((!code || code.trim() === '') && !userClearedCode) {
       const template = getCodeTemplate(selectedLanguage);
       setCode(template);
     }
-  }, [selectedLanguage, problem, code, getCodeTemplate]);
-
-  // Handle language switching for Monaco Editor
-  useEffect(() => {
-    // Get all possible templates (boilerplates + function templates)
-    const allBoilerplates = Object.values(languageBoilerplates);
-    const allFunctionTemplates = problem?.functionTemplates ? Object.values(problem.functionTemplates) : [];
-    const allTemplates = [...allBoilerplates, ...allFunctionTemplates];
-    
-    const currentTemplate = getCodeTemplate(selectedLanguage);
-    
-    // If current code is a template, empty, or default placeholder, update to new language template
-    const isCurrentlyTemplate = allTemplates.some(template => 
-      code.trim() === template.trim()
-    ) || code.trim() === '' || code.trim() === '// Start coding here...' || code.trim() === getCodeTemplate('javascript').trim();
-    
-    if (isCurrentlyTemplate) {
-      setCode(currentTemplate);
-      setUserClearedCode(false);
-    }
-  }, [selectedLanguage, code, getCodeTemplate, problem?.functionTemplates]);
+  }, [problem, code, getCodeTemplate, selectedLanguage, userClearedCode]);
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
@@ -1384,7 +1373,7 @@ export default function CodeChallengePage() {
             <div className={styles.editorHeaderLeft}>
               <select 
                 value={selectedLanguage} 
-                onChange={(e) => setSelectedLanguage(e.target.value)}
+                onChange={(e) => handleLanguageChange(e.target.value)}
                 className={styles.languageSelect}
               >
                 {languageOptions.map(lang => (
@@ -1440,11 +1429,8 @@ export default function CodeChallengePage() {
                 onChange={(value) => {
                   const newCode = value || '';
                   setCode(newCode);
-                  // If user manually clears all code, respect that
-                  if (newCode.trim() === '') {
-                    setUserClearedCode(true);
-                  } else {
-                    // If user starts typing, they're no longer in "cleared" state
+                  // Reset the cleared state when user starts typing
+                  if (newCode.trim() !== '' && userClearedCode) {
                     setUserClearedCode(false);
                   }
                 }}
