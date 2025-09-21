@@ -130,8 +130,13 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Submit rating error:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
     return NextResponse.json(
-      { error: 'Failed to submit rating' },
+      { error: 'Failed to submit rating', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

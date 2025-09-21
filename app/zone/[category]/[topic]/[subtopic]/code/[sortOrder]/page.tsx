@@ -875,6 +875,18 @@ export default function CodeChallengePage() {
     };
   }, [checkUserSession, fetchOrGenerateProblem, handleError]);
 
+  // Debug: Log share button visibility conditions
+  useEffect(() => {
+    console.log('Share button visibility check:', {
+      'problem?.is_ai_generated': problem?.is_ai_generated,
+      'user?.authenticated': user?.authenticated,
+      'user?.id': user?.id,
+      'problem?.user_id': problem?.user_id,
+      'isOwner': user?.id && problem?.user_id && problem?.user_id === user?.id,
+      'shouldShowShare': problem?.is_ai_generated && user?.authenticated && user?.id && problem?.user_id && problem?.user_id === user?.id
+    });
+  }, [user, problem]);
+
   // Handle code execution
   const runCode = async () => {
     if (!problem || !code.trim()) {
@@ -1048,11 +1060,18 @@ export default function CodeChallengePage() {
         // Refresh problem data to get updated rating
         // fetchOrGenerateProblem();
       } else {
-        throw new Error('Failed to submit rating');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Rating submission failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(errorData.details || errorData.error || 'Failed to submit rating');
       }
     } catch (error) {
       console.error('Error submitting rating:', error);
-      showNotification('Failed to submit rating. Please try again.', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit rating. Please try again.';
+      showNotification(errorMessage, 'error');
     }
   };
 
@@ -1354,8 +1373,8 @@ export default function CodeChallengePage() {
                 Rate
               </button>
               
-              {/* Make Public Button */}
-              {user?.authenticated && problem?.user_id === user?.id && (
+              {/* Make Public Button - Show for authenticated users who own the problem */}
+              {user?.authenticated && user?.id && problem?.user_id && problem?.user_id === user?.id && (
                 <button 
                   onClick={() => setShowPublicDialog(true)}
                   className={styles.actionButton}
