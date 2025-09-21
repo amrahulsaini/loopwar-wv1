@@ -965,6 +965,24 @@ export default function CodeChallengePage() {
       return;
     }
 
+    // Check if code has been run and all test cases pass
+    if (!executionResult) {
+      showNotification('Please run your code first to verify it works!', 'warning');
+      return;
+    }
+
+    if (!executionResult.isCorrect) {
+      showNotification('All test cases must pass before you can submit your solution!', 'error');
+      return;
+    }
+
+    // Additional check for test case results
+    const testCases = executionResult.detailedAnalysis?.testCases;
+    if (testCases && testCases.total > 0 && testCases.passed !== testCases.total) {
+      showNotification(`Only ${testCases.passed}/${testCases.total} test cases passed. All test cases must pass before submission!`, 'error');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -986,9 +1004,8 @@ export default function CodeChallengePage() {
 
       if (response.ok) {
         const result = await response.json();
-        showNotification('Code submitted successfully!', 'success');
-        // Optionally run the code after submission
-        await runCode();
+        showNotification('🎉 Congratulations! Code submitted successfully - All test cases passed!', 'success');
+        // Don't run code again since we already verified it passes
       } else {
         throw new Error('Failed to submit code');
       }
@@ -1664,9 +1681,23 @@ export default function CodeChallengePage() {
               </button>
               <button 
                 onClick={submitCode}
-                disabled={isSubmitting || !user?.authenticated}
+                disabled={
+                  isSubmitting || 
+                  !user?.authenticated || 
+                  !executionResult || 
+                  !executionResult.isCorrect ||
+                  (executionResult.detailedAnalysis?.testCases && executionResult.detailedAnalysis.testCases.passed !== executionResult.detailedAnalysis.testCases.total)
+                }
                 className={styles.submitButton}
-                title={!user?.authenticated ? 'Please login to submit' : 'Submit your solution'}
+                title={
+                  !user?.authenticated 
+                    ? 'Please login to submit' 
+                    : !executionResult 
+                    ? 'Run your code first to verify it works'
+                    : !executionResult.isCorrect
+                    ? 'All test cases must pass before submission'
+                    : 'Submit your solution'
+                }
               >
                 {isSubmitting ? (
                   <>
