@@ -158,6 +158,15 @@ CRITICAL FORMATTING RULES:
 - For code blocks use triple backticks: \`\`\`code\`\`\`
 - ABSOLUTELY NO CSS class names or HTML formatting in the output
 
+CRITICAL JSON FORMATTING:
+- ALL STRING VALUES must be properly escaped
+- NO unescaped newlines in JSON strings - use \\n instead
+- NO unescaped quotes in JSON strings - use \\" instead
+- Keep JSON structure clean and valid
+- DO NOT include any text after the closing }
+- Ensure all braces { } are properly matched
+- NEVER truncate the JSON - complete all fields fully
+
 EXAMPLES OF WHAT NOT TO DO:
 - "format-code">variable
 - class="format-keyword"
@@ -275,7 +284,7 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
         const aiResult = await response.json();
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Simplified JSON cleaning function
+        // Enhanced JSON cleaning function
         function cleanJsonString(jsonStr: string): string {
           console.log('Raw AI text (first 500 chars):', jsonStr.substring(0, 500));
           
@@ -293,10 +302,16 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
             cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
           }
           
-          // Only essential cleaning
+          // Fix common JSON issues that break parsing
           cleaned = cleaned
+            // Fix unescaped newlines in string values (preserve structure)
+            .replace(/(?<!\\)\n(?=\s*[^"}])/g, '\\n')
+            .replace(/(?<!\\)\r(?=\s*[^"}])/g, '\\r')
+            .replace(/(?<!\\)\t(?=\s*[^"}])/g, '\\t')
             // Remove any trailing commas before closing braces/brackets
-            .replace(/,(\s*[}\]])/g, '$1');
+            .replace(/,(\s*[}\]])/g, '$1')
+            // Collapse multiple spaces but preserve structure
+            .replace(/\s+/g, ' ');
           
           return cleaned;
         }
@@ -309,8 +324,49 @@ Generate a problem specifically based on "${problemTitle}" and "${problemDescrip
           console.log('AI generation successful');
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
-          console.error('Problematic JSON:', cleanedText);
-          throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+          console.error('Problematic JSON (first 2000 chars):', cleanedText.substring(0, 2000));
+          
+          // Try to fix common JSON issues and parse again
+          try {
+            console.log('Attempting to fix JSON issues...');
+            let fixedJson = cleanedText;
+            
+            // Find where the error roughly occurred (around position 1954)
+            const errorPos = 1950;
+            const beforeError = cleanedText.substring(errorPos - 50, errorPos + 50);
+            console.log('Context around error position:', beforeError);
+            
+            // More targeted fixes
+            fixedJson = fixedJson
+              // Escape any unescaped newlines properly
+              .replace(/([^\\])\n/g, '$1\\n')
+              .replace(/([^\\])\r/g, '$1\\r')
+              .replace(/([^\\])\t/g, '$1\\t')
+              // Fix any unescaped quotes in the middle of strings
+              .replace(/"([^"]*)"([^,:}\]]+[^,}\]]*)"([^,}\]]*)/g, '"$1$2$3"')
+              // Remove any stray characters after JSON
+              .replace(/}[^}]*$/, '}');
+            
+            // If the JSON was truncated, try to close it properly
+            if (!fixedJson.trim().endsWith('}')) {
+              // Count open braces vs closed braces
+              const openBraces = (fixedJson.match(/{/g) || []).length;
+              const closeBraces = (fixedJson.match(/}/g) || []).length;
+              const missingBraces = openBraces - closeBraces;
+              
+              if (missingBraces > 0) {
+                console.log(`Adding ${missingBraces} missing closing braces`);
+                fixedJson += '}'.repeat(missingBraces);
+              }
+            }
+            
+            generatedProblem = JSON.parse(fixedJson);
+            console.log('JSON fixed and parsed successfully');
+          } catch (secondParseError) {
+            console.error('Second parse attempt also failed:', secondParseError);
+            console.error('JSON around error position:', cleanedText.substring(Math.max(0, 1950), 2050));
+            throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+          }
         }
       } else {
         const errorText = await response.text();
