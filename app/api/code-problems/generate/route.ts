@@ -31,12 +31,6 @@ interface CodeProblemRow extends RowDataPacket {
   updated_at: string;
 }
 
-// Initialize Gemini AI
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is required');
-}
-
 interface TestCase {
   input: string;
   expected: string;
