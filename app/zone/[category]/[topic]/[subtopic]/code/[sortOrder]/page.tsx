@@ -1099,6 +1099,16 @@ export default function CodeChallengePage() {
     );
   }
 
+  // At this point, problem is guaranteed to exist or we're loading
+  if (!problem) {
+    return (
+      <div className={styles.loadingContainer}>
+        <LoadingSpinner />
+        <p>Loading code challenge...</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {/* Header */}
