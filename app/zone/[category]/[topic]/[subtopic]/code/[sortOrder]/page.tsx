@@ -683,12 +683,15 @@ export default function CodeChallengePage() {
               return; // Exit early since we're navigating away
             }
             
+            // Set the generated problem immediately to prevent "Problem Not Found" flash
             setProblem(generatedProblem);
+            setIsLoading(false);
+            setIsGeneratingProblem(false);
             
-            // Force a complete refetch after generation to ensure persistence
+            // Background verification without affecting UI - no setProblem() calls
             setTimeout(async () => {
               try {
-                console.log('Force refetching problem after generation...');
+                console.log('Background verification of generated problem...');
                 const timestamp = Date.now();
                 const verifyResponse = await fetch(`/api/code-problems/by-location?category=${category}&topic=${topic}&subtopic=${subtopic}&sortOrder=${sortOrder}&t=${timestamp}`, {
                   cache: 'no-store',
@@ -700,24 +703,25 @@ export default function CodeChallengePage() {
                 });
                 if (verifyResponse.ok) {
                   const verifiedProblem = await verifyResponse.json();
-                  console.log('Verified problem after generation:', {
+                  console.log('Background verification successful:', {
                     id: verifiedProblem.id,
                     title: verifiedProblem.title,
                     testCasesCount: verifiedProblem.testCases?.length || 0,
-                    testCasesData: verifiedProblem.testCases,
-                    hasTestCases: !verifiedProblem.needs_generation,
-                    needsGeneration: verifiedProblem.needs_generation,
-                    functionTemplatesKeys: verifiedProblem.functionTemplates ? Object.keys(verifiedProblem.functionTemplates) : 'None'
+                    persistedSuccessfully: !verifiedProblem.needs_generation
                   });
-                  // Always update with the verified problem from database
-                  setProblem(verifiedProblem);
+                  // Only update if the generated problem is actually different
+                  if (verifiedProblem.id !== generatedProblem.id || 
+                      verifiedProblem.testCases?.length !== generatedProblem.testCases?.length) {
+                    console.log('Updating with verified problem due to differences');
+                    setProblem(verifiedProblem);
+                  }
                 } else {
-                  console.error('Verification fetch failed with status:', verifyResponse.status);
+                  console.error('Background verification failed with status:', verifyResponse.status);
                 }
               } catch (error) {
-                console.error('Verification fetch failed:', error);
+                console.error('Background verification failed:', error);
               }
-            }, 2000); // Increased delay to 2 seconds
+            }, 1000); // Reduced delay to 1 second for background check
           } else {
             // Use the base problem data with minimal enhancements
             setProblem({
@@ -1062,7 +1066,8 @@ export default function CodeChallengePage() {
     );
   }
 
-  if (isLoading) {
+  // Show loading state during initial load or generation
+  if (isLoading || isGeneratingProblem) {
     return (
       <div className={styles.loadingContainer}>
         <LoadingSpinner />
@@ -1077,7 +1082,8 @@ export default function CodeChallengePage() {
     );
   }
 
-  if (!problem) {
+  // Only show "Problem Not Found" if we're not loading and definitely have no problem
+  if (!problem && !isLoading && !isGeneratingProblem) {
     return (
       <div className={styles.errorContainer}>
         <div className={styles.errorIcon}>
