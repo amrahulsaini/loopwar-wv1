@@ -96,115 +96,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if code problem already exists and find next available sort order
+    // Always generate new problems - no more constraint limitations
     let finalSortOrder = sortOrder;
     
-    // First, check if a problem with the same title already exists for this location
-    if (baseProblem && baseProblem.title && !isRegeneration) {
-      console.log(`Checking for existing problem with title: "${baseProblem.title}"`);
-      
-      const existingProblemWithTitle = await Database.query(
-        `SELECT id, sort_order, title, description, difficulty, constraints, examples, 
-                hints, time_complexity, space_complexity, test_cases, function_templates,
-                is_ai_generated, created_at, updated_at 
-         FROM code_problems 
-         WHERE category = ? AND topic = ? AND subtopic = ? AND title = ?
-         ORDER BY created_at DESC LIMIT 1`,
-        [category, topic, subtopic, baseProblem.title]
-      ) as CodeProblemRow[];
+    // Note: We removed the title-based caching since each user should be able to 
+    // generate their own version of problems, even with the same title
+    console.log(`Generating new problem for user ${userId || 'guest'} with title: "${baseProblem?.title || 'Generated Problem'}"`);
 
-      if (existingProblemWithTitle && existingProblemWithTitle.length > 0) {
-        // Found existing problem with same title - return it instead of creating new one
-        const problem = existingProblemWithTitle[0];
-        console.log(`Found existing problem with same title "${baseProblem.title}" at sort_order ${problem.sort_order}, returning cached version`);
-        
-        // Format display names
-        const formatDisplayName = (urlName: string) => {
-          return urlName
-            .replace(/-/g, ' ')
-            .replace(/and/g, '&')
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        };
-
-        // Parse JSON fields safely
-        let parsedHints: string[] = [];
-        let parsedTestCases: Array<{ input: string; expected: string; explanation?: string }> = [];
-        let parsedFunctionTemplates: Record<string, string> = {};
-
-        try {
-          parsedHints = problem.hints ? JSON.parse(problem.hints) : [];
-        } catch (e) {
-          parsedHints = ["Think step by step", "Consider edge cases"];
-        }
-
-        try {
-          parsedTestCases = problem.test_cases ? JSON.parse(problem.test_cases) : [];
-        } catch (e) {
-          parsedTestCases = [{ input: "sample", expected: "result", explanation: "example" }];
-        }
-
-        try {
-          parsedFunctionTemplates = problem.function_templates ? JSON.parse(problem.function_templates) : {};
-        } catch (e) {
-          parsedFunctionTemplates = {};
-        }
-
-        const responseData = {
-          id: problem.id,
-          title: problem.title,
-          description: problem.description,
-          difficulty: problem.difficulty,
-          category: problem.category,
-          topic: problem.topic,
-          subtopic: problem.subtopic,
-          sort_order: problem.sort_order,
-          constraints: problem.constraints,
-          examples: problem.examples,
-          hints: parsedHints,
-          timeComplexity: problem.time_complexity,
-          spaceComplexity: problem.space_complexity,
-          testCases: parsedTestCases,
-          functionTemplates: parsedFunctionTemplates,
-          category_name: formatDisplayName(category),
-          topic_name: formatDisplayName(topic),
-          subtopic_name: formatDisplayName(subtopic),
-          is_ai_generated: problem.is_ai_generated,
-          created_at: problem.created_at,
-          updated_at: problem.updated_at
-        };
-
-        console.log(`Returning cached problem: ${problem.title} (ID: ${problem.id})`);
-        return NextResponse.json(responseData);
-      } else {
-        console.log(`No existing problem found with title "${baseProblem.title}", will generate new one`);
-      }
-    }
-
-    // If we reach here, we need to generate a new problem
+    // For new problems, always use the provided sort order or find next available
     if (!isRegeneration) {
-      // For new problems, find the next available sort order to create a new record
-      const existingProblems = await Database.query(
-        `SELECT sort_order FROM code_problems 
-         WHERE category = ? AND topic = ? AND subtopic = ? 
-         ORDER BY sort_order DESC`,
-        [category, topic, subtopic]
-      ) as Array<{ sort_order: number }>;
-
-      if (existingProblems && existingProblems.length > 0) {
-        // Find the highest sort order and increment
-        const maxSortOrder = Math.max(...existingProblems.map(p => p.sort_order));
-        finalSortOrder = maxSortOrder + 1;
-        console.log(`Found existing problems, using next sort order: ${finalSortOrder}`);
-      }
+      // Use the sort order from the URL - this corresponds to the problem they clicked
+      finalSortOrder = sortOrder;
+      console.log(`Using sort order from URL: ${finalSortOrder}`);
     } else {
-      // For regeneration, also create a new record instead of updating
-      // Find the next available sort order even for regeneration
+      // For regeneration, create a new problem with incremented sort order
       const existingProblems = await Database.query(
         `SELECT sort_order FROM code_problems 
          WHERE category = ? AND topic = ? AND subtopic = ? 
-         ORDER BY sort_order DESC`,
+         ORDER BY sort_order DESC LIMIT 1`,
         [category, topic, subtopic]
       ) as Array<{ sort_order: number }>;
 
@@ -212,6 +121,8 @@ export async function POST(request: NextRequest) {
         const maxSortOrder = Math.max(...existingProblems.map(p => p.sort_order));
         finalSortOrder = maxSortOrder + 1;
         console.log(`Regeneration: creating new record with sort order: ${finalSortOrder}`);
+      } else {
+        finalSortOrder = sortOrder;
       }
     }
 

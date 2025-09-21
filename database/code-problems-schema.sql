@@ -1,6 +1,6 @@
 -- Code Problems and Submissions Schema for LoopWar
 
--- Code Problems Table
+-- Code Problems Table - Updated to allow multiple problems per location
 CREATE TABLE IF NOT EXISTS code_problems (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
@@ -13,18 +13,21 @@ CREATE TABLE IF NOT EXISTS code_problems (
     constraints TEXT,
     examples TEXT,
     hints JSON,
-    time_complexity VARCHAR(100),
-    space_complexity VARCHAR(100),
+    time_complexity VARCHAR(500),
+    space_complexity VARCHAR(500),
     test_cases JSON NOT NULL,
+    function_templates JSON COMMENT 'JSON object containing function templates for each supported language (javascript, python, java, cpp, c, csharp, go, rust, php, ruby)',
     is_ai_generated BOOLEAN DEFAULT TRUE,
     user_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_location (category, topic, subtopic, sort_order),
+    -- REMOVED: UNIQUE KEY unique_location (category, topic, subtopic, sort_order), 
+    -- Now multiple problems can exist for the same location
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user_problems (user_id, created_at),
-    INDEX idx_location_user (category, topic, subtopic, sort_order, user_id)
-);
+    INDEX idx_location_latest (category, topic, subtopic, sort_order, created_at DESC),
+    INDEX idx_title_location (category, topic, subtopic, title, created_at DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Code Submissions Table
 CREATE TABLE IF NOT EXISTS code_submissions (
