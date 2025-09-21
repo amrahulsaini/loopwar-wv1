@@ -12,7 +12,7 @@
 .header {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
   border-bottom: 2px solid #e0e0e0;
-  padding: 1.25rem 2rem;
+  padding: 0.75rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -27,6 +27,12 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .backButton {
@@ -3442,11 +3448,32 @@
   object-fit: cover;
 }
 
+.creatorAvatarDefault {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.creatorUsername {
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
 .creatorLink {
   color: #1d4ed8;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .creatorLink:hover {
@@ -3711,4 +3738,54 @@
 
 .publicButton:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* Notification System */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  max-width: 400px;
+  min-width: 300px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-left: 4px solid #2e7d32;
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border-left: 4px solid #c62828;
+}
+
+.notification.warning {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border-left: 4px solid #ef6c00;
+}
+
+.notification.info {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  border-left: 4px solid #1565C0;
+}
+
+.notification:hover {
+  transform: translateX(-5px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
 }

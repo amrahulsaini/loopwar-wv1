@@ -58,6 +58,10 @@ interface ProblemData {
   is_ai_generated?: boolean;
   user_id?: number;
   needs_generation?: boolean;
+  is_public?: boolean;
+  rating?: number;
+  rating_count?: number;
+  submission_count?: number;
   functionTemplates?: {
     javascript: string;
     python: string;
@@ -273,9 +277,16 @@ export default function CodeChallengePage() {
   // Dialog states
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [showPublicDialog, setShowPublicDialog] = useState(false);
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(1); // Start with 1 instead of 0
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [problemCreator, setProblemCreator] = useState<{username: string, profilePicture?: string} | null>(null);
+  
+  // Notification system
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'warning' | 'info';
+    show: boolean;
+  } | null>(null);
   
   // Resizable panel state
   const [leftWidth, setLeftWidth] = useState('30%'); // Problem section (30%)
@@ -283,6 +294,17 @@ export default function CodeChallengePage() {
   
   // Console state
   const [consoleExpanded, setConsoleExpanded] = useState(false);
+
+  // Notification helper function
+  const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    setNotification({ message, type, show: true });
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+      setNotification(prev => prev ? { ...prev, show: false } : null);
+      // Remove notification after animation
+      setTimeout(() => setNotification(null), 300);
+    }, 4000);
+  };
 
   // Function to get the appropriate code template for a language
   const getCodeTemplate = useCallback((language: string): string => {
@@ -917,12 +939,12 @@ export default function CodeChallengePage() {
   // Handle code submit
   const submitCode = async () => {
     if (!problem || !code.trim()) {
-      alert('Please write some code first!');
+      showNotification('Please write some code first!', 'warning');
       return;
     }
 
     if (!user?.authenticated) {
-      alert('Please login to submit your solution!');
+      showNotification('Please login to submit your solution!', 'error');
       return;
     }
 
@@ -947,7 +969,7 @@ export default function CodeChallengePage() {
 
       if (response.ok) {
         const result = await response.json();
-        alert('Code submitted successfully!');
+        showNotification('Code submitted successfully!', 'success');
         // Optionally run the code after submission
         await runCode();
       } else {
@@ -955,7 +977,7 @@ export default function CodeChallengePage() {
       }
     } catch (error) {
       console.error('Error submitting code:', error);
-      alert('Failed to submit code. Please try again.');
+      showNotification('Failed to submit code. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -964,12 +986,12 @@ export default function CodeChallengePage() {
   // Handle rating submission
   const submitRating = async () => {
     if (!problem || !user?.authenticated) {
-      alert('Please login to rate this problem!');
+      showNotification('Please login to rate this problem!', 'error');
       return;
     }
 
     if (rating < 1 || rating > 10) {
-      alert('Please select a rating between 1 and 10!');
+      showNotification('Please select a rating between 1 and 10!', 'warning');
       return;
     }
 
@@ -986,9 +1008,9 @@ export default function CodeChallengePage() {
       });
 
       if (response.ok) {
-        alert('Thank you for rating this problem!');
+        showNotification('Thank you for rating this problem!', 'success');
         setShowRatingDialog(false);
-        setRating(0);
+        setRating(1); // Reset to 1 instead of 0
         // Refresh problem data to get updated rating
         // fetchOrGenerateProblem();
       } else {
@@ -996,14 +1018,14 @@ export default function CodeChallengePage() {
       }
     } catch (error) {
       console.error('Error submitting rating:', error);
-      alert('Failed to submit rating. Please try again.');
+      showNotification('Failed to submit rating. Please try again.', 'error');
     }
   };
 
   // Handle make public
   const makePublic = async (isPublic: boolean) => {
     if (!problem || !user?.authenticated) {
-      alert('Please login to modify problem visibility!');
+      showNotification('Please login to modify problem visibility!', 'error');
       return;
     }
 
@@ -1020,7 +1042,7 @@ export default function CodeChallengePage() {
       });
 
       if (response.ok) {
-        alert(isPublic ? 'Problem is now available to the community!' : 'Problem is now private!');
+        showNotification(isPublic ? 'Problem is now available to the community!' : 'Problem is now private!', 'success');
         setShowPublicDialog(false);
         // Update local problem state
         setProblem(prev => prev ? {...prev, is_public: isPublic} : null);
@@ -1029,27 +1051,29 @@ export default function CodeChallengePage() {
       }
     } catch (error) {
       console.error('Error updating problem visibility:', error);
-      alert('Failed to update problem visibility. Please try again.');
+      showNotification('Failed to update problem visibility. Please try again.', 'error');
     }
   };
 
   // Fetch problem creator info
   const fetchProblemCreator = useCallback(async () => {
-    if (problem?.user_id) {
+    if (problem?.id) {
       try {
-        const response = await fetch(`/api/user/profile/${problem.user_id}`);
+        const response = await fetch(`/api/code-problems/creator?problemId=${problem.id}`);
         if (response.ok) {
-          const userData = await response.json();
-          setProblemCreator({
-            username: userData.username,
-            profilePicture: userData.profile_picture
-          });
+          const data = await response.json();
+          if (data.success && data.creator) {
+            setProblemCreator({
+              username: data.creator.username,
+              profilePicture: data.creator.profilePicture
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching problem creator:', error);
       }
     }
-  }, [problem?.user_id]);
+  }, [problem?.id]);
 
   // Handle code reset
   const resetCode = () => {
@@ -1281,9 +1305,11 @@ export default function CodeChallengePage() {
           </div>
         </div>
         <div className={styles.headerRight}>
-          {/* Problem Actions */}
+          <Logo />
+          
+          {/* Problem Actions - Next to Logo */}
           {problem?.is_ai_generated && (
-            <div className={styles.problemActions}>
+            <div className={styles.headerActions}>
               {/* Rate Problem Button */}
               <button 
                 onClick={() => setShowRatingDialog(true)}
@@ -1308,8 +1334,8 @@ export default function CodeChallengePage() {
               
               {/* Created by info */}
               {problemCreator && (
-                <div className={styles.createdBy}>
-                  <span className={styles.createdByText}>Created by</span>
+                <div className={styles.creatorInfo}>
+                  <span>Created by</span>
                   <Link 
                     href={`/profiles/${problemCreator.username}`}
                     className={styles.creatorLink}
@@ -1333,8 +1359,6 @@ export default function CodeChallengePage() {
               )}
             </div>
           )}
-          
-          <Logo />
         </div>
       </header>
 
@@ -1982,7 +2006,7 @@ export default function CodeChallengePage() {
               <button 
                 onClick={submitRating}
                 className={styles.submitButton}
-                disabled={rating === 0}
+                disabled={rating < 1 || rating > 10}
               >
                 Submit Rating
               </button>
@@ -2038,6 +2062,16 @@ export default function CodeChallengePage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Custom Notification System */}
+      {notification && (
+        <div 
+          className={`${styles.notification} ${notification.show ? styles.show : ''} ${styles[notification.type]}`}
+          onClick={() => setNotification(prev => prev ? { ...prev, show: false } : null)}
+        >
+          {notification.message}
         </div>
       )}
     </div>
