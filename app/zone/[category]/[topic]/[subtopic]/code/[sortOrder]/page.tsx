@@ -479,6 +479,14 @@ export default function CodeChallengePage() {
 
   // Format test cases for different programming languages
   const formatTestCaseForLanguage = (testCase: TestCase, language: string) => {
+    if (!testCase) {
+      return {
+        input: 'No input provided',
+        expected: 'No expected output',
+        explanation: 'Test case data is not available'
+      };
+    }
+
     const input = testCase.input || '';
     const expected = testCase.expected || '';
     
@@ -551,25 +559,34 @@ export default function CodeChallengePage() {
       }
     };
 
-    // Format input - handle multiple variable declarations
-    let formattedInput = input;
-    if (input.includes('=')) {
-      const declarations = input.split(',').map(decl => decl.trim());
-      formattedInput = declarations
-        .map(decl => formatVariable(decl, language))
-        .join('\n');
-    } else {
-      formattedInput = formatValue(input, language);
+    try {
+      // Format input - handle multiple variable declarations
+      let formattedInput = input;
+      if (input.includes('=')) {
+        const declarations = input.split(',').map(decl => decl.trim());
+        formattedInput = declarations
+          .map(decl => formatVariable(decl, language))
+          .join('\n');
+      } else {
+        formattedInput = formatValue(input, language);
+      }
+
+      // Format expected output
+      const formattedExpected = formatValue(expected, language);
+
+      return {
+        input: formattedInput,
+        expected: formattedExpected,
+        explanation: testCase.explanation || ''
+      };
+    } catch (error) {
+      console.error('Error formatting test case:', error);
+      return {
+        input: input || 'Error formatting input',
+        expected: expected || 'Error formatting expected output',
+        explanation: testCase.explanation || 'Error occurred while formatting test case'
+      };
     }
-
-    // Format expected output
-    const formattedExpected = formatValue(expected, language);
-
-    return {
-      input: formattedInput,
-      expected: formattedExpected,
-      explanation: testCase.explanation || ''
-    };
   };
 
   // Error boundary function
