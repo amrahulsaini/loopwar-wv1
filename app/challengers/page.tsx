@@ -254,6 +254,10 @@ const ChallengersPage: React.FC = () => {
     setShowResults(false);
 
     try {
+      // Validate test cases exist and are properly formatted
+      const testCases = currentProblem.testCases || [];
+      console.log('Test cases:', testCases);
+      
       // Use AI code checking instead of Judge0
       const response = await fetch('/api/code/check', {
         method: 'POST',
@@ -263,8 +267,8 @@ const ChallengersPage: React.FC = () => {
         body: JSON.stringify({
           code,
           language: selectedLanguage,
-          problemDescription: currentProblem.description,
-          testCases: currentProblem.testCases
+          problemDescription: currentProblem.description || 'Solve this coding problem',
+          testCases: testCases
         }),
       });
 
@@ -278,8 +282,13 @@ const ChallengersPage: React.FC = () => {
         throw new Error(result.error || 'AI code checking failed');
       }
       
-      setResults(result.result); // Use result.result to get the actual AI analysis data
-      setShowResults(true);
+      // Ensure result data exists before setting
+      if (result.result) {
+        setResults(result.result);
+        setShowResults(true);
+      } else {
+        throw new Error('Invalid response from AI checker');
+      }
     } catch (error) {
       console.error('Error running code:', error);
       setResults({
@@ -603,55 +612,62 @@ const ChallengersPage: React.FC = () => {
 
                     {/* Test Cases */}
                     {results.detailedAnalysis?.testCases?.results && 
-                      results.detailedAnalysis.testCases.results.map((result, index) => (
-                        <div key={index} className={`${styles.testCase} ${result.passed ? styles.passed : styles.failed}`}>
-                          <div className={styles.testCaseHeader}>
-                            <span className={styles.testNumber}>Test Case {index + 1}</span>
-                            <span className={`${styles.status} ${result.passed ? styles.passed : styles.failed}`}>
-                              {result.passed ? '✅ Passed' : '❌ Failed'}
-                            </span>
-                          </div>
-                          
-                          <div className={styles.testDetails}>
-                            <div className={styles.testDetail}>
-                              <strong>Input:</strong> <code>{result.input}</code>
-                            </div>
-                            <div className={styles.testDetail}>
-                              <strong>Expected:</strong> <code>{result.expectedOutput}</code>
-                            </div>
-                            <div className={styles.testDetail}>
-                              <strong>Actual:</strong> <code>{result.actualOutput}</code>
+                      Array.isArray(results.detailedAnalysis.testCases.results) &&
+                      results.detailedAnalysis.testCases.results.length > 0 &&
+                      results.detailedAnalysis.testCases.results.map((result, index) => {
+                        // Safety check for each result object
+                        if (!result || typeof result !== 'object') return null;
+                        
+                        return (
+                          <div key={index} className={`${styles.testCase} ${result.passed ? styles.passed : styles.failed}`}>
+                            <div className={styles.testCaseHeader}>
+                              <span className={styles.testNumber}>Test Case {index + 1}</span>
+                              <span className={`${styles.status} ${result.passed ? styles.passed : styles.failed}`}>
+                                {result.passed ? '✅ Passed' : '❌ Failed'}
+                              </span>
                             </div>
                             
-                            {result.explanation && (
+                            <div className={styles.testDetails}>
                               <div className={styles.testDetail}>
-                                <strong>Explanation:</strong> {result.explanation}
+                                <strong>Input:</strong> <code>{result.input || 'N/A'}</code>
                               </div>
-                            )}
+                              <div className={styles.testDetail}>
+                                <strong>Expected:</strong> <code>{result.expectedOutput || 'N/A'}</code>
+                              </div>
+                              <div className={styles.testDetail}>
+                                <strong>Actual:</strong> <code>{result.actualOutput || 'N/A'}</code>
+                              </div>
+                              
+                              {result.explanation && (
+                                <div className={styles.testDetail}>
+                                  <strong>Explanation:</strong> {result.explanation}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      }).filter(Boolean)
                     }
 
                     {/* Hints */}
-                    {results.hints && results.hints.length > 0 && (
+                    {results.hints && Array.isArray(results.hints) && results.hints.length > 0 && (
                       <div className={styles.hintsSection}>
                         <h4>💡 Hints</h4>
                         <ul>
                           {results.hints.map((hint, index) => (
-                            <li key={index}>{hint}</li>
+                            <li key={index}>{hint || 'No hint available'}</li>
                           ))}
                         </ul>
                       </div>
                     )}
 
                     {/* Learning Points */}
-                    {results.learningPoints && results.learningPoints.length > 0 && (
+                    {results.learningPoints && Array.isArray(results.learningPoints) && results.learningPoints.length > 0 && (
                       <div className={styles.learningSection}>
                         <h4>📚 Learning Points</h4>
                         <ul>
                           {results.learningPoints.map((point, index) => (
-                            <li key={index}>{point}</li>
+                            <li key={index}>{point || 'No learning point available'}</li>
                           ))}
                         </ul>
                       </div>

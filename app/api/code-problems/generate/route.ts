@@ -129,47 +129,129 @@ export async function POST(request: NextRequest) {
       problemDescription = `Solve this ${subtopicDisplay.toLowerCase()} problem step by step.`;
     }
 
-    // Create a much simpler AI prompt
-    const systemPrompt = `Generate a coding problem as valid JSON only.
+    // Create AI prompt based on the specific problem title and context
+    let systemPrompt: string;
+    
+    if (baseProblem && baseProblem.title) {
+      // User has selected a specific problem title - generate based on that exact title
+      systemPrompt = `Generate a comprehensive coding problem based on the SPECIFIC TITLE provided.
 
-Topic: ${subtopic.replace(/-/g, ' ')}
-Title: ${problemTitle}
-Difficulty: ${problemDifficulty}
+REQUIRED PROBLEM TITLE: "${baseProblem.title}"
+Category: ${category}
+Topic: ${topic}
+Subtopic: ${subtopic.replace(/-/g, ' ')}
+Difficulty: ${baseProblem.difficulty || problemDifficulty}
+
+You MUST create a coding problem that directly matches the title "${baseProblem.title}".
+Make the problem unique and challenging while staying true to the exact title provided.
+The problem should be related to ${subtopic.replace(/-/g, ' ')} concepts.
 
 Return ONLY this JSON structure with no extra text:
 
 {
-  "title": "Problem title here",
-  "description": "Problem description here",
-  "difficulty": "${problemDifficulty}",
-  "constraints": "Constraints here",
-  "examples": "Examples here",
-  "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4"],
-  "timeComplexity": "O(n)",
-  "spaceComplexity": "O(1)",
+  "title": "${baseProblem.title}",
+  "description": "Detailed problem description that directly relates to the title '${baseProblem.title}' and involves ${subtopic.replace(/-/g, ' ')} concepts",
+  "difficulty": "${baseProblem.difficulty || problemDifficulty}",
+  "constraints": "Specific constraints for this problem based on the title",
+  "examples": "Clear examples showing input/output format for '${baseProblem.title}'",
+  "hints": ["Strategic hint 1 for ${baseProblem.title}", "Algorithmic hint 2", "Implementation hint 3", "Optimization hint 4"],
+  "timeComplexity": "Expected optimal time complexity",
+  "spaceComplexity": "Expected space complexity",
   "testCases": [
-    {"input": "example input", "expected": "example output", "explanation": "explanation"},
-    {"input": "example input", "expected": "example output", "explanation": "explanation"},
-    {"input": "example input", "expected": "example output", "explanation": "explanation"},
-    {"input": "example input", "expected": "example output", "explanation": "explanation"},
-    {"input": "example input", "expected": "example output", "explanation": "explanation"},
-    {"input": "example input", "expected": "example output", "explanation": "explanation"}
+    {"input": "realistic test input for ${baseProblem.title}", "expected": "correct output", "explanation": "why this output is correct"},
+    {"input": "edge case input", "expected": "edge output", "explanation": "edge case explanation"},
+    {"input": "complex scenario input", "expected": "complex output", "explanation": "complex case explanation"},
+    {"input": "boundary condition input", "expected": "boundary output", "explanation": "boundary explanation"},
+    {"input": "performance test input", "expected": "performance output", "explanation": "performance test case"},
+    {"input": "corner case input", "expected": "corner output", "explanation": "corner case handling"}
   ],
   "functionTemplates": {
-    "javascript": "function solve() { return null; }",
-    "python": "def solve(): return None",
-    "java": "public int solve() { return 0; }",
-    "cpp": "int solve() { return 0; }",
-    "c": "int solve() { return 0; }",
-    "csharp": "public int Solve() { return 0; }",
-    "go": "func solve() int { return 0 }",
-    "rust": "fn solve() -> i32 { 0 }",
-    "php": "function solve() { return 0; }",
-    "ruby": "def solve; 0; end"
+    "javascript": "function solve${baseProblem.title.replace(/\s+/g, '')}(param1, param2) {\\n    // TODO: Implement solution for ${baseProblem.title}\\n    return null;\\n}",
+    "python": "def solve_${baseProblem.title.toLowerCase().replace(/\s+/g, '_')}(param1, param2):\\n    \\"\\"\\"\\n    TODO: Implement solution for ${baseProblem.title}\\n    \\"\\"\\"\\n    pass",
+    "java": "public class Solution {\\n    public int solve${baseProblem.title.replace(/\s+/g, '')}(int[] param1, int param2) {\\n        // TODO: Implement solution for ${baseProblem.title}\\n        return 0;\\n    }\\n}",
+    "cpp": "class Solution {\\npublic:\\n    int solve${baseProblem.title.replace(/\s+/g, '')}(vector<int>& param1, int param2) {\\n        // TODO: Implement solution for ${baseProblem.title}\\n        return 0;\\n    }\\n};",
+    "c": "int solve_${baseProblem.title.toLowerCase().replace(/\s+/g, '_')}(int* param1, int size, int param2) {\\n    // TODO: Implement solution for ${baseProblem.title}\\n    return 0;\\n}",
+    "csharp": "public class Solution {\\n    public int Solve${baseProblem.title.replace(/\s+/g, '')}(int[] param1, int param2) {\\n        // TODO: Implement solution for ${baseProblem.title}\\n        return 0;\\n    }\\n}",
+    "go": "func solve${baseProblem.title.replace(/\s+/g, '')}(param1 []int, param2 int) int {\\n    // TODO: Implement solution for ${baseProblem.title}\\n    return 0\\n}",
+    "rust": "impl Solution {\\n    pub fn solve_${baseProblem.title.toLowerCase().replace(/\s+/g, '_')}(param1: Vec<i32>, param2: i32) -> i32 {\\n        // TODO: Implement solution for ${baseProblem.title}\\n        0\\n    }\\n}",
+    "php": "function solve${baseProblem.title.replace(/\s+/g, '')}($param1, $param2) {\\n    // TODO: Implement solution for ${baseProblem.title}\\n    return 0;\\n}",
+    "ruby": "def solve_${baseProblem.title.toLowerCase().replace(/\s+/g, '_')}(param1, param2)\\n    # TODO: Implement solution for ${baseProblem.title}\\n    0\\nend"
   }
 }`;
+    } else {
+      // Fallback for when no specific title is provided (original random generation)
+      const problemTypes = [
+        'array manipulation', 'string processing', 'mathematical calculation', 'data structure implementation',
+        'algorithm optimization', 'pattern matching', 'sorting and searching', 'graph traversal',
+        'dynamic programming', 'greedy algorithm', 'two pointer technique', 'sliding window',
+        'hash table operations', 'binary search', 'recursion and backtracking'
+      ];
+      
+      const complexity_levels = {
+        'Easy': ['simple iteration', 'basic conditions', 'direct calculation', 'straightforward logic'],
+        'Medium': ['nested loops', 'multiple conditions', 'intermediate algorithms', 'data structure usage'],
+        'Hard': ['complex algorithms', 'advanced optimization', 'multiple data structures', 'edge case handling']
+      };
+      
+      const randomProblemType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+      const randomComplexity = complexity_levels[problemDifficulty as keyof typeof complexity_levels];
+      const randomComplexityHint = randomComplexity[Math.floor(Math.random() * randomComplexity.length)];
+      const randomSeed = Math.floor(Math.random() * 10000);
+      
+      systemPrompt = `Generate a UNIQUE and CREATIVE coding problem as valid JSON only.
 
-    console.log('Generating AI problem for:', { problemTitle, category, topic, subtopic });
+REQUIREMENTS:
+- Topic: ${subtopic.replace(/-/g, ' ')}
+- Problem Type: ${randomProblemType}
+- Complexity Focus: ${randomComplexityHint}
+- Difficulty: ${problemDifficulty}
+- Uniqueness Seed: ${randomSeed}
+
+CREATE A COMPLETELY ORIGINAL PROBLEM that involves ${randomProblemType} with ${randomComplexityHint}.
+Make it different from common coding problems. Be creative and innovative!
+
+Return ONLY this JSON structure with no extra text:
+
+{
+  "title": "Creative and unique problem title here",
+  "description": "Detailed problem description with clear requirements and innovative twist",
+  "difficulty": "${problemDifficulty}",
+  "constraints": "Specific constraints for this unique problem",
+  "examples": "Multiple clear examples showing input/output format",
+  "hints": ["Creative hint 1", "Algorithmic hint 2", "Implementation hint 3", "Optimization hint 4"],
+  "timeComplexity": "Expected optimal time complexity",
+  "spaceComplexity": "Expected space complexity",
+  "testCases": [
+    {"input": "realistic test input", "expected": "correct output", "explanation": "why this output"},
+    {"input": "edge case input", "expected": "edge output", "explanation": "edge case explanation"},
+    {"input": "complex input", "expected": "complex output", "explanation": "complex case explanation"},
+    {"input": "boundary input", "expected": "boundary output", "explanation": "boundary explanation"},
+    {"input": "stress test input", "expected": "stress output", "explanation": "performance test"},
+    {"input": "corner case input", "expected": "corner output", "explanation": "corner case handling"}
+  ],
+  "functionTemplates": {
+    "javascript": "function solveProblem(param1, param2) {\\n    // TODO: Implement your solution\\n    return null;\\n}",
+    "python": "def solve_problem(param1, param2):\\n    \\"\\"\\"\\n    TODO: Implement your solution\\n    \\"\\"\\"\\n    pass",
+    "java": "public class Solution {\\n    public int solveProblem(int[] param1, int param2) {\\n        // TODO: Implement your solution\\n        return 0;\\n    }\\n}",
+    "cpp": "class Solution {\\npublic:\\n    int solveProblem(vector<int>& param1, int param2) {\\n        // TODO: Implement your solution\\n        return 0;\\n    }\\n};",
+    "c": "int solveProblem(int* param1, int size, int param2) {\\n    // TODO: Implement your solution\\n    return 0;\\n}",
+    "csharp": "public class Solution {\\n    public int SolveProblem(int[] param1, int param2) {\\n        // TODO: Implement your solution\\n        return 0;\\n    }\\n}",
+    "go": "func solveProblem(param1 []int, param2 int) int {\\n    // TODO: Implement your solution\\n    return 0\\n}",
+    "rust": "impl Solution {\\n    pub fn solve_problem(param1: Vec<i32>, param2: i32) -> i32 {\\n        // TODO: Implement your solution\\n        0\\n    }\\n}",
+    "php": "function solveProblem($param1, $param2) {\\n    // TODO: Implement your solution\\n    return 0;\\n}",
+    "ruby": "def solve_problem(param1, param2)\\n    # TODO: Implement your solution\\n    0\\nend"
+  }
+}`;
+    }
+
+    console.log('Generating AI problem for:', { 
+      problemTitle, 
+      category, 
+      topic, 
+      subtopic, 
+      baseProblemTitle: baseProblem?.title || 'None',
+      hasBaseProblem: !!baseProblem 
+    });
     console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
     
     // Generate with fallback structure
