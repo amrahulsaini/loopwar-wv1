@@ -24,7 +24,12 @@ import {
   TestTube,
   FileCode,
   Brain,
-  SeparatorHorizontal
+  SeparatorHorizontal,
+  Upload,
+  Star,
+  Plus,
+  Users,
+  Eye
 } from 'lucide-react';
 import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
@@ -118,6 +123,7 @@ interface ExecutionResult {
 }
 
 interface UserData {
+  id: number;
   username: string;
   authenticated: boolean;
 }
@@ -263,6 +269,13 @@ export default function CodeChallengePage() {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [userClearedCode, setUserClearedCode] = useState(false);
+  
+  // Dialog states
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [showPublicDialog, setShowPublicDialog] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [problemCreator, setProblemCreator] = useState<{username: string, profilePicture?: string} | null>(null);
   
   // Resizable panel state
   const [leftWidth, setLeftWidth] = useState('30%'); // Problem section (30%)
@@ -585,12 +598,14 @@ export default function CodeChallengePage() {
       if (response.ok) {
         const userData = await response.json();
         setUser({
+          id: userData.id || 0,
           username: userData.username,
           authenticated: userData.authenticated
         });
       } else {
         console.warn('User session check failed, using guest mode');
         setUser({
+          id: 0,
           username: 'Guest',
           authenticated: false
         });
@@ -602,6 +617,7 @@ export default function CodeChallengePage() {
         console.error('Error checking user session:', error);
       }
       setUser({
+        id: 0,
         username: 'Guest',
         authenticated: false
       });
@@ -898,6 +914,143 @@ export default function CodeChallengePage() {
     }
   };
 
+  // Handle code submit
+  const submitCode = async () => {
+    if (!problem || !code.trim()) {
+      alert('Please write some code first!');
+      return;
+    }
+
+    if (!user?.authenticated) {
+      alert('Please login to submit your solution!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/code-problems/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          problemId: problem.id,
+          code,
+          language: selectedLanguage,
+          category,
+          topic,
+          subtopic,
+          sortOrder: parseInt(sortOrder)
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert('Code submitted successfully!');
+        // Optionally run the code after submission
+        await runCode();
+      } else {
+        throw new Error('Failed to submit code');
+      }
+    } catch (error) {
+      console.error('Error submitting code:', error);
+      alert('Failed to submit code. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle rating submission
+  const submitRating = async () => {
+    if (!problem || !user?.authenticated) {
+      alert('Please login to rate this problem!');
+      return;
+    }
+
+    if (rating < 1 || rating > 10) {
+      alert('Please select a rating between 1 and 10!');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/code-problems/rate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          problemId: problem.id,
+          rating: rating
+        }),
+      });
+
+      if (response.ok) {
+        alert('Thank you for rating this problem!');
+        setShowRatingDialog(false);
+        setRating(0);
+        // Refresh problem data to get updated rating
+        // fetchOrGenerateProblem();
+      } else {
+        throw new Error('Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      alert('Failed to submit rating. Please try again.');
+    }
+  };
+
+  // Handle make public
+  const makePublic = async (isPublic: boolean) => {
+    if (!problem || !user?.authenticated) {
+      alert('Please login to modify problem visibility!');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/code-problems/make-public', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          problemId: problem.id,
+          isPublic: isPublic
+        }),
+      });
+
+      if (response.ok) {
+        alert(isPublic ? 'Problem is now available to the community!' : 'Problem is now private!');
+        setShowPublicDialog(false);
+        // Update local problem state
+        setProblem(prev => prev ? {...prev, is_public: isPublic} : null);
+      } else {
+        throw new Error('Failed to update problem visibility');
+      }
+    } catch (error) {
+      console.error('Error updating problem visibility:', error);
+      alert('Failed to update problem visibility. Please try again.');
+    }
+  };
+
+  // Fetch problem creator info
+  const fetchProblemCreator = useCallback(async () => {
+    if (problem?.user_id) {
+      try {
+        const response = await fetch(`/api/user/profile/${problem.user_id}`);
+        if (response.ok) {
+          const userData = await response.json();
+          setProblemCreator({
+            username: userData.username,
+            profilePicture: userData.profile_picture
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching problem creator:', error);
+      }
+    }
+  }, [problem?.user_id]);
+
   // Handle code reset
   const resetCode = () => {
     setCode(getCodeTemplate(selectedLanguage));
@@ -931,6 +1084,11 @@ export default function CodeChallengePage() {
       setCode(template);
     }
   }, [problem]); // Only runs when problem loads, not when code changes
+
+  // Fetch problem creator info when problem changes
+  useEffect(() => {
+    fetchProblemCreator();
+  }, [fetchProblemCreator]);
 
   // Resize handlers for panels
   const handleLeftResize = (e: React.MouseEvent) => {
@@ -1123,6 +1281,59 @@ export default function CodeChallengePage() {
           </div>
         </div>
         <div className={styles.headerRight}>
+          {/* Problem Actions */}
+          {problem?.is_ai_generated && (
+            <div className={styles.problemActions}>
+              {/* Rate Problem Button */}
+              <button 
+                onClick={() => setShowRatingDialog(true)}
+                className={styles.actionButton}
+                title="Rate this problem"
+              >
+                <Star size={16} />
+                Rate
+              </button>
+              
+              {/* Make Public Button */}
+              {user?.authenticated && problem?.user_id === user?.id && (
+                <button 
+                  onClick={() => setShowPublicDialog(true)}
+                  className={styles.actionButton}
+                  title="Share with community"
+                >
+                  <Plus size={16} />
+                  Share
+                </button>
+              )}
+              
+              {/* Created by info */}
+              {problemCreator && (
+                <div className={styles.createdBy}>
+                  <span className={styles.createdByText}>Created by</span>
+                  <Link 
+                    href={`/profiles/${problemCreator.username}`}
+                    className={styles.creatorLink}
+                  >
+                    {problemCreator.profilePicture ? (
+                      <img 
+                        src={problemCreator.profilePicture} 
+                        alt={problemCreator.username}
+                        className={styles.creatorAvatar}
+                      />
+                    ) : (
+                      <div className={styles.creatorAvatarDefault}>
+                        {problemCreator.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className={styles.creatorUsername}>
+                      {problemCreator.username}
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+          
           <Logo />
         </div>
       </header>
@@ -1407,6 +1618,24 @@ export default function CodeChallengePage() {
                   <>
                     <Play size={16} />
                     Run Code
+                  </>
+                )}
+              </button>
+              <button 
+                onClick={submitCode}
+                disabled={isSubmitting || !user?.authenticated}
+                className={styles.submitButton}
+                title={!user?.authenticated ? 'Please login to submit' : 'Submit your solution'}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className={styles.spinner}></div>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    Submit
                   </>
                 )}
               </button>
@@ -1706,6 +1935,111 @@ export default function CodeChallengePage() {
         </div>
         </div>
       </main>
+
+      {/* Rating Dialog */}
+      {showRatingDialog && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialogBox}>
+            <div className={styles.dialogHeader}>
+              <h3>Rate this Problem</h3>
+              <p>Help others by rating this LoopAI generated problem</p>
+            </div>
+            <div className={styles.dialogContent}>
+              <div className={styles.ratingSection}>
+                <label>Rate out of 10:</label>
+                <div className={styles.ratingSlider}>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={rating}
+                    onChange={(e) => setRating(parseInt(e.target.value))}
+                    className={styles.slider}
+                  />
+                  <div className={styles.ratingValue}>{rating}/10</div>
+                </div>
+                <div className={styles.ratingStars}>
+                  {[...Array(10)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={20}
+                      fill={i < rating ? '#ffd700' : 'none'}
+                      color={i < rating ? '#ffd700' : '#ddd'}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setRating(i + 1)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className={styles.dialogActions}>
+              <button 
+                onClick={() => setShowRatingDialog(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={submitRating}
+                className={styles.submitButton}
+                disabled={rating === 0}
+              >
+                Submit Rating
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Make Public Dialog */}
+      {showPublicDialog && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialogBox}>
+            <div className={styles.dialogHeader}>
+              <h3>Share with Community</h3>
+              <p>Make this problem publicly available for other users to practice?</p>
+            </div>
+            <div className={styles.dialogContent}>
+              <div className={styles.publicInfo}>
+                <div className={styles.publicOption}>
+                  <Users size={24} />
+                  <div>
+                    <h4>Make Public</h4>
+                    <p>Other users can discover and solve this problem</p>
+                  </div>
+                </div>
+                <div className={styles.publicOption}>
+                  <Eye size={24} />
+                  <div>
+                    <h4>Keep Private</h4>
+                    <p>Only you can access this problem</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.dialogActions}>
+              <button 
+                onClick={() => setShowPublicDialog(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => makePublic(false)}
+                className={styles.privateButton}
+              >
+                Keep Private
+              </button>
+              <button 
+                onClick={() => makePublic(true)}
+                className={styles.publicButton}
+              >
+                Make Public
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
