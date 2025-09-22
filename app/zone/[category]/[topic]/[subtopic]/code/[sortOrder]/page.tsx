@@ -1345,7 +1345,6 @@ export default function CodeChallengePage() {
         <div className={styles.headerLeft}>
           <Link href={`/zone/${category}/${topic}/${subtopic}`} className={styles.backButton}>
             <ArrowLeft size={16} />
-            Back
           </Link>
           <div className={styles.breadcrumb}>
             <span>{categoryDisplay}</span>
@@ -1369,7 +1368,6 @@ export default function CodeChallengePage() {
                 title="Platform Information"
               >
                 <Info size={16} />
-                Info
               </button>
               
               {/* Rate Problem Button */}
@@ -1379,7 +1377,6 @@ export default function CodeChallengePage() {
                 title="Rate this problem"
               >
                 <Star size={16} />
-                Rate
               </button>
               
               {/* Make Public Button - Show for authenticated users who own the problem */}
@@ -1390,7 +1387,6 @@ export default function CodeChallengePage() {
                   title="Share with community"
                 >
                   <Plus size={16} />
-                  Share
                 </button>
               )}
               
@@ -2146,51 +2142,51 @@ export default function CodeChallengePage() {
         <div className={styles.dialogOverlay}>
           <div className={styles.dialogBox}>
             <div className={styles.dialogHeader}>
-              <h3>LoopAI Platform Information</h3>
-              <p>Everything you need to know about LoopAI powered problems</p>
+              <h3>LoopAI Platform Guidelines</h3>
+              <p>Essential information about our AI-powered coding platform</p>
             </div>
             <div className={styles.dialogContent}>
               <div className={styles.infoList}>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>1</div>
                   <div className={styles.infoText}>
-                    In this page, all the problems are LoopAI crafted - none of the problems are human made.
+                    All problems on this platform are exclusively crafted by LoopAI. Every challenge is AI-generated to ensure consistent quality and educational value.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>2</div>
                   <div className={styles.infoText}>
-                    Over the top of problems and structured content, LoopAI is trained to generate the question problems.
+                    Our advanced LoopAI system is trained on comprehensive programming concepts to generate well-structured, challenging problems with optimal learning outcomes.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>3</div>
                   <div className={styles.infoText}>
-                    You can rate the problem so it could be visible to more users and even your credits will too be shared.
+                    Rate problems to help improve visibility for other users. Your ratings contribute to the community and enhance your reputation credits.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>4</div>
                   <div className={styles.infoText}>
-                    Make your problem public to make it publicly available to the community.
+                    Share your solved problems with the community by making them public. This helps other learners discover quality practice material.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>5</div>
                   <div className={styles.infoText}>
-                    Submit your problem to increase your problem solved numbers and points.
+                    Submit your solutions to track your progress. Successfully solved problems contribute to your achievement points and coding statistics.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>6</div>
                   <div className={styles.infoText}>
-                    If a question is wrong or any test cases are wrong, just contact the LoopAI workspace to make all edits with a conversation.
+                    Found an error in a problem or test case? Contact our LoopAI support team for quick resolution through our feedback system.
                   </div>
                 </div>
                 <div className={styles.infoItem}>
                   <div className={styles.infoNumber}>7</div>
                   <div className={styles.infoText}>
-                    Your feedback is too mandatory, so please feel free to provide us feedback.
+                    Your feedback drives our platform improvement. Please share your experience and suggestions to help us enhance the learning experience.
                   </div>
                 </div>
               </div>
