@@ -31,7 +31,6 @@ import {
   Users,
   Eye
 } from 'lucide-react';
-import Logo from '../../../../../../components/Logo';
 import LoadingSpinner from '../../../../../../components/LoadingSpinner';
 import styles from './CodeChallenge.module.css';
 
@@ -277,6 +276,7 @@ export default function CodeChallengePage() {
   // Dialog states
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [showPublicDialog, setShowPublicDialog] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [rating, setRating] = useState(1); // Start with 1 instead of 0
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [problemCreator, setProblemCreator] = useState<{username: string, profilePicture?: string} | null>(null);
@@ -1358,11 +1358,20 @@ export default function CodeChallengePage() {
           </div>
         </div>
         <div className={styles.headerRight}>
-          <Logo />
           
-          {/* Problem Actions - Next to Logo */}
+          {/* Problem Actions */}
           {problem?.is_ai_generated && (
             <div className={styles.headerActions}>
+              {/* Info Button */}
+              <button 
+                onClick={() => setShowInfoDialog(true)}
+                className={styles.actionButton}
+                title="Platform Information"
+              >
+                <Info size={16} />
+                Info
+              </button>
+              
               {/* Rate Problem Button */}
               <button 
                 onClick={() => setShowRatingDialog(true)}
@@ -2126,6 +2135,72 @@ export default function CodeChallengePage() {
                 className={styles.publicButton}
               >
                 Make Public
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Info Dialog */}
+      {showInfoDialog && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialogBox}>
+            <div className={styles.dialogHeader}>
+              <h3>LoopAI Platform Information</h3>
+              <p>Everything you need to know about LoopAI powered problems</p>
+            </div>
+            <div className={styles.dialogContent}>
+              <div className={styles.infoList}>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>1</div>
+                  <div className={styles.infoText}>
+                    In this page, all the problems are LoopAI crafted - none of the problems are human made.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>2</div>
+                  <div className={styles.infoText}>
+                    Over the top of problems and structured content, LoopAI is trained to generate the question problems.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>3</div>
+                  <div className={styles.infoText}>
+                    You can rate the problem so it could be visible to more users and even your credits will too be shared.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>4</div>
+                  <div className={styles.infoText}>
+                    Make your problem public to make it publicly available to the community.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>5</div>
+                  <div className={styles.infoText}>
+                    Submit your problem to increase your problem solved numbers and points.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>6</div>
+                  <div className={styles.infoText}>
+                    If a question is wrong or any test cases are wrong, just contact the LoopAI workspace to make all edits with a conversation.
+                  </div>
+                </div>
+                <div className={styles.infoItem}>
+                  <div className={styles.infoNumber}>7</div>
+                  <div className={styles.infoText}>
+                    Your feedback is too mandatory, so please feel free to provide us feedback.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.dialogActions}>
+              <button 
+                onClick={() => setShowInfoDialog(false)}
+                className={styles.submitButton}
+              >
+                Got it!
               </button>
             </div>
           </div>
