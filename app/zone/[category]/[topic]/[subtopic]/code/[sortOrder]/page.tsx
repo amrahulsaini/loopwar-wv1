@@ -358,11 +358,25 @@ export default function CodeChallengePage() {
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&#8217;/g, "'")
+      .replace(/&#8216;/g, "'")
+      .replace(/&#8220;/g, '"')
+      .replace(/&#8221;/g, '"')
       .replace(/&amp;/g, '&')
+      // Normalize quotes and apostrophes
+      .replace(/"/g, '"')
+      .replace(/"/g, '"')
+      .replace(/'/g, "'")
+      .replace(/'/g, "'")
+      .replace(/'/g, "'")
       // Remove unicode emojis
       .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
       // Remove any remaining HTML-like tags
       .replace(/<[^>]*>/g, '')
+      // Normalize whitespace
+      .replace(/\s+/g, ' ')
       .trim();
 
     // Split content into sections based on common AI patterns
@@ -466,14 +480,24 @@ export default function CodeChallengePage() {
     });
   };
 
-  // Enhanced inline text formatting - DISABLED to prevent format class injection
+  // Enhanced inline text formatting
   const formatInlineText = (text: string) => {
-    // Temporarily disabled to prevent CSS class injection issues
-    // Just return cleaned text without adding any format classes
     return text
       .replace(/<[^>]*>/g, '') // Remove any HTML tags
-      .replace(/"/g, '"') // Fix quotes
-      .replace(/'/g, "'") // Fix apostrophes
+      .replace(/&quot;/g, '"') // Fix HTML encoded quotes
+      .replace(/&apos;/g, "'") // Fix HTML encoded apostrophes
+      .replace(/&#39;/g, "'") // Fix numeric apostrophes
+      .replace(/&#8217;/g, "'") // Fix curly apostrophes
+      .replace(/&#8216;/g, "'") // Fix opening curly quotes
+      .replace(/&#8220;/g, '"') // Fix opening curly double quotes
+      .replace(/&#8221;/g, '"') // Fix closing curly double quotes
+      .replace(/"/g, '"') // Normalize quotes to straight quotes
+      .replace(/'/g, "'") // Normalize apostrophes to straight quotes
+      .replace(/'/g, "'") // Fix curly apostrophes
+      .replace(/'/g, "'") // Fix other curly apostrophes
+      .replace(/"/g, '"') // Fix opening curly quotes
+      .replace(/"/g, '"') // Fix closing curly quotes
+      .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
   };
 
