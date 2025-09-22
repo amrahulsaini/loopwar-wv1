@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import judge0Service from '@/lib/judge0-service';
+import { AICodeChecker } from '@/lib/ai-code-checker';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { code, language, testCases } = body;
+    const { code, language, testCases, problemDescription } = body;
 
     if (!code || !language || !testCases) {
       return NextResponse.json(
@@ -19,15 +19,21 @@ export async function POST(request: NextRequest) {
       testCaseCount: testCases.length
     });
 
-    const result = await judge0Service.executeWithTestCases(code, language, testCases);
+    // Use AI code checker instead of Judge0
+    const aiCodeChecker = new AICodeChecker();
+    const result = await aiCodeChecker.checkCode(
+      code, 
+      language, 
+      problemDescription || "Code execution test", 
+      testCases
+    );
 
     console.log('API: Execution result:', result);
 
     return NextResponse.json({
       success: result.success,
-      results: result.results,
-      overallStatus: result.overallStatus,
-      error: result.error
+      result: result,
+      error: result.success ? undefined : result.feedback
     });
 
   } catch (error) {
@@ -37,8 +43,7 @@ export async function POST(request: NextRequest) {
       { 
         success: false, 
         error: error instanceof Error ? error.message : 'Internal server error',
-        results: [],
-        overallStatus: 'Error'
+        result: null
       },
       { status: 500 }
     );
