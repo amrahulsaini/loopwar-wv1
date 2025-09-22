@@ -92,9 +92,8 @@
 .mainContent {
   flex: 1;
   display: flex;
-  height: calc(100vh - 50px);
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 0.25rem;
+  padding: 80px 0 0 0;
   gap: 0.75rem;
 }
 
