@@ -270,7 +270,8 @@ Return ONLY this JSON structure with no extra text:
       baseProblemTitle: baseProblem?.title || 'None',
       hasBaseProblem: !!baseProblem 
     });
-    console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
+    console.log('🔑 API Key available:', !!apiKey, 'Length:', apiKey?.length);
+    console.log('📝 System Prompt (first 300 chars):', systemPrompt.substring(0, 300));
     
     // Generate with fallback structure
     let generatedProblem: GeneratedProblem;
@@ -280,8 +281,11 @@ Return ONLY this JSON structure with no extra text:
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30 second timeout
       
-      console.log('Starting AI generation with Gemini...');
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
+      console.log('🚀 Starting AI generation with Gemini...');
+      const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+      console.log('🌐 Calling Gemini API...');
+      
+      const response = await fetch(geminiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -297,11 +301,22 @@ Return ONLY this JSON structure with no extra text:
       });
       
       clearTimeout(timeoutId);
-      console.log('AI API response status:', response.status);
+      console.log('✅ AI API response status:', response.status);
+      console.log('📊 Response OK:', response.ok);
       
       if (response.ok) {
         const aiResult = await response.json();
+        console.log('📦 AI Result structure:', {
+          hasCandidates: !!aiResult.candidates,
+          candidatesLength: aiResult.candidates?.length,
+          hasContent: !!aiResult.candidates?.[0]?.content,
+          hasParts: !!aiResult.candidates?.[0]?.content?.parts,
+          partsLength: aiResult.candidates?.[0]?.content?.parts?.length
+        });
+        
         const aiText = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.log('📝 AI generated text length:', aiText.length);
+        console.log('📝 AI generated text (first 500 chars):', aiText.substring(0, 500));
         
         // Simple JSON extraction
         function cleanJsonString(jsonStr: string): string {
@@ -321,11 +336,15 @@ Return ONLY this JSON structure with no extra text:
         }
         
         const cleanedText = cleanJsonString(aiText);
-        console.log('Cleaned AI text (first 500 chars):', cleanedText.substring(0, 500));
+        console.log('🧹 Cleaned AI text length:', cleanedText.length);
+        console.log('🧹 Cleaned AI text (first 500 chars):', cleanedText.substring(0, 500));
+        console.log('🧹 Cleaned AI text (last 200 chars):', cleanedText.substring(Math.max(0, cleanedText.length - 200)));
         
         try {
           generatedProblem = JSON.parse(cleanedText);
-          console.log('AI generation successful');
+          console.log('✅ AI generation successful! Problem title:', generatedProblem.title);
+          console.log('✅ Test cases count:', generatedProblem.testCases?.length);
+          console.log('✅ Hints count:', generatedProblem.hints?.length);
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
           console.error('Problematic JSON:', cleanedText);
@@ -339,10 +358,15 @@ Return ONLY this JSON structure with no extra text:
       }
       
     } catch (aiError) {
-      console.error('AI generation failed:', aiError);
+      console.error('❌ AI generation failed with error:', aiError);
+      console.error('Error details:', {
+        message: aiError instanceof Error ? aiError.message : 'Unknown error',
+        stack: aiError instanceof Error ? aiError.stack : 'No stack trace',
+        name: aiError instanceof Error ? aiError.name : 'Unknown'
+      });
       
       // Create a fallback problem when AI fails
-      console.log('Creating fallback problem due to AI failure');
+      console.log('⚠️  Creating fallback problem due to AI failure');
       generatedProblem = {
         title: problemTitle,
         description: problemDescription,
